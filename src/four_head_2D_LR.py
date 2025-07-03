@@ -88,8 +88,9 @@ class FourierHead2DLR(nn.Module):
 
         # build C = Σ_r [u^(r) ⊗ v^(r)] → (B,2m+1,2m+1)
         # ua: (B,R,K), va: (B,R,K) with K=2m+1
+        # Optimized: use einsum instead of unsqueeze+multiply+sum
         K = 2*L - 1
-        C = (ua.unsqueeze(3) * va.unsqueeze(2)).sum(dim=1)  # (B,K,K)
+        C = torch.einsum('brk,brj->bkj', ua, va)  # Much more efficient!
 
         # normalize so C[0,0] = 1/4
         centre = C[:, self.m, self.m].real.view(B,1,1)
