@@ -9,9 +9,8 @@ from torch import nn
 from pathlib import Path
 
 # Import existing components
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-from four_head_2D_LR import FourierHead2DLR
-from nano_gpt_trajectory import TrajectoryGPT, TrajectoryGPTConfig
+from .four_head_2D_LR import FourierHead2DLR
+from .nano_gpt_trajectory import TrajectoryGPT, TrajectoryGPTConfig
 
 class HorizonAwareFourierHead2DLR(nn.Module):
     """

@@ -21,13 +21,13 @@ from torch.utils.data import IterableDataset, DataLoader
 from tqdm import tqdm
 
 # Import components
-from .four_head_2D_LR import FourierHead2DLR
-from .nano_gpt_trajectory import TrajectoryGPT, TrajectoryGPTConfig
+from trackfm.four_head_2D_LR import FourierHead2DLR
+from trackfm.nano_gpt_trajectory import TrajectoryGPT, TrajectoryGPTConfig
 
 # Import the horizon-aware model and dataset
-from .trackfm_model import HorizonAwareTrajectoryForecaster
-from .trackfm_dataset import StreamingMultiHorizonAISDataset
-from .config import load_config, TrackFMConfig
+from trackfm.trackfm_model import HorizonAwareTrajectoryForecaster
+from trackfm.trackfm_dataset import StreamingMultiHorizonAISDataset
+from trackfm.config import load_config, TrackFMConfig
 
 def find_latest_valid_checkpoint(ckpt_dir, model, device):
     """Find the latest valid checkpoint that loads without errors"""
@@ -334,9 +334,10 @@ def main():
                 key, value = override.split("=", 1)
                 # Try to convert to appropriate type
                 try:
-                    if "." in value:
-                        value = float(value)
-                    else:
+                    # Try float first (handles scientific notation like 1e-4)
+                    value = float(value)
+                    # If it's a whole number, convert to int
+                    if value.is_integer():
                         value = int(value)
                 except ValueError:
                     if value.lower() in ["true", "false"]:
@@ -360,7 +361,7 @@ def main():
     
     if args.experiment:
         # Save experiment config
-        from .config import create_experiment_config
+        from trackfm.config import create_experiment_config
         experiment_config_path = create_experiment_config(
             args.config, args.experiment, overrides
         )

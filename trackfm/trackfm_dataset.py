@@ -98,7 +98,7 @@ class StreamingMultiHorizonAISDataset(IterableDataset):
             df_chunk = df_scan.slice(chunk_start, chunk_end - chunk_start).collect()
             
             # Group by MMSI and process trajectories
-            for mmsi, group_df in df_chunk.group_by("MMSI"):
+            for mmsi, group_df in df_chunk.group_by("mmsi"):
                 yield from self._extract_sequences(group_df)
     
     def _extract_sequences(self, df: pl.DataFrame):
@@ -107,11 +107,11 @@ class StreamingMultiHorizonAISDataset(IterableDataset):
             return
         
         # Sort by timestamp
-        df = df.sort("BaseDateTime")
+        df = df.sort("timestamp")
         
         # Extract coordinates
-        lats = df["LAT"].to_numpy()
-        lons = df["LON"].to_numpy()
+        lats = df["lat"].to_numpy()
+        lons = df["lon"].to_numpy()
         
         # Convert to local coordinates using trajectory center
         centre_lat = float(np.mean(lats))

@@ -1,0 +1,53 @@
+# TrackFM Training Configuration - Custom 20 Horizon, 256 Frequencies
+
+# Model Architecture
+model:
+  seq_len: 20                    # Input sequence length
+  horizon: 20                    # Number of future steps to predict (increased from 10)
+  d_model: 128                   # Transformer embedding dimension
+  nhead: 8                       # Number of attention heads
+  num_layers: 6                  # Number of transformer layers
+  ff_hidden: 512                 # Feed-forward hidden size
+  fourier_m: 256                 # Number of Fourier frequencies (increased from 128)
+  fourier_rank: 4                # Low-rank decomposition rank
+  max_horizon: 20                # Maximum horizon for embeddings (matching horizon)
+  dropout: 0.1                   # Dropout rate
+
+# Training Parameters
+training:
+  batch_size: 236                # Optimal batch size for 97.5% GPU utilization
+  lr: 0.0001                     # Learning rate
+  epochs: 50                     # Number of training epochs
+  weight_decay: 0.00001          # AdamW weight decay
+  grad_clip_norm: 1.0            # Gradient clipping norm
+  ckpt_every: 1000               # Checkpoint frequency (batches)
+  
+# Data Configuration
+data:
+  bucket_name: "ais-pipeline-data-10179bbf-us-east-1"
+  chunk_size: 200000             # Parquet file chunk size
+  prefix: "cleaned/"             # S3 prefix for data files
+  num_workers: 4                 # DataLoader workers
+  pin_memory: true               # Pin memory for GPU transfer
+  persistent_workers: true       # Keep workers alive between epochs
+
+# Paths
+paths:
+  ckpt_dir: "checkpoints"        # Checkpoint directory
+  model_tag: "trackfm_20h_256f"  # Model identifier for 20 horizon, 256 freq
+  warmup_checkpoint: null        # No warm start for new architecture
+
+# System
+system:
+  device: "auto"                 # Device: "auto", "cuda", "cpu"
+  mixed_precision: false         # Use mixed precision training
+  compile_model: false           # Use torch.compile (PyTorch 2.0+)
+
+# Logging
+logging:
+  log_every: 10                  # Log frequency (batches)
+  wandb:
+    enabled: false               # Enable Weights & Biases logging
+    project: "trackfm"           # W&B project name
+    entity: null                 # W&B entity (username/team)
+    tags: ["20horizon", "256freq", "fourier", "transformer"]
