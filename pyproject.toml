@@ -1,7 +1,11 @@
 [project]
-name = "track-fm"
+name = "trackfm"
 version = "0.1.0"
-description = "Fourier Head methods for learning complex probability distributions"
+description = "Multi-Horizon Trajectory Forecasting with Horizon-Aware Transformers"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [{name = "Saul Pingerman"}]
+urls = {repository = "https://github.com/saulpingerman/track-fm"}
 requires-python = ">=3.9"
 dependencies = [
     "torch>=2.0.0",
@@ -12,6 +16,7 @@ dependencies = [
     "jupyter>=1.0.0",
     "tqdm>=4.65.0",
     "boto3>=1.34.0",
+    "pyyaml>=6.0.0",
 ]
 
 [project.optional-dependencies]

@@ -1,0 +1,14 @@
+# High Resolution Experiment - More Fourier frequencies
+# Override default config for higher resolution modeling
+
+model:
+  fourier_m: 256                # Double the frequencies
+  fourier_rank: 8               # Higher rank for more expressiveness
+
+training:
+  batch_size: 512               # Smaller batch due to memory
+  lr: 5e-5                      # Lower learning rate for stability
+  ckpt_every: 500               # More frequent checkpoints
+
+paths:
+  model_tag: "trackfm_high_res_256f_rank8"

@@ -1,0 +1,17 @@
+# Fast Training Experiment - Reduced complexity for quick iterations
+# Good for debugging and rapid prototyping
+
+model:
+  fourier_m: 64                 # Fewer frequencies
+  fourier_rank: 2               # Lower rank
+  d_model: 64                   # Smaller model
+  num_layers: 4                 # Fewer layers
+  
+training:
+  batch_size: 2048              # Larger batch
+  lr: 2e-4                      # Higher learning rate
+  epochs: 20                    # Fewer epochs
+  ckpt_every: 200               # Frequent checkpoints
+
+paths:
+  model_tag: "trackfm_fast_64f_rank2"
