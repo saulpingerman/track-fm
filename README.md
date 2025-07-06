@@ -1,44 +1,43 @@
-# Track-FM: Trajectory Forecasting with Multi-Horizon Transformers
+# TrackGPT: Trajectory Forecasting with Transformers
 
-A high-performance trajectory prediction system using decoder-only transformers with low-rank Fourier heads for multi-horizon forecasting.
+A high-performance vessel trajectory prediction system using GPT-style transformers with low-rank Fourier heads for probabilistic multi-step forecasting.
 
 ## Features
 
-- **Causal Multi-Horizon Prediction**: Predicts multiple future trajectory points using causal attention
-- **Low-Rank Fourier Heads**: Efficient continuous probability density modeling with rank-4 decomposition
-- **Streaming Data Pipeline**: Memory-efficient processing of large-scale AIS trajectory datasets
-- **nanoGPT Architecture**: Optimized decoder-only transformer backbone
-- **Mixed Precision Training**: Accelerated training with automatic mixed precision
+- **Multi-Step Trajectory Prediction**: Predicts 10 future positions (10-100 minutes ahead)
+- **Time-Aware Architecture**: Incorporates temporal information for horizon-specific predictions
+- **Probabilistic Outputs**: Full probability distributions using low-rank Fourier decomposition
+- **Efficient Training**: Optimized for large-scale AIS vessel tracking data
+- **Real-Time Inference**: Fast prediction suitable for operational use
 
 ## Architecture
 
-The system combines:
-- **nanoGPT backbone**: Decoder-only transformer with causal attention
-- **Low-rank Fourier head**: Continuous PDF modeling with 64 frequencies, rank-4 decomposition
-- **Multi-horizon output**: Simultaneous prediction of 10 future trajectory points
-- **Coordinate transformation**: Local UV coordinates with proper Jacobian correction
+TrackGPT combines:
+- **GPT-style Transformer**: Causal attention mechanism prevents information leakage
+- **Low-Rank Fourier Head**: Efficient continuous probability density modeling (128 frequencies, rank 4)
+- **Time Encoding**: Horizon-aware predictions based on time intervals
+- **Local Coordinate System**: UV space transformation for translation invariance
 
 ## Performance
 
-- **GPU Utilization**: 99% on Tesla T4 with batch size 2560
-- **Training Speed**: 2,600+ samples/second
-- **Memory Efficient**: Streaming dataset handles 75M+ trajectory points
-- **Optimized Operations**: Custom einsum-based Fourier computations
+- **Training Speed**: ~1.5k samples/second on Tesla T4
+- **Model Size**: 1.5M parameters
+- **Loss**: Converges to -1.0 NLL on moving vessels
+- **GPU Utilization**: 95%+ with optimized data loading
 
 ## Installation
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/yourusername/track-fm.git
 cd track-fm
 
-# Install with uv (recommended)
-uv venv
+# Create virtual environment
+python -m venv .venv
 source .venv/bin/activate
-uv pip install -e .
 
-# Or with pip
-pip install -e .
+# Install dependencies
+pip install -r requirements.txt
 ```
 
 ## Quick Start
@@ -46,85 +45,82 @@ pip install -e .
 ### Training
 
 ```bash
-# Train on S3 data with optimized settings
-python scripts/train_causal_multihorizon.py
+# Train TrackGPT on vessel data
+python scripts/train_causal_multihorizon_time_aware.py
 
 # Monitor training progress
-watch -n 2 python scripts/monitor_loss.py
+python scripts/visualization/plot_loss_log_scale.py logs/latest.log
 ```
 
-### Configuration
+### Visualization
 
-Key parameters in `train_causal_multihorizon.py`:
-- `seq_len=20`: Input sequence length
-- `horizon=10`: Number of future steps to predict
-- `fourier_m=64`: Number of Fourier frequencies
-- `fourier_rank=4`: Low-rank decomposition rank
-- `batch_size=2560`: Training batch size
+```bash
+# Visualize predictions on real tracks
+python scripts/visualization/viz_time_aware_real_data.py
 
-## Dataset Format
+# Analyze model behavior
+python scripts/visualization/diagnose_predictions.py
+```
 
-The system expects trajectory data with columns:
+## Data Format
+
+TrackGPT expects AIS vessel tracking data with:
 - `lat`, `lon`: Geographic coordinates
-- `mmsi`: Vessel identifier
-- `timestamp`: Time information
-- `track_id`: Unique track identifier
+- `track_id`: Unique trajectory identifier  
+- `timestamp`: Time of observation
+- Minimum average speed: 5 knots (for quality filtering)
 
-## Model Components
+## Model Configuration
 
-### Core Architecture
-- `src/nano_gpt_trajectory.py`: nanoGPT-based transformer backbone
-- `src/four_head_2D_LR.py`: Low-rank Fourier head implementation
-- `scripts/train_causal_multihorizon.py`: Main training script
+Key parameters:
+- `seq_len`: 20 (input sequence length)
+- `horizon`: 10 (prediction steps)
+- `d_model`: 128 (model dimension)
+- `num_layers`: 6 (transformer layers)
+- `fourier_m`: 128 (Fourier frequencies)
+- `fourier_rank`: 4 (low-rank decomposition)
 
-### Data Pipeline
-- Streaming dataset with chunked S3 loading
-- Random sampling across tracks to prevent overfitting
-- Local coordinate transformation with Jacobian correction
-
-### Monitoring
-- `scripts/monitor_loss.py`: Real-time training metrics
-- Loss curves, timing breakdowns, GPU utilization
-- Training speed and trend analysis
-
-## Research
-
-This implementation focuses on:
-- **Causal trajectory modeling**: No information leakage from future positions
-- **Multi-horizon prediction**: Simultaneous forecasting of multiple time steps
-- **Continuous PDFs**: Fourier-based density modeling vs discrete approaches
-- **Scalable training**: Efficient processing of large maritime datasets
-
-## Performance Optimizations
-
-- **Einsum operations**: Optimized tensor contractions in Fourier head
-- **Mixed precision**: FP16 for transformer, FP32 for Fourier computations
-- **Streaming data**: Memory-efficient large dataset processing
-- **Gradient scaling**: Stable training with large batch sizes
-
-## File Structure
+## Project Structure
 
 ```
 track-fm/
-├── src/                    # Core model implementations
-├── scripts/                # Training and monitoring scripts
-├── notebooks/              # Research and analysis notebooks
-├── output/                 # Visualization outputs
-├── checkpoints/            # Model checkpoints
-└── pyproject.toml         # Package configuration
+├── src/
+│   ├── nano_gpt_trajectory.py    # Core GPT architecture
+│   └── four_head_2D_LR.py        # Low-rank Fourier head
+├── scripts/
+│   ├── train_*.py                # Training scripts
+│   └── visualization/            # Analysis tools
+├── logs/                         # Training logs
+├── checkpoints/                  # Model checkpoints
+└── output/                       # Visualizations
 ```
+
+## Key Insights
+
+1. **Moving Vessels Only**: Training on vessels with >5 knot average speed prevents the model from learning trivial "no movement" predictions
+
+2. **Time-Aware Predictions**: Each prediction horizon uses temporal encoding to produce appropriate uncertainty estimates
+
+3. **Local Coordinates**: UV space transformation (±50 miles) provides translation invariance and numerical stability
+
+## Training Tips
+
+- Start with batch size 512 and increase based on GPU memory
+- Use local data files instead of S3 for better GPU utilization
+- Filter stationary vessels from training data
+- Monitor NLL values - should be around -1.0 for good performance
 
 ## Citation
 
 ```bibtex
-@misc{track-fm,
-  title={Track-FM: Trajectory Forecasting with Multi-Horizon Transformers},
+@misc{trackgpt2025,
+  title={TrackGPT: Trajectory Forecasting with Transformers},
   year={2025},
   publisher={GitHub},
-  url={<repository-url>}
+  url={https://github.com/yourusername/track-fm}
 }
 ```
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT License - see LICENSE file for details.
