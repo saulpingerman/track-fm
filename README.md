@@ -151,6 +151,7 @@ cat experiments.json | jq '.experiments.exp001'
 
 ```bibtex
 @misc{trackfm2025,
+  author={Paul Singerman},
   title={Track-FM: Trajectory Forecasting with Transformers},
   year={2025},
   publisher={GitHub},
