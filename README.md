@@ -1,4 +1,4 @@
-# TrackGPT: Trajectory Forecasting with Transformers
+# Track-FM: Trajectory Forecasting with Transformers
 
 A high-performance vessel trajectory prediction system using GPT-style transformers with low-rank Fourier heads for probabilistic multi-step forecasting.
 
@@ -12,7 +12,7 @@ A high-performance vessel trajectory prediction system using GPT-style transform
 
 ## Architecture
 
-TrackGPT combines:
+Track-FM combines:
 - **GPT-style Transformer**: Causal attention mechanism prevents information leakage
 - **Low-Rank Fourier Head**: Efficient continuous probability density modeling (128 frequencies, rank 4)
 - **Time Encoding**: Horizon-aware predictions based on time intervals
@@ -45,7 +45,7 @@ pip install -r requirements.txt
 ### Training
 
 ```bash
-# Train TrackGPT on vessel data
+# Train Track-FM on vessel data
 python scripts/train_trackfm.py
 
 # Monitor training progress
@@ -64,7 +64,7 @@ python scripts/visualization/diagnose_predictions.py
 
 ## Data Format
 
-TrackGPT expects AIS vessel tracking data with:
+Track-FM expects AIS vessel tracking data with:
 - `lat`, `lon`: Geographic coordinates
 - `track_id`: Unique trajectory identifier  
 - `timestamp`: Time of observation
@@ -150,8 +150,8 @@ cat experiments.json | jq '.experiments.exp001'
 ## Citation
 
 ```bibtex
-@misc{trackgpt2025,
-  title={TrackGPT: Trajectory Forecasting with Transformers},
+@misc{trackfm2025,
+  title={Track-FM: Trajectory Forecasting with Transformers},
   year={2025},
   publisher={GitHub},
   url={https://github.com/yourusername/track-fm}
