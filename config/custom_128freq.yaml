@@ -1,0 +1,34 @@
+# Custom configuration for 128 frequency model
+
+model:
+  d_model: 128
+  nhead: 8
+  num_layers: 6
+  dim_ff: 512
+  dropout: 0.1
+  block_size: 20
+  fourier_m: 128      # 128 frequencies as requested
+  fourier_rank: 4     # Rank 4 as requested
+
+training:
+  batch_size: 64
+  lr: 0.0001          # Learning rate 1e-4 as requested
+  weight_decay: 0.00001
+  epochs: 50
+  warmup_iters: 200
+  lr_decay_iters: 10000
+  min_lr: 0.00006
+  grad_clip_norm: 1.0
+
+data:
+  bucket_name: "ais-pipeline-data-10179bbf-us-east-1"
+  prefix: "cleaned/"
+  seq_len: 20
+  horizon: 10
+  half_side_mi: 50.0
+
+system:
+  device: "cuda"
+  compile: false
+  ckpt_dir: "checkpoints"
+  ckpt_every: 1000

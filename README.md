@@ -46,7 +46,7 @@ pip install -r requirements.txt
 
 ```bash
 # Train TrackGPT on vessel data
-python scripts/train_causal_multihorizon_time_aware.py
+python scripts/train_trackfm.py
 
 # Monitor training progress
 python scripts/visualization/plot_loss_log_scale.py logs/latest.log

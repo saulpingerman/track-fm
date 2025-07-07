@@ -1,4 +1,5 @@
 {
+  "training_script": "scripts/train_trackfm.py",
   "experiments": {
     "exp001": {
       "timestamp": "20250706_020302",

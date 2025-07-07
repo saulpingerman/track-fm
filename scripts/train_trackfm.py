@@ -187,7 +187,7 @@ class StreamingMultiHorizonAISDatasetTimeAware(torch.utils.data.IterableDataset)
     """Streaming dataset that includes time deltas"""
     
     def __init__(self, bucket_name, seq_len=20, horizon=10, 
-                 chunk_size=500_000, half_side_mi=50.0):  # Increased chunk size
+                 chunk_size=500_000, half_side_mi=50.0):
         self.bucket_name = bucket_name
         self.seq_len = seq_len
         self.horizon = horizon
@@ -358,13 +358,13 @@ def main():
     nhead = 8
     num_layers = 6
     ff_hidden = 512
-    fourier_m = 128  # Reduced to 128 frequencies
+    fourier_m = 128
     fourier_rank = 4
     
     # Training parameters
-    batch_size = 1536  # Increased from 1024
+    batch_size = 1536
     lr = 1e-4
-    epochs = 10  # Reduced for initial testing
+    epochs = 10
     save_every = 1000  # Save checkpoints every 1k steps
     log_every = 1  # Log every batch
     model_tag = f"time_aware_causal_multihorizon_moving_vessels_{fourier_m}freq_bs{batch_size}"
@@ -408,7 +408,7 @@ def main():
         batch_size=batch_size,
         collate_fn=collate_fn,
         drop_last=True,
-        num_workers=2,  # Reduced to avoid CPU bottleneck
+        num_workers=2,
         prefetch_factor=2,
         persistent_workers=True,  # Keep workers alive between epochs
         pin_memory=True  # Pin memory for faster GPU transfer
