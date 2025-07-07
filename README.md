@@ -92,7 +92,44 @@ track-fm/
 │   └── visualization/            # Analysis tools
 ├── logs/                         # Training logs
 ├── checkpoints/                  # Model checkpoints
-└── output/                       # Visualizations
+├── output/                       # Visualizations
+└── experiments.json              # Experiment tracking metadata
+```
+
+## Experiment Tracking
+
+This project uses a simple experiment tracking system to manage hyperparameters and outputs:
+
+- **Experiment IDs**: Short identifiers (e.g., `exp001`, `exp002`) replace verbose filenames
+- **Metadata Storage**: All hyperparameters stored in `experiments.json`
+- **File Naming**: Logs, checkpoints, and outputs use experiment IDs
+
+### Example Experiment Entry
+
+```json
+{
+  "exp001": {
+    "timestamp": "20250706_020302",
+    "model": "time_aware",
+    "dataset": "training",
+    "frequencies": 128,
+    "batch_size": 512,
+    "optimized": false,
+    "description": "Initial time-aware training run",
+    "log_file": "logs/exp001.log",
+    "checkpoint_dir": "checkpoints/exp001/"
+  }
+}
+```
+
+### Viewing Experiment Details
+
+```bash
+# List all experiments
+cat experiments.json | jq '.experiments | keys'
+
+# View specific experiment
+cat experiments.json | jq '.experiments.exp001'
 ```
 
 ## Key Insights

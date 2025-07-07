@@ -1,0 +1,28 @@
+{
+  "experiments": {
+    "exp001": {
+      "timestamp": "20250706_020302",
+      "model": "time_aware",
+      "dataset": "training",
+      "frequencies": 128,
+      "batch_size": 512,
+      "optimized": false,
+      "description": "Initial time-aware training run",
+      "log_file": "logs/exp001.log",
+      "checkpoint_dir": "checkpoints/exp001/"
+    },
+    "exp002": {
+      "timestamp": "20250706_054257",
+      "model": "time_aware",
+      "dataset": "moving_vessels",
+      "frequencies": 128,
+      "batch_size": 1536,
+      "optimized": true,
+      "description": "Optimized moving vessels training with larger batch size",
+      "log_file": "logs/exp002.log",
+      "checkpoint_dir": "checkpoints/exp002/",
+      "output_plot": "output/loss_plots/exp002_loss.png"
+    }
+  },
+  "next_experiment_id": "exp003"
+}
