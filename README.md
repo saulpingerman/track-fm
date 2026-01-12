@@ -1,170 +1,121 @@
-# Fourier Head Trajectory Prediction Experiments
+# TrackFM: Vessel Trajectory Prediction with Transformers
 
-This repository contains experiments testing whether a transformer backbone with a 2D Fourier head can learn trajectory prediction (dead reckoning).
+This repository contains experiments on vessel trajectory prediction using causal transformers with 2D Fourier density heads. Starting with synthetic data experiments (01-08) and progressing to real AIS vessel tracking data (09-10).
+
+## Key Results
+
+- **Experiment 10**: Long-horizon prediction (up to 1 hour ahead) on real AIS data
+  - **~40% improvement** over dead reckoning baseline (with fair sigma comparison)
+  - Predicts probability distributions over 64x64 grids covering ±33km
+  - Trained on 3,754 vessel tracks (23M positions) from Danish maritime zone
 
 ## Repository Structure
 
 ```
-fourier_trajectory_test/
-├── README.md                 # This file
-├── src/                      # Shared code modules
-│   ├── models.py            # Model architectures
-│   ├── data.py              # Data generation
-│   └── training.py          # Training utilities
-├── experiments/              # Individual experiments
-│   ├── 01_fixed_dt_baseline/ # Fixed time horizon experiment
-│   │   ├── run_experiment.py
-│   │   ├── results/
-│   │   └── README.md        # Experiment report
-│   ├── 02_variable_dt_methods/ # Variable Δt conditioning methods
-│   │   ├── run_variable_dt_experiment.py
-│   │   ├── results/
-│   │   └── README.md        # Experiment report
-│   ├── 03_multi_horizon/     # Multi-horizon prediction
-│   │   ├── run_multi_horizon_experiment.py
-│   │   ├── results/
-│   │   └── README.md        # Experiment report
-│   ├── 04_pointwise_nll/     # Pointwise vs soft target NLL
-│   │   ├── run_pointwise_nll_experiment.py
-│   │   ├── results/
-│   │   └── README.md        # Experiment report
-│   ├── 05_variable_dt_loss_comparison/ # Loss methods with variable Δt
-│   │   ├── run_experiment.py
-│   │   ├── results/
-│   │   └── README.md        # Experiment report
-│   ├── 06_relative_displacement/ # Relative displacement with normalized grid
-│   │   ├── run_experiment.py
-│   │   ├── results/
-│   │   └── README.md        # Experiment report
-│   ├── 07_decoder_transformer/  # Causal vs bidirectional attention
-│   │   ├── run_experiment.py
-│   │   ├── results/
-│   │   └── README.md        # Experiment report
-│   └── 08_causal_multihorizon/  # Causal decoder + multi-horizon prediction
-│       ├── run_experiment.py
-│       ├── comprehensive_evaluation.py
-│       ├── results/
-│       ├── comprehensive_results/
-│       └── README.md        # Experiment report
+track-fm/
+├── README.md                    # This file
+├── .gitignore
+└── experiments/
+    ├── 01_fixed_dt_baseline/    # Synthetic: Fixed time horizon
+    ├── 02_variable_dt_methods/  # Synthetic: Variable Δt conditioning
+    ├── 03_multi_horizon/        # Synthetic: Multi-horizon prediction
+    ├── 04_pointwise_nll/        # Synthetic: Loss function comparison
+    ├── 05_variable_dt_loss/     # Synthetic: Loss with variable Δt
+    ├── 06_relative_displacement/# Synthetic: Relative displacement grids
+    ├── 07_decoder_transformer/  # Synthetic: Causal vs bidirectional
+    ├── 08_causal_multihorizon/  # Synthetic: Causal + multi-horizon
+    ├── 09_ais_real_data/        # Real AIS: Short-horizon (20 steps)
+    └── 10_long_horizon/         # Real AIS: Long-horizon (400 steps, ~1 hour)
 ```
 
 ## Experiments
 
-### Experiment 1: Fixed Δt Baseline
-**Question:** Can transformer + 2D Fourier head learn dead reckoning with NLL loss?
+### Synthetic Data (01-08)
 
-**Answer:** YES - with wide velocity range [0.1, 4.5], curriculum learning achieves 0.077 error (vs 0.074 regression baseline).
+These experiments use generated trajectories to validate the transformer + Fourier head approach.
 
-See: `experiments/01_fixed_dt_baseline/README.md`
+| Exp | Question | Key Finding |
+|-----|----------|-------------|
+| 01 | Can transformer + Fourier head learn dead reckoning? | YES with curriculum learning |
+| 02 | How to incorporate variable Δt? | Concat to input is best |
+| 03 | Can we predict multiple horizons efficiently? | YES, 4.7x faster than separate |
+| 04 | What loss function works best? | Soft targets (σ=0.5) |
+| 05 | Does loss choice hold with variable Δt? | Soft targets remain best |
+| 06 | Does relative displacement change results? | σ must scale with grid range |
+| 07 | Causal vs bidirectional attention? | Causal works for trajectories |
+| 08 | Causal + multi-horizon together? | 99.4% MSE reduction vs baselines |
 
-### Experiment 2: Variable Δt Methods
-**Question:** How should we incorporate variable prediction time horizon (Δt)?
+### Real AIS Data (09-10)
 
-**Finding:** Concat to Input (append Δt to each position as (x, y, Δt)) is best method, achieving 0.247 error vs 0.366 regression baseline (32% improvement).
+These experiments use real vessel tracking data from the Danish maritime zone.
 
-See: `experiments/02_variable_dt_methods/README.md`
+#### Experiment 9: Real AIS Data (Short Horizon)
+- **Data**: ~73M positions, ~7,775 valid tracks
+- **Horizon**: 20 steps (~3-10 minutes)
+- **Result**: 83.4% improvement over dead reckoning
 
-### Experiment 3: Multi-Horizon Prediction
-**Question:** Can we efficiently predict multiple future horizons by encoding the trajectory once?
+#### Experiment 10: Long Horizon Prediction (Up to 1 Hour)
+- **Data**: 3,754 tracks, 23M positions (filtered for moving vessels)
+- **Horizon**: 400 steps (~1 hour ahead)
+- **Grid**: ±33km prediction range
+- **Features**: Early stopping, fair baseline comparison, random horizon sampling
+- **Result**: ~40% improvement over dead reckoning (with optimized baseline sigma)
 
-**Finding:** Yes! Encode once + duplicate embedding is **4.7x faster** than encoding separately for each horizon, with equal or better accuracy.
+See `experiments/10_long_horizon/README.md` for full details.
 
-See: `experiments/03_multi_horizon/README.md`
+## Model Architecture
 
-### Experiment 4: Loss Function Comparison
-**Question:** How should we compute the loss for the Fourier density head?
+```
+CausalAISModel
+├── Input Projection: 6 features → 128 dim
+├── Positional Encoding: Sinusoidal
+├── Transformer Encoder: 4 layers, 8 heads, causal masking
+├── Cumulative Time Encoding: For arbitrary horizon prediction
+└── Fourier Head 2D: Outputs 64x64 probability grid
+```
 
-**Finding:** Soft target (σ=0.5) is best (0.076 error), beating even regression! Hard target (one-hot) works (0.163). True pointwise works (0.191). Grid-interpolated fails (2.96).
-
-See: `experiments/04_pointwise_nll/README.md`
-
-### Experiment 5: Loss Comparison with Variable Δt
-**Question:** Do the loss function results hold when adding variable Δt?
-
-**Finding:** NO! True pointwise NLL **fails** with variable Δt (0.586 error) while it worked with fixed Δt (0.191). Soft target σ=0.5 remains best (0.232 vs 0.271 regression).
-
-See: `experiments/05_variable_dt_loss_comparison/README.md`
-
-### Experiment 6: Relative Displacement Prediction
-**Question:** Do results change when predicting relative displacement with a normalized grid?
-
-**Finding:** Complete reversal! True pointwise works well (0.100), soft targets fail (0.248). σ must scale with grid range.
-
-See: `experiments/06_relative_displacement/README.md`
-
-### Experiment 7: Decoder Transformer Backbone
-**Question:** Does causal (autoregressive) attention work better than bidirectional attention?
-
-**Setup:** Compares encoder transformer (bidirectional) vs decoder transformer (causal masking) for trajectory prediction.
-
-See: `experiments/07_decoder_transformer/README.md`
-
-### Experiment 8: Causal Multi-Horizon Prediction
-**Question:** Can we efficiently train a causal decoder transformer for trajectory prediction with variable time spacing and multiple prediction horizons?
-
-**Finding:** YES! The causal multi-horizon model achieves **99.4% MSE reduction** vs naive baselines (last position / zero prediction). Model predicts 1-5 positions ahead with MSE ranging from 0.12 (horizon 1) to 1.13 (horizon 5), vs 8.2-192.8 for baselines.
-
-Key features validated:
-- Causal attention (autoregressive) works for trajectory prediction
-- Multi-horizon prediction (1-5 steps ahead) from each position
-- Variable time spacing with Δt conditioning
-- Works with different input history lengths (3-11 positions)
-
-See: `experiments/08_causal_multihorizon/README.md`
+### Input Features
+| Feature | Description |
+|---------|-------------|
+| lat, lon | Position (normalized) |
+| sog | Speed over ground |
+| cog_sin, cog_cos | Course over ground |
+| dt | Time since previous position |
 
 ## Quick Start
 
 ```bash
-# Run experiment 1
-cd experiments/01_fixed_dt_baseline
-python3 run_experiment.py
+# Activate environment
+source /opt/pytorch/bin/activate
 
-# Run experiment 2
-cd experiments/02_variable_dt_methods
-python3 run_variable_dt_experiment.py
+# Run experiment 10 (long horizon on real AIS data)
+cd experiments/10_long_horizon
+./run_all.sh my_experiment 100  # 100 epochs with early stopping
 
-# Run experiment 3
-cd experiments/03_multi_horizon
-python3 run_multi_horizon_experiment.py
-
-# Run experiment 4
-cd experiments/04_pointwise_nll
-python3 run_pointwise_nll_experiment.py
-
-# Run experiment 5
-cd experiments/05_variable_dt_loss_comparison
-python3 run_experiment.py
-
-# Run experiment 6
-cd experiments/06_relative_displacement
-python3 run_experiment.py
-
-# Run experiment 7
-cd experiments/07_decoder_transformer
-python3 run_experiment.py
-
-# Run experiment 8
-cd experiments/08_causal_multihorizon
-python3 run_experiment.py
-# For comprehensive evaluation with baselines:
-python3 comprehensive_evaluation.py
+# Or run individual steps:
+python run_experiment.py --exp-name my_exp --num-epochs 100
+python visualize_predictions.py --exp-name my_exp
+python make_horizon_videos.py --exp-name my_exp --max-horizon 400
 ```
 
-## Key Findings
+## Key Learnings
 
-1. **Transformer extracts velocity** from position sequences (no explicit velocity input needed)
-2. **2D Fourier head works** but requires careful training (soft targets, curriculum learning)
-3. **Wide velocity range critical** to prevent marginal distribution exploitation
-4. **Concat to Input** is best method for incorporating Δt (32% better than regression)
-5. **Grid range critical** for variable Δt - must cover max displacement (velocity × Δt)
-6. **Multi-horizon is efficient** - encode trajectory once, reuse embedding for all horizons (4.7x speedup)
-7. **Soft targets best for training** - true pointwise NLL works for fixed Δt but soft targets (σ=0.5) optimize better
-8. **Pointwise fails with variable Δt** - sparse gradient signal insufficient for harder learning problems
-9. **σ must scale with grid range** - soft target σ=0.5 works for grid_range=5-20, but fails for normalized grids (range=1)
-10. **Causal attention works** - decoder transformer (autoregressive) successfully predicts trajectories
-11. **Multi-horizon + causal training validated** - single model predicts 1-5 steps ahead with 99.4% MSE reduction vs baselines
-12. **Δt conditioning critical** - error increases 6x without time conditioning (2.63 vs 0.44)
+1. **Random horizon sampling works** - Train on 40 random samples from 400 horizons per batch
+2. **Cumulative time encoding** - Enables prediction at any horizon, including beyond training
+3. **Fair baseline comparison matters** - DR baseline needs appropriate sigma (~0.05° vs 0.003°)
+4. **Early stopping essential** - Validation loss plateaus quickly (4-10 checks)
+5. **Large batch + chunked loss** - 8000 batch size with 512-chunk loss computation for GPU efficiency
 
-## Hardware Used
-- NVIDIA L4 GPU (23GB)
-- CUDA 13.0
+## Hardware
+
+- NVIDIA L40S GPU (48GB)
+- ~44GB GPU memory used for experiment 10
+- FSx for Lustre for AIS data storage
+
+## Data
+
+Real AIS data from Danish maritime zone (not included in repo):
+- **Source**: FSx for Lustre linked to S3
+- **Path**: `/mnt/fsx/data/`
+- **Region**: 54-58.5°N, 7-16°E
+- **Time**: Jan-Feb 2025
