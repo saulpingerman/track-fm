@@ -1,0 +1,40 @@
+{
+  "overall_mse": {
+    "model": 0.45640390115101603,
+    "dead_reckoning": 1.1456754527696969e-11,
+    "last_position": 78.94604288645151,
+    "zero_prediction": 78.94604288645151
+  },
+  "overall_mean_error": {
+    "model": 0.5042201536520745,
+    "dead_reckoning": 2.194405474304891e-06,
+    "last_position": 7.197251985663416
+  },
+  "mse_by_horizon": {
+    "1": {
+      "model": 0.12146411702245301,
+      "dead_reckoning": 2.306575291134488e-12,
+      "last_position": 8.180197460995108
+    },
+    "2": {
+      "model": 0.18782400278534644,
+      "dead_reckoning": 6.4391759561183926e-12,
+      "last_position": 31.64950647058526
+    },
+    "3": {
+      "model": 0.3993900177639209,
+      "dead_reckoning": 1.2862270881122857e-11,
+      "last_position": 70.06255825636934
+    },
+    "4": {
+      "model": 0.6035535793605229,
+      "dead_reckoning": 1.5320006835611162e-11,
+      "last_position": 123.74619452333573
+    },
+    "5": {
+      "model": 1.1349211802931687,
+      "dead_reckoning": 2.3546304038176735e-11,
+      "last_position": 192.82822433882325
+    }
+  }
+}

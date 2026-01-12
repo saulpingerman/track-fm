@@ -1,0 +1,36 @@
+{
+  "config": {
+    "num_train": 5000,
+    "num_val": 500,
+    "seq_len": 15,
+    "velocity_range": [
+      0.5,
+      4.5
+    ],
+    "dt_mean": 1.0,
+    "dt_std": 0.3,
+    "dt_min": 0.2,
+    "dt_max": 3.0,
+    "d_model": 64,
+    "nhead": 4,
+    "num_layers": 2,
+    "max_horizon": 5,
+    "grid_size": 64,
+    "num_freqs": 8,
+    "grid_range": 40.0,
+    "batch_size": 64,
+    "learning_rate": 0.0003,
+    "weight_decay": 1e-05,
+    "num_epochs": 30,
+    "sigma": 1.5
+  },
+  "metrics": {
+    "1": 0.42021520883007907,
+    "2": 0.6291494964777778,
+    "3": 0.9375573129015199,
+    "4": 1.361883966103535,
+    "5": 1.9501010900247842
+  },
+  "final_train_loss": 0.3838914312139342,
+  "final_val_loss": 0.3633858673274517
+}

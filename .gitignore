@@ -1,0 +1,30 @@
+# Checkpoints (except best_model.pt)
+**/checkpoint_step_*.pt
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment
+.env
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large data files (keep on FSx, not git)
+*.parquet
+
+# Logs can get large - keep training.log but exclude others
+**/run.log

@@ -1,0 +1,31 @@
+{
+  "config": {
+    "num_train": 10000,
+    "num_val": 1000,
+    "seq_len": 10,
+    "velocity_range": [
+      0.1,
+      4.5
+    ],
+    "dt": 1.0,
+    "endpoint_range": 10.0,
+    "d_model": 64,
+    "nhead": 4,
+    "num_layers": 2,
+    "grid_size": 64,
+    "num_freqs": 8,
+    "grid_range": 1.0,
+    "batch_size": 64,
+    "learning_rate": 0.0003,
+    "num_epochs": 30
+  },
+  "scale_factor": 4.5,
+  "results": {
+    "regression": 0.0612670979462564,
+    "true_pointwise": 0.10564831551164389,
+    "grid_interpolated": 0.10334014054387808,
+    "hard_target": 0.11244186479598284,
+    "soft_0.5": 0.2393543478101492,
+    "soft_0.2": 0.12857227586209774
+  }
+}

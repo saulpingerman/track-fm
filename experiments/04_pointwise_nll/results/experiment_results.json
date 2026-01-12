@@ -1,0 +1,20 @@
+{
+  "regression": {
+    "error": 0.07883137774467468
+  },
+  "true_pointwise_nll": {
+    "error": 0.1910370035171509
+  },
+  "grid_interpolated_nll": {
+    "error": 2.9551824493408203
+  },
+  "hard_target_nll": {
+    "error": 0.16290085077285765
+  },
+  "soft_nll_0.5": {
+    "error": 0.07587029647827148
+  },
+  "soft_nll_0.2": {
+    "error": 0.11034397792816163
+  }
+}

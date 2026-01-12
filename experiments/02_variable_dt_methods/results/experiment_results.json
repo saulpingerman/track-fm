@@ -1,0 +1,79 @@
+{
+  "config": {
+    "num_train": 10000,
+    "num_val": 1000,
+    "seq_len": 10,
+    "velocity_range": [
+      0.1,
+      4.5
+    ],
+    "dt_range": [
+      0.5,
+      4.0
+    ],
+    "noise_std": 0.0,
+    "d_model": 64,
+    "nhead": 4,
+    "num_layers": 2,
+    "grid_size": 64,
+    "num_freqs": 8,
+    "grid_range": 20.0,
+    "batch_size": 64,
+    "learning_rate": 0.0003,
+    "weight_decay": 1e-05,
+    "num_epochs": 30
+  },
+  "regression_baseline": {
+    "error": 0.365883469581604
+  },
+  "Method 1: Concat to Output": {
+    "expected_error": 0.4614355266094208,
+    "mode_error": 0.5763004422187805,
+    "uses_dt": "True",
+    "dt_correlation": 0.9994840470060956,
+    "uses_input": true,
+    "input_diff": 5.222510814666748,
+    "final_train_loss": 0.26318643958705246,
+    "final_val_loss": 2.1428167745471
+  },
+  "Method 2: FiLM Conditioning": {
+    "expected_error": 0.3857176601886749,
+    "mode_error": 0.5102227330207825,
+    "uses_dt": "True",
+    "dt_correlation": 0.9999239378926408,
+    "uses_input": true,
+    "input_diff": 5.287152290344238,
+    "final_train_loss": 0.2529739270544356,
+    "final_val_loss": 2.016653284430504
+  },
+  "Method 3: Concat to Input": {
+    "expected_error": 0.2467690110206604,
+    "mode_error": 0.40543195605278015,
+    "uses_dt": "True",
+    "dt_correlation": 0.9994835864773536,
+    "uses_input": true,
+    "input_diff": 5.441566467285156,
+    "final_train_loss": 0.2960255967014155,
+    "final_val_loss": 1.8631164729595184
+  },
+  "Method 4: \u0394t as Token": {
+    "expected_error": 0.2498967945575714,
+    "mode_error": 0.38789674639701843,
+    "uses_dt": "True",
+    "dt_correlation": 0.9992721858051039,
+    "uses_input": true,
+    "input_diff": 5.541524887084961,
+    "final_train_loss": 0.31382287545188975,
+    "final_val_loss": 1.8524238988757133
+  },
+  "Method 5: Cross-Attention": {
+    "expected_error": 0.30890780687332153,
+    "mode_error": 0.4473470151424408,
+    "uses_dt": "True",
+    "dt_correlation": 0.9993433277998178,
+    "uses_input": true,
+    "input_diff": 5.325775146484375,
+    "final_train_loss": 0.25296804707521087,
+    "final_val_loss": 1.9176802262663841
+  }
+}

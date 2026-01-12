@@ -1,0 +1,16 @@
+{
+  "multi_horizon": {
+    "error": 0.23640177125930786,
+    "inference_time_ms": 0.9177649000048405,
+    "description": "Encode trajectory once, predict all horizons"
+  },
+  "single_horizon": {
+    "error": 0.2660120893478394,
+    "inference_time_ms": 4.953226650004581,
+    "description": "Encode trajectory N times (once per horizon)"
+  },
+  "regression": {
+    "error": 0.11198621673583985,
+    "description": "Direct (x, y) regression"
+  }
+}

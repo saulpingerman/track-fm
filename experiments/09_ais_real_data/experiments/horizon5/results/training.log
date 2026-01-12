@@ -1,0 +1,271 @@
+/opt/pytorch/lib64/python3.12/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+Using device: cuda
+GPU: NVIDIA L40S
+GPU Memory: 47.7 GB
+======================================================================
+EXPERIMENT 9: REAL AIS DATA - CAUSAL MULTI-HORIZON PREDICTION
+======================================================================
+
+Configuration:
+  data_path: /mnt/fsx/data
+  catalog_path: /mnt/fsx/data/track_catalog.parquet
+  min_track_length: 100
+  max_seq_len: 128
+  min_sog: 3.0
+  d_model: 128
+  nhead: 8
+  num_layers: 4
+  dim_feedforward: 512
+  dropout: 0.1
+  grid_size: 64
+  num_freqs: 12
+  grid_range: 0.02
+  max_horizon: 5
+  batch_size: 256
+  learning_rate: 0.0001
+  weight_decay: 1e-05
+  num_epochs: 5
+  warmup_steps: 500
+  val_every_n_batches: 1000
+  val_max_batches: 50
+  sigma: 0.001
+  use_amp: True
+  num_workers: 0
+  pin_memory: True
+  gradient_accumulation: 1
+  lat_mean: 56.25
+  lat_std: 1.0
+  lon_mean: 11.5
+  lon_std: 2.0
+  sog_max: 30.0
+  dt_max: 300.0
+
+======================================================================
+LOADING DATA
+======================================================================
+Loading track catalog...
+  Selected 2000 tracks for training
+Loading track data from FSx (streaming)...
+    Processed tracks.parquet, tracks so far: 198
+    Processed tracks.parquet, tracks so far: 668
+    Processed tracks.parquet, tracks so far: 852
+    Processed tracks.parquet, tracks so far: 1046
+    Processed tracks.parquet, tracks so far: 1223
+    Processed tracks.parquet, tracks so far: 1390
+    Processed tracks.parquet, tracks so far: 1544
+    Processed tracks.parquet, tracks so far: 1565
+  Loaded 1565 tracks in 27.3s
+  Total positions: 17,730,101
+  Train tracks: 1385, Val tracks: 154
+
+Creating datasets...
+  Created 495,107 training samples from 1385 tracks
+  Created 53,362 training samples from 154 tracks
+  Train batches: 1935
+  Val batches: 209
+
+======================================================================
+CREATING MODEL
+======================================================================
+/opt/pytorch/lib64/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+  Parameters: 1,004,898
+
+======================================================================
+TRAINING
+======================================================================
+
+Initial validation (before training)...
+  Model (untrained): 6.5204
+  Random Model:      8.0759
+  Dead Reckoning:    0.3602
+  Last Position:     1.9178
+/opt/pytorch/lib64/python3.12/site-packages/torch/optim/lr_scheduler.py:192: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn(
+  Epoch 1, Batch 100/1935, Loss: 4.0650, LR: 2.00e-05, GPU: 16.9GB
+  Epoch 1, Batch 200/1935, Loss: 2.3900, LR: 4.00e-05, GPU: 16.9GB
+  Epoch 1, Batch 300/1935, Loss: 1.7641, LR: 6.00e-05, GPU: 16.9GB
+  Epoch 1, Batch 400/1935, Loss: 1.4132, LR: 8.00e-05, GPU: 16.9GB
+  Epoch 1, Batch 500/1935, Loss: 1.1840, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 1, Batch 600/1935, Loss: 1.0243, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 1, Batch 700/1935, Loss: 0.9062, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 1, Batch 800/1935, Loss: 0.8162, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 1, Batch 900/1935, Loss: 0.7450, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 1, Batch 1000/1935, Loss: 0.6874, LR: 1.00e-04, GPU: 16.9GB
+
+  >>> VALIDATION at step 1000:
+      Train Loss:     0.6874
+      ---
+      Model:          0.1417  (vs DR: +60.7%, vs LP: +92.6%)
+      Dead Reckoning: 0.3602
+      Last Position:  1.9178
+      Random Model:   8.0759
+
+      Saved checkpoint: checkpoint_step_1000.pt
+      New best model!
+  Epoch 1, Batch 1100/1935, Loss: 0.1602, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 1, Batch 1200/1935, Loss: 0.1591, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 1, Batch 1300/1935, Loss: 0.1574, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 1, Batch 1400/1935, Loss: 0.1559, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 1, Batch 1500/1935, Loss: 0.1553, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 1, Batch 1600/1935, Loss: 0.1542, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 1, Batch 1700/1935, Loss: 0.1534, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 1, Batch 1800/1935, Loss: 0.1528, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 1, Batch 1900/1935, Loss: 0.1525, LR: 1.00e-04, GPU: 16.9GB
+Epoch 1/5 complete, Time=410.5s
+  Epoch 2, Batch 100/1935, Loss: 0.1513, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 2, Batch 200/1935, Loss: 0.1503, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 2, Batch 300/1935, Loss: 0.1496, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 2, Batch 400/1935, Loss: 0.1489, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 2, Batch 500/1935, Loss: 0.1480, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 2, Batch 600/1935, Loss: 0.1474, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 2, Batch 700/1935, Loss: 0.1468, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 2, Batch 800/1935, Loss: 0.1461, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 2, Batch 900/1935, Loss: 0.1453, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 2, Batch 1000/1935, Loss: 0.1445, LR: 1.00e-04, GPU: 16.9GB
+
+  >>> VALIDATION at step 2935:
+      Train Loss:     0.1445
+      ---
+      Model:          0.1172  (vs DR: +67.5%, vs LP: +93.9%)
+      Dead Reckoning: 0.3602
+      Last Position:  1.9178
+      Random Model:   8.0759
+
+      Saved checkpoint: checkpoint_step_2935.pt
+      New best model!
+  Epoch 2, Batch 1100/1935, Loss: 0.1269, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 2, Batch 1200/1935, Loss: 0.1269, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 2, Batch 1300/1935, Loss: 0.1272, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 2, Batch 1400/1935, Loss: 0.1267, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 2, Batch 1500/1935, Loss: 0.1260, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 2, Batch 1600/1935, Loss: 0.1257, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 2, Batch 1700/1935, Loss: 0.1249, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 2, Batch 1800/1935, Loss: 0.1247, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 2, Batch 1900/1935, Loss: 0.1239, LR: 1.00e-04, GPU: 16.9GB
+Epoch 2/5 complete, Time=409.9s
+  Epoch 3, Batch 100/1935, Loss: 0.1232, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 3, Batch 200/1935, Loss: 0.1228, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 3, Batch 300/1935, Loss: 0.1223, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 3, Batch 400/1935, Loss: 0.1218, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 3, Batch 500/1935, Loss: 0.1215, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 3, Batch 600/1935, Loss: 0.1211, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 3, Batch 700/1935, Loss: 0.1207, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 3, Batch 800/1935, Loss: 0.1204, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 3, Batch 900/1935, Loss: 0.1200, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 3, Batch 1000/1935, Loss: 0.1197, LR: 1.00e-04, GPU: 16.9GB
+
+  >>> VALIDATION at step 4870:
+      Train Loss:     0.1197
+      ---
+      Model:          0.1017  (vs DR: +71.8%, vs LP: +94.7%)
+      Dead Reckoning: 0.3602
+      Last Position:  1.9178
+      Random Model:   8.0759
+
+      Saved checkpoint: checkpoint_step_4870.pt
+      New best model!
+  Epoch 3, Batch 1100/1935, Loss: 0.1153, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 3, Batch 1200/1935, Loss: 0.1145, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 3, Batch 1300/1935, Loss: 0.1141, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 3, Batch 1400/1935, Loss: 0.1138, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 3, Batch 1500/1935, Loss: 0.1132, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 3, Batch 1600/1935, Loss: 0.1134, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 3, Batch 1700/1935, Loss: 0.1130, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 3, Batch 1800/1935, Loss: 0.1127, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 3, Batch 1900/1935, Loss: 0.1128, LR: 1.00e-04, GPU: 16.9GB
+Epoch 3/5 complete, Time=409.1s
+  Epoch 4, Batch 100/1935, Loss: 0.1125, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 4, Batch 200/1935, Loss: 0.1122, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 4, Batch 300/1935, Loss: 0.1122, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 4, Batch 400/1935, Loss: 0.1122, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 4, Batch 500/1935, Loss: 0.1120, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 4, Batch 600/1935, Loss: 0.1119, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 4, Batch 700/1935, Loss: 0.1117, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 4, Batch 800/1935, Loss: 0.1115, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 4, Batch 900/1935, Loss: 0.1113, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 4, Batch 1000/1935, Loss: 0.1111, LR: 1.00e-04, GPU: 16.9GB
+
+  >>> VALIDATION at step 6805:
+      Train Loss:     0.1111
+      ---
+      Model:          0.0959  (vs DR: +73.4%, vs LP: +95.0%)
+      Dead Reckoning: 0.3602
+      Last Position:  1.9178
+      Random Model:   8.0759
+
+      Saved checkpoint: checkpoint_step_6805.pt
+      New best model!
+  Epoch 4, Batch 1100/1935, Loss: 0.1072, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 4, Batch 1200/1935, Loss: 0.1072, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 4, Batch 1300/1935, Loss: 0.1077, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 4, Batch 1400/1935, Loss: 0.1076, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 4, Batch 1500/1935, Loss: 0.1072, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 4, Batch 1600/1935, Loss: 0.1070, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 4, Batch 1700/1935, Loss: 0.1066, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 4, Batch 1800/1935, Loss: 0.1068, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 4, Batch 1900/1935, Loss: 0.1069, LR: 1.00e-04, GPU: 16.9GB
+Epoch 4/5 complete, Time=411.2s
+  Epoch 5, Batch 100/1935, Loss: 0.1068, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 5, Batch 200/1935, Loss: 0.1066, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 5, Batch 300/1935, Loss: 0.1066, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 5, Batch 400/1935, Loss: 0.1066, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 5, Batch 500/1935, Loss: 0.1064, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 5, Batch 600/1935, Loss: 0.1064, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 5, Batch 700/1935, Loss: 0.1063, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 5, Batch 800/1935, Loss: 0.1063, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 5, Batch 900/1935, Loss: 0.1062, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 5, Batch 1000/1935, Loss: 0.1062, LR: 1.00e-04, GPU: 16.9GB
+
+  >>> VALIDATION at step 8740:
+      Train Loss:     0.1062
+      ---
+      Model:          0.0933  (vs DR: +74.1%, vs LP: +95.1%)
+      Dead Reckoning: 0.3602
+      Last Position:  1.9178
+      Random Model:   8.0759
+
+      Saved checkpoint: checkpoint_step_8740.pt
+      New best model!
+  Epoch 5, Batch 1100/1935, Loss: 0.1049, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 5, Batch 1200/1935, Loss: 0.1040, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 5, Batch 1300/1935, Loss: 0.1040, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 5, Batch 1400/1935, Loss: 0.1035, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 5, Batch 1500/1935, Loss: 0.1033, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 5, Batch 1600/1935, Loss: 0.1035, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 5, Batch 1700/1935, Loss: 0.1035, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 5, Batch 1800/1935, Loss: 0.1035, LR: 1.00e-04, GPU: 16.9GB
+  Epoch 5, Batch 1900/1935, Loss: 0.1034, LR: 1.00e-04, GPU: 16.9GB
+Epoch 5/5 complete, Time=409.7s
+
+Final validation...
+
+  FINAL RESULTS:
+  Model:          0.0957  (vs DR: +73.4%, vs LP: +95.0%)
+  Dead Reckoning: 0.3602
+  Last Position:  1.9178
+  Random Model:   8.0759
+
+======================================================================
+EVALUATION
+======================================================================
+  horizon_1_error_deg: 0.0003
+  horizon_1_error_km: 0.0286
+  horizon_2_error_deg: 0.0003
+  horizon_2_error_km: 0.0283
+  horizon_3_error_deg: 0.0003
+  horizon_3_error_km: 0.0286
+  horizon_4_error_deg: 0.0003
+  horizon_4_error_km: 0.0287
+  horizon_5_error_deg: 0.0003
+  horizon_5_error_km: 0.0287
+
+======================================================================
+SAVING RESULTS
+======================================================================
+
+  Results saved to: /home/ec2-user/trackfm-toy studies/experiments/09_ais_real_data/results
+======================================================================
+DONE
+======================================================================

@@ -1,0 +1,521 @@
+
+Experiment: long_horizon_100ep
+Output directory: /home/ec2-user/trackfm-toy studies/experiments/10_long_horizon/experiments/long_horizon_100ep
+  Checkpoints: /home/ec2-user/trackfm-toy studies/experiments/10_long_horizon/experiments/long_horizon_100ep/checkpoints
+  Results: /home/ec2-user/trackfm-toy studies/experiments/10_long_horizon/experiments/long_horizon_100ep/results
+  Log file: /home/ec2-user/trackfm-toy studies/experiments/10_long_horizon/experiments/long_horizon_100ep/results/training.log
+
+Configuration:
+  data_path: /mnt/fsx/data
+  catalog_path: /mnt/fsx/data/track_catalog.parquet
+  min_track_length: 600
+  max_seq_len: 128
+  min_sog: 3.0
+  d_model: 128
+  nhead: 8
+  num_layers: 4
+  dim_feedforward: 512
+  dropout: 0.1
+  grid_size: 64
+  num_freqs: 12
+  grid_range: 0.3
+  max_horizon: 400
+  num_horizon_samples: 40
+  batch_size: 8000
+  learning_rate: 0.0003
+  weight_decay: 1e-05
+  num_epochs: 100
+  warmup_steps: 20
+  val_every_n_batches: 20
+  val_max_batches: 10
+  sigma: 0.003
+  use_amp: True
+  num_workers: 0
+  pin_memory: True
+  gradient_accumulation: 1
+  lat_mean: 56.25
+  lat_std: 1.0
+  lon_mean: 11.5
+  lon_std: 2.0
+  sog_max: 30.0
+  dt_max: 300.0
+
+======================================================================
+LOADING DATA
+======================================================================
+Loading track catalog...
+  Selected 2000 tracks for training
+Loading track data from FSx (streaming)...
+    Processed tracks.parquet, tracks so far: 198
+    Processed tracks.parquet, tracks so far: 668
+    Processed tracks.parquet, tracks so far: 852
+    Processed tracks.parquet, tracks so far: 1046
+    Processed tracks.parquet, tracks so far: 1223
+    Processed tracks.parquet, tracks so far: 1390
+    Processed tracks.parquet, tracks so far: 1544
+    Processed tracks.parquet, tracks so far: 1565
+  Loaded 1565 tracks in 27.9s
+  Total positions: 17,708,816
+  Train tracks: 1349, Val tracks: 150
+
+Creating datasets...
+  Created 473,692 training samples from 1349 tracks
+  Created 55,755 training samples from 150 tracks
+  Train batches: 60
+  Val batches: 55
+
+======================================================================
+CREATING MODEL
+======================================================================
+  Parameters: 1,004,898
+
+======================================================================
+TRAINING
+======================================================================
+
+Initial validation (before training)...
+  Model (untrained): 11.4920
+  Random Model:      12.1716
+  Dead Reckoning:    12.5081
+  Last Position:     18.8154
+
+  >>> VALIDATION at step 1 (batch 1):
+      Train Loss:     11.0445
+      ---
+      Model:          11.4920  (vs DR: +8.1%, vs LP: +38.9%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1.pt
+      New best model!
+
+  >>> VALIDATION at step 3 (batch 3):
+      Train Loss:     11.3671
+      ---
+      Model:          10.6156  (vs DR: +15.1%, vs LP: +43.6%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_3.pt
+      New best model!
+
+  >>> VALIDATION at step 7 (batch 7):
+      Train Loss:     9.8537
+      ---
+      Model:          8.3361  (vs DR: +33.4%, vs LP: +55.7%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_7.pt
+      New best model!
+
+  >>> VALIDATION at step 15 (batch 15):
+      Train Loss:     7.5401
+      ---
+      Model:          6.2878  (vs DR: +49.7%, vs LP: +66.6%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_15.pt
+      New best model!
+
+  >>> VALIDATION at step 31 (batch 31):
+      Train Loss:     5.6575
+      ---
+      Model:          5.5777  (vs DR: +55.4%, vs LP: +70.4%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_31.pt
+      New best model!
+Epoch 1/100 complete, Time=132.9s
+
+  >>> VALIDATION at step 63 (batch 63):
+      Train Loss:     4.6799
+      ---
+      Model:          4.6315  (vs DR: +63.0%, vs LP: +75.4%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_63.pt
+      New best model!
+Epoch 2/100 complete, Time=121.0s
+
+  >>> VALIDATION at step 123 (batch 123):
+      Train Loss:     3.9645
+      ---
+      Model:          4.3712  (vs DR: +65.1%, vs LP: +76.8%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_123.pt
+      New best model!
+Epoch 3/100 complete, Time=121.1s
+
+  >>> VALIDATION at step 183 (batch 183):
+      Train Loss:     3.7191
+      ---
+      Model:          4.1924  (vs DR: +66.5%, vs LP: +77.7%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_183.pt
+      New best model!
+Epoch 4/100 complete, Time=120.9s
+
+  >>> VALIDATION at step 243 (batch 243):
+      Train Loss:     3.4752
+      ---
+      Model:          4.1222  (vs DR: +67.0%, vs LP: +78.1%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_243.pt
+      New best model!
+Epoch 5/100 complete, Time=121.3s
+
+  >>> VALIDATION at step 303 (batch 303):
+      Train Loss:     3.4659
+      ---
+      Model:          4.1041  (vs DR: +67.2%, vs LP: +78.2%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_303.pt
+      New best model!
+Epoch 6/100 complete, Time=121.0s
+
+  >>> VALIDATION at step 363 (batch 363):
+      Train Loss:     3.3446
+      ---
+      Model:          4.1002  (vs DR: +67.2%, vs LP: +78.2%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_363.pt
+      New best model!
+Epoch 7/100 complete, Time=121.2s
+
+  >>> VALIDATION at step 423 (batch 423):
+      Train Loss:     3.2136
+      ---
+      Model:          4.1088  (vs DR: +67.2%, vs LP: +78.2%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_423.pt
+Epoch 8/100 complete, Time=121.0s
+
+  >>> VALIDATION at step 483 (batch 483):
+      Train Loss:     3.2186
+      ---
+      Model:          4.0053  (vs DR: +68.0%, vs LP: +78.7%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_483.pt
+      New best model!
+Epoch 9/100 complete, Time=121.3s
+
+  >>> VALIDATION at step 543 (batch 543):
+      Train Loss:     3.1771
+      ---
+      Model:          3.9186  (vs DR: +68.7%, vs LP: +79.2%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_543.pt
+      New best model!
+Epoch 10/100 complete, Time=121.3s
+
+  >>> VALIDATION at step 603 (batch 603):
+      Train Loss:     3.1424
+      ---
+      Model:          3.8346  (vs DR: +69.3%, vs LP: +79.6%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_603.pt
+      New best model!
+Epoch 11/100 complete, Time=121.1s
+
+  >>> VALIDATION at step 663 (batch 663):
+      Train Loss:     3.0689
+      ---
+      Model:          3.7872  (vs DR: +69.7%, vs LP: +79.9%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_663.pt
+      New best model!
+Epoch 12/100 complete, Time=121.0s
+
+  >>> VALIDATION at step 723 (batch 723):
+      Train Loss:     3.0878
+      ---
+      Model:          3.8002  (vs DR: +69.6%, vs LP: +79.8%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_723.pt
+Epoch 13/100 complete, Time=120.9s
+
+  >>> VALIDATION at step 783 (batch 783):
+      Train Loss:     3.0412
+      ---
+      Model:          3.8280  (vs DR: +69.4%, vs LP: +79.7%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_783.pt
+Epoch 14/100 complete, Time=121.1s
+
+  >>> VALIDATION at step 843 (batch 843):
+      Train Loss:     3.0203
+      ---
+      Model:          3.8802  (vs DR: +69.0%, vs LP: +79.4%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_843.pt
+Epoch 15/100 complete, Time=120.9s
+
+  >>> VALIDATION at step 903 (batch 903):
+      Train Loss:     2.9476
+      ---
+      Model:          3.7003  (vs DR: +70.4%, vs LP: +80.3%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_903.pt
+      New best model!
+Epoch 16/100 complete, Time=121.2s
+
+  >>> VALIDATION at step 963 (batch 963):
+      Train Loss:     3.0219
+      ---
+      Model:          3.8273  (vs DR: +69.4%, vs LP: +79.7%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_963.pt
+Epoch 17/100 complete, Time=121.1s
+
+  >>> VALIDATION at step 1023 (batch 1023):
+      Train Loss:     3.0009
+      ---
+      Model:          3.7131  (vs DR: +70.3%, vs LP: +80.3%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1023.pt
+Epoch 18/100 complete, Time=121.1s
+
+  >>> VALIDATION at step 1083 (batch 1083):
+      Train Loss:     2.9337
+      ---
+      Model:          3.8471  (vs DR: +69.2%, vs LP: +79.6%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1083.pt
+Epoch 19/100 complete, Time=121.2s
+
+  >>> VALIDATION at step 1143 (batch 1143):
+      Train Loss:     2.9377
+      ---
+      Model:          3.6897  (vs DR: +70.5%, vs LP: +80.4%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1143.pt
+      New best model!
+Epoch 20/100 complete, Time=120.9s
+
+  >>> VALIDATION at step 1203 (batch 1203):
+      Train Loss:     2.9193
+      ---
+      Model:          3.7440  (vs DR: +70.1%, vs LP: +80.1%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1203.pt
+Epoch 21/100 complete, Time=121.0s
+
+  >>> VALIDATION at step 1263 (batch 1263):
+      Train Loss:     2.8705
+      ---
+      Model:          3.8127  (vs DR: +69.5%, vs LP: +79.7%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1263.pt
+Epoch 22/100 complete, Time=129.1s
+
+  >>> VALIDATION at step 1323 (batch 1323):
+      Train Loss:     2.8641
+      ---
+      Model:          3.8185  (vs DR: +69.5%, vs LP: +79.7%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1323.pt
+Epoch 23/100 complete, Time=133.8s
+
+  >>> VALIDATION at step 1383 (batch 1383):
+      Train Loss:     2.8881
+      ---
+      Model:          3.6979  (vs DR: +70.4%, vs LP: +80.3%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1383.pt
+Epoch 24/100 complete, Time=133.5s
+
+  >>> VALIDATION at step 1443 (batch 1443):
+      Train Loss:     2.8325
+      ---
+      Model:          3.8147  (vs DR: +69.5%, vs LP: +79.7%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1443.pt
+Epoch 25/100 complete, Time=132.1s
+
+  >>> VALIDATION at step 1503 (batch 1503):
+      Train Loss:     2.8409
+      ---
+      Model:          3.7015  (vs DR: +70.4%, vs LP: +80.3%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1503.pt
+Epoch 26/100 complete, Time=130.5s
+
+  >>> VALIDATION at step 1563 (batch 1563):
+      Train Loss:     2.8438
+      ---
+      Model:          3.7813  (vs DR: +69.8%, vs LP: +79.9%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1563.pt
+Epoch 27/100 complete, Time=135.4s
+
+  >>> VALIDATION at step 1623 (batch 1623):
+      Train Loss:     2.8013
+      ---
+      Model:          3.7654  (vs DR: +69.9%, vs LP: +80.0%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1623.pt
+Epoch 28/100 complete, Time=126.5s
+
+  >>> VALIDATION at step 1683 (batch 1683):
+      Train Loss:     2.7721
+      ---
+      Model:          3.8238  (vs DR: +69.4%, vs LP: +79.7%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1683.pt
+Epoch 29/100 complete, Time=126.9s
+
+  >>> VALIDATION at step 1743 (batch 1743):
+      Train Loss:     2.7979
+      ---
+      Model:          3.8614  (vs DR: +69.1%, vs LP: +79.5%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1743.pt
+Epoch 30/100 complete, Time=127.5s
+
+  >>> VALIDATION at step 1803 (batch 1803):
+      Train Loss:     2.7508
+      ---
+      Model:          3.7271  (vs DR: +70.2%, vs LP: +80.2%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1803.pt
+Epoch 31/100 complete, Time=121.5s
+
+  >>> VALIDATION at step 1863 (batch 1863):
+      Train Loss:     2.7508
+      ---
+      Model:          3.7713  (vs DR: +69.8%, vs LP: +80.0%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1863.pt
+Epoch 32/100 complete, Time=121.0s
+
+  >>> VALIDATION at step 1923 (batch 1923):
+      Train Loss:     2.7191
+      ---
+      Model:          3.7247  (vs DR: +70.2%, vs LP: +80.2%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1923.pt
+Epoch 33/100 complete, Time=121.2s
+
+  >>> VALIDATION at step 1983 (batch 1983):
+      Train Loss:     2.7085
+      ---
+      Model:          3.7429  (vs DR: +70.1%, vs LP: +80.1%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_1983.pt
+Epoch 34/100 complete, Time=122.1s
+
+  >>> VALIDATION at step 2043 (batch 2043):
+      Train Loss:     2.7044
+      ---
+      Model:          3.7068  (vs DR: +70.4%, vs LP: +80.3%)
+      Dead Reckoning: 12.5081
+      Last Position:  18.8154
+      Random Model:   12.1716
+
+      Saved checkpoint: checkpoint_step_2043.pt
