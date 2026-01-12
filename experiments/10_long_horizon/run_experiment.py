@@ -62,6 +62,11 @@ class Config:
     dim_feedforward: int = 512
     dropout: float = 0.1
 
+    # Model scale presets (small=1x, medium=~5x, large=~17x params)
+    # small:  d_model=128, nhead=8,  num_layers=4, dim_ff=512   (~1M params)
+    # medium: d_model=256, nhead=8,  num_layers=6, dim_ff=1024  (~5M params)
+    # large:  d_model=384, nhead=16, num_layers=8, dim_ff=2048  (~17M params)
+
     # Fourier head
     grid_size: int = 64
     num_freqs: int = 12
@@ -992,6 +997,100 @@ def evaluate_model(model: nn.Module, val_loader: DataLoader, config: Config) -> 
 # Main
 # ============================================================================
 
+def find_optimal_batch_size(model: nn.Module, config: Config, target_gpu_pct: float = 0.90) -> int:
+    """
+    Binary search to find the largest batch size that fits in target GPU memory.
+
+    Args:
+        model: The model to test
+        config: Configuration object
+        target_gpu_pct: Target GPU memory utilization (default 90%)
+
+    Returns:
+        Optimal batch size
+    """
+    import gc
+
+    model = model.to(DEVICE)
+    total_mem = torch.cuda.get_device_properties(0).total_memory
+    target_mem = total_mem * target_gpu_pct
+
+    print(f"\nFinding optimal batch size for {target_gpu_pct*100:.0f}% GPU utilization...")
+    print(f"  Total GPU memory: {total_mem / 1e9:.1f} GB")
+    print(f"  Target memory: {target_mem / 1e9:.1f} GB")
+
+    # Create a small synthetic batch for testing
+    seq_len = config.max_seq_len + config.max_horizon
+
+    # Binary search between min and max batch sizes
+    min_bs, max_bs = 64, 16000
+    best_bs = min_bs
+
+    while min_bs <= max_bs:
+        mid_bs = (min_bs + max_bs) // 2
+
+        # Clear GPU memory
+        torch.cuda.empty_cache()
+        gc.collect()
+        torch.cuda.reset_peak_memory_stats()
+
+        try:
+            # Create synthetic batch
+            features = torch.randn(mid_bs, seq_len, 6, device=DEVICE)
+
+            # Forward pass with gradient computation
+            model.train()
+            with autocast('cuda', enabled=config.use_amp):
+                log_densities, targets, _ = model.forward_train(features)
+                loss = compute_soft_target_loss(
+                    log_densities, targets,
+                    config.grid_range, config.grid_size, config.sigma
+                )
+
+            # Backward pass
+            scaler = GradScaler('cuda') if config.use_amp else None
+            if config.use_amp:
+                scaler.scale(loss).backward()
+            else:
+                loss.backward()
+
+            # Check peak memory
+            peak_mem = torch.cuda.max_memory_allocated()
+
+            # Clean up
+            del features, log_densities, targets, loss
+            model.zero_grad()
+            torch.cuda.empty_cache()
+            gc.collect()
+
+            pct_used = peak_mem / total_mem * 100
+            print(f"  Batch size {mid_bs}: {peak_mem / 1e9:.1f} GB ({pct_used:.1f}%)", end="")
+
+            if peak_mem <= target_mem:
+                best_bs = mid_bs
+                min_bs = mid_bs + 1
+                print(" ✓")
+            else:
+                max_bs = mid_bs - 1
+                print(" (too high)")
+
+        except RuntimeError as e:
+            if "out of memory" in str(e).lower():
+                print(f"  Batch size {mid_bs}: OOM")
+                max_bs = mid_bs - 1
+                torch.cuda.empty_cache()
+                gc.collect()
+            else:
+                raise e
+
+    # Round down to nearest 100 for cleaner batch sizes
+    best_bs = (best_bs // 100) * 100
+    best_bs = max(best_bs, 64)  # Minimum 64
+
+    print(f"\n  Optimal batch size: {best_bs}")
+    return best_bs
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description='Train AIS trajectory prediction model')
@@ -1002,7 +1101,7 @@ def main():
     parser.add_argument('--num-epochs', type=int, default=None,
                         help='Number of training epochs (overrides config)')
     parser.add_argument('--batch-size', type=int, default=None,
-                        help='Batch size (overrides config)')
+                        help='Batch size (overrides config, use 0 for auto-find)')
     parser.add_argument('--learning-rate', type=float, default=None,
                         help='Learning rate (overrides config)')
     parser.add_argument('--early-stop-patience', type=int, default=None,
@@ -1011,6 +1110,19 @@ def main():
                         help='Disable early stopping')
     parser.add_argument('--max-tracks', type=int, default=None,
                         help='Maximum number of tracks to load (default: all)')
+    # Model size arguments
+    parser.add_argument('--model-scale', type=str, choices=['small', 'medium', 'large'], default=None,
+                        help='Model scale preset: small (~1M), medium (~5M), large (~17M params)')
+    parser.add_argument('--d-model', type=int, default=None,
+                        help='Model dimension (overrides preset)')
+    parser.add_argument('--nhead', type=int, default=None,
+                        help='Number of attention heads (overrides preset)')
+    parser.add_argument('--num-layers', type=int, default=None,
+                        help='Number of transformer layers (overrides preset)')
+    parser.add_argument('--dim-feedforward', type=int, default=None,
+                        help='Feedforward dimension (overrides preset)')
+    parser.add_argument('--target-gpu-pct', type=float, default=0.90,
+                        help='Target GPU memory utilization for auto batch size (default: 0.90)')
     args = parser.parse_args()
 
     print("=" * 70, flush=True)
@@ -1019,19 +1131,51 @@ def main():
 
     config = Config()
 
-    # Override config with command line arguments
+    # Apply model scale preset first
+    if args.model_scale == 'small':
+        config.d_model = 128
+        config.nhead = 8
+        config.num_layers = 4
+        config.dim_feedforward = 512
+    elif args.model_scale == 'medium':
+        config.d_model = 256
+        config.nhead = 8
+        config.num_layers = 6
+        config.dim_feedforward = 1024
+    elif args.model_scale == 'large':
+        config.d_model = 384
+        config.nhead = 16
+        config.num_layers = 8
+        config.dim_feedforward = 2048
+
+    # Override individual model params (takes precedence over preset)
+    if args.d_model is not None:
+        config.d_model = args.d_model
+    if args.nhead is not None:
+        config.nhead = args.nhead
+    if args.num_layers is not None:
+        config.num_layers = args.num_layers
+    if args.dim_feedforward is not None:
+        config.dim_feedforward = args.dim_feedforward
+
+    # Override other config with command line arguments
     if args.max_horizon is not None:
         config.max_horizon = args.max_horizon
     if args.num_epochs is not None:
         config.num_epochs = args.num_epochs
-    if args.batch_size is not None:
-        config.batch_size = args.batch_size
     if args.learning_rate is not None:
         config.learning_rate = args.learning_rate
     if args.early_stop_patience is not None:
         config.early_stop_patience = args.early_stop_patience
     if args.no_early_stop:
         config.early_stop_patience = float('inf')  # Effectively disable
+
+    # Handle batch size: if 0 or not specified with large model, use auto-find
+    auto_batch_size = args.batch_size == 0 or (args.batch_size is None and args.model_scale in ['medium', 'large'])
+
+    # If explicit batch size specified (not 0), use it
+    if args.batch_size is not None and args.batch_size > 0:
+        config.batch_size = args.batch_size
 
     # Create output directory
     from datetime import datetime
@@ -1121,6 +1265,39 @@ def main():
     model = CausalAISModel(config)
     num_params = sum(p.numel() for p in model.parameters())
     print(f"  Parameters: {num_params:,}", flush=True)
+    print(f"  Architecture: d_model={config.d_model}, nhead={config.nhead}, "
+          f"num_layers={config.num_layers}, dim_ff={config.dim_feedforward}", flush=True)
+
+    # Find optimal batch size if requested
+    if auto_batch_size:
+        print("\n" + "=" * 70, flush=True)
+        print("FINDING OPTIMAL BATCH SIZE", flush=True)
+        print("=" * 70, flush=True)
+        config.batch_size = find_optimal_batch_size(model, config, args.target_gpu_pct)
+
+        # Recreate data loaders with new batch size
+        print(f"\nRecreating data loaders with batch_size={config.batch_size}...", flush=True)
+        train_loader = DataLoader(
+            train_dataset,
+            batch_size=config.batch_size,
+            shuffle=True,
+            num_workers=config.num_workers,
+            pin_memory=config.pin_memory,
+            persistent_workers=config.num_workers > 0
+        )
+        val_batch_size = min(config.batch_size, 1024)
+        val_loader = DataLoader(
+            val_dataset,
+            batch_size=val_batch_size,
+            num_workers=config.num_workers,
+            pin_memory=config.pin_memory
+        )
+        print(f"  Train batches: {len(train_loader)}", flush=True)
+        print(f"  Val batches: {len(val_loader)}", flush=True)
+
+        # Update config file with found batch size
+        with open(output_dir / 'config.json', 'w') as f:
+            json.dump(config.__dict__, f, indent=2)
 
     # Train
     print("\n" + "=" * 70, flush=True)

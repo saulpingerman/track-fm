@@ -4,7 +4,7 @@
 
 This experiment extends Experiment 9's causal multi-horizon transformer to predict vessel trajectories up to **1 hour into the future** (400 horizons vs 20). To make training with 400 horizons computationally feasible, we use **random horizon sampling** - selecting 40 horizons uniformly from 1-400 per batch rather than computing all horizons.
 
-**Key Result**: The model achieves **68.6% improvement** over dead reckoning baseline at 5 epochs, with prediction errors of ~12.75 km at horizon 400 (~1 hour ahead).
+**Key Result**: The large model (18M params) achieves **44% improvement** over dead reckoning baseline, with prediction errors of ~12 km at horizon 400 (~1 hour ahead).
 
 ## Key Differences from Experiment 9
 
@@ -43,34 +43,63 @@ Same as Experiment 9:
 
 ```
 CausalAISModel
-├── Input Projection: 6 → 128 (Linear)
+├── Input Projection: 6 → d_model (Linear)
 ├── Positional Encoding: Sinusoidal
-├── Transformer Encoder: 4 layers, 8 heads, 512 FFN dim
+├── Transformer Encoder: num_layers layers, nhead heads, dim_feedforward FFN dim
 │   └── Causal mask: Each position only attends to itself and past
 ├── Cumulative Time Encoding: Sinusoidal (enables arbitrary horizon prediction)
 └── Fourier Head 2D: Outputs 64x64 probability grid per sampled horizon
 ```
 
+### Model Scale Presets
+
+Three model sizes are available via `--model-scale`:
+
+| Scale | d_model | nhead | num_layers | dim_ff | Parameters |
+|-------|---------|-------|------------|--------|------------|
+| small | 128 | 8 | 4 | 512 | ~1M |
+| medium | 256 | 8 | 6 | 1024 | ~5M |
+| large | 384 | 16 | 8 | 2048 | ~18M |
+
 ### Configuration
 
 ```python
-d_model: 128
-nhead: 8
-num_layers: 4
-dim_feedforward: 512
+# Model (default: small, use --model-scale large for best results)
+d_model: 128              # Model dimension
+nhead: 8                  # Attention heads
+num_layers: 4             # Transformer layers
+dim_feedforward: 512      # FFN hidden dimension
 dropout: 0.1
+
+# Fourier head
 grid_size: 64
 grid_range: 0.3           # ±0.3° = ±33km prediction range (15x larger than exp 9)
+
+# Training
 max_horizon: 400          # Up to 1 hour ahead
 num_horizon_samples: 40   # Sample 40 horizons per batch
 max_seq_len: 128
-batch_size: 8000          # Large batch for GPU efficiency
+batch_size: 8000          # Auto-found for large models (use --batch-size 0)
 learning_rate: 0.0003
 use_amp: True             # Mixed precision for memory efficiency
+
+# Loss
 sigma: 0.003              # Soft target sigma for model
 dr_sigma: 0.05            # Baseline sigma (optimized on training data)
+
+# Early stopping
 early_stop_patience: 4    # Stop after 4 val checks with no improvement
 ```
+
+### Automatic Batch Size Finding
+
+For medium/large models, the script automatically finds the largest batch size that fits in ~90% GPU memory:
+
+```bash
+python run_experiment.py --model-scale large --batch-size 0  # 0 = auto-find
+```
+
+The binary search tests batch sizes and finds optimal utilization (e.g., batch_size=1900 for large model on L40S 48GB).
 
 ## Training Approach: Random Horizon Sampling
 
@@ -161,25 +190,30 @@ Without this optimization, DR would be unfairly penalized (sigma=0.003 is too ti
 
 ## Results
 
-### Training Run: long_horizon_5ep (5 epochs)
+### Training Run: large_model_overnight (Large Model, 18M params)
 
 | Metric | Value |
 |--------|-------|
-| Final Train Loss | 0.161 |
-| Final Val Loss | 0.158 |
-| Dead Reckoning Loss | 0.503 |
-| Improvement vs DR | **68.6%** |
-| GPU Memory Used | 43.56 GB (91%) |
+| Model | Large (18M params) |
+| Best Val Loss | 2.92 |
+| Dead Reckoning Loss | 5.36 |
+| Last Position Loss | 8.08 |
+| Improvement vs DR | **44%** |
+| Improvement vs LP | **63%** |
+| GPU Memory Used | 42.9 GB (90%) |
+| Batch Size (auto) | 1900 |
+| Early Stopped | Epoch 22 |
 
-### Error by Horizon (5 epochs)
+### Error by Horizon (Large Model)
 
 | Horizon | Approx Time | Error (km) |
 |---------|-------------|------------|
-| 1 | ~10s | ~0.08 |
-| 100 | ~15 min | ~3.5 |
-| 200 | ~30 min | ~7.0 |
-| 300 | ~45 min | ~10.0 |
-| 400 | ~1 hour | ~12.75 |
+| 1 | ~10s | 0.46 |
+| 10 | ~100s | 0.25 |
+| 50 | ~8 min | 0.49 |
+| 100 | ~17 min | 0.90 |
+| 200 | ~33 min | 2.12 |
+| 400 | ~1 hour | 12.0 |
 
 Note: Actual time varies per track based on dt values.
 
@@ -225,18 +259,22 @@ cd "/home/ec2-user/trackfm-toy studies/experiments/10_long_horizon"
 ### Individual Scripts
 
 ```bash
-# Training only
-python run_experiment.py --exp-name my_exp --num-epochs 5
+# Training with large model (recommended)
+python run_experiment.py --exp-name my_exp --model-scale large --batch-size 0 --num-epochs 100
 
 # Available training options:
 python run_experiment.py \
     --exp-name <name>              # Experiment name (required)
+    --model-scale <small|medium|large>  # Model size preset
+    --d-model <int>                # Override d_model
+    --nhead <int>                  # Override attention heads
+    --num-layers <int>             # Override transformer layers
+    --dim-feedforward <int>        # Override FFN dimension
     --max-horizon <int>            # Max horizon (default: 400)
-    --num-horizon-samples <int>    # Samples per batch (default: 40)
     --num-epochs <int>             # Training epochs (default: 100)
-    --batch-size <int>             # Batch size (default: 8000)
+    --batch-size <int>             # Batch size (0 = auto-find for 90% GPU)
+    --target-gpu-pct <float>       # Target GPU utilization (default: 0.90)
     --learning-rate <float>        # Learning rate (default: 0.0003)
-    --grid-range <float>           # Grid range in degrees (default: 0.3)
     --max-tracks <int>             # Max tracks to load (default: all)
     --early-stop-patience <int>    # Early stopping patience (default: 4)
     --no-early-stop                # Disable early stopping
@@ -308,15 +346,19 @@ At horizon 400 (~1 hour), vessels can travel 15-30 km. Grid range of ±0.3° (±
 
 1. **Random horizon sampling works**: Model learns to predict at all horizons despite only seeing 40 random samples per batch.
 
-2. **Batch size matters for GPU efficiency**: Large batch (8000) with chunked loss achieves 91% GPU utilization.
+2. **Larger models help**: 18M param model (large) significantly outperforms 1M param model (small).
 
-3. **Exponential validation schedule**: Early frequent validation + later sparse validation balances feedback vs speed.
+3. **Auto batch size finding**: Binary search for batch size that uses ~90% GPU memory maximizes training efficiency across model sizes.
 
-4. **Batched video generation**: Computing 400 frames serially is slow. Batching horizon predictions (50 at a time) dramatically speeds up GIF generation.
+4. **Exponential validation schedule**: Early frequent validation + later sparse validation balances feedback vs speed.
 
-5. **Auto color scale for videos**: Fixed color scale doesn't work across 400 horizons where probability distributions vary widely.
+5. **Fair baseline comparison matters**: Using optimized sigma (0.05°) for DR baseline instead of model's tight sigma (0.003°) gives fair comparison.
 
-6. **50fps for smooth videos**: With 400 frames, 50fps gives 8-second videos showing smooth prediction evolution.
+6. **Batched video generation**: Computing 400 frames serially is slow. Batching horizon predictions (50 at a time) dramatically speeds up GIF generation.
+
+7. **Auto color scale for videos**: Fixed color scale doesn't work across 400 horizons where probability distributions vary widely.
+
+8. **50fps for smooth videos**: With 400 frames, 50fps gives 8-second videos showing smooth prediction evolution.
 
 ## Known Issues
 

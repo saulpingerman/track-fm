@@ -1,0 +1,557 @@
+
+Experiment: large_model_overnight
+Output directory: /home/ec2-user/trackfm-toy studies/experiments/10_long_horizon/experiments/large_model_overnight
+  Checkpoints: /home/ec2-user/trackfm-toy studies/experiments/10_long_horizon/experiments/large_model_overnight/checkpoints
+  Results: /home/ec2-user/trackfm-toy studies/experiments/10_long_horizon/experiments/large_model_overnight/results
+  Log file: /home/ec2-user/trackfm-toy studies/experiments/10_long_horizon/experiments/large_model_overnight/results/training.log
+
+Configuration:
+  data_path: /mnt/fsx/data
+  catalog_path: /mnt/fsx/data/track_catalog.parquet
+  min_track_length: 600
+  max_seq_len: 128
+  min_sog: 3.0
+  d_model: 384
+  nhead: 16
+  num_layers: 8
+  dim_feedforward: 2048
+  dropout: 0.1
+  grid_size: 64
+  num_freqs: 12
+  grid_range: 0.3
+  max_horizon: 400
+  num_horizon_samples: 40
+  batch_size: 8000
+  learning_rate: 0.0003
+  weight_decay: 1e-05
+  num_epochs: 100
+  warmup_steps: 20
+  val_every_n_batches: 20
+  val_max_batches: 10
+  sigma: 0.003
+  dr_sigma: 0.05
+  early_stop_patience: 10
+  early_stop_min_delta: 0.01
+  use_amp: True
+  num_workers: 0
+  pin_memory: True
+  gradient_accumulation: 1
+  lat_mean: 56.25
+  lat_std: 1.0
+  lon_mean: 11.5
+  lon_std: 2.0
+  sog_max: 30.0
+  dt_max: 300.0
+
+======================================================================
+LOADING DATA
+======================================================================
+Loading track catalog...
+  Selected 5833 tracks for training
+Loading track data from FSx (streaming)...
+    Processed tracks.parquet, tracks so far: 596
+    Processed tracks.parquet, tracks so far: 1566
+    Processed tracks.parquet, tracks so far: 1960
+    Processed tracks.parquet, tracks so far: 2369
+    Processed tracks.parquet, tracks so far: 2741
+    Processed tracks.parquet, tracks so far: 3075
+    Processed tracks.parquet, tracks so far: 3509
+    Processed tracks.parquet, tracks so far: 3754
+  Loaded 3754 tracks in 5.5s
+  Total positions: 23,324,281
+  Train tracks: 2704, Val tracks: 301
+
+Creating datasets...
+  Created 611,455 training samples from 2704 tracks
+  Created 69,407 training samples from 301 tracks
+  Train batches: 77
+  Val batches: 68
+
+======================================================================
+CREATING MODEL
+======================================================================
+  Parameters: 18,273,378
+  Architecture: d_model=384, nhead=16, num_layers=8, dim_ff=2048
+
+======================================================================
+FINDING OPTIMAL BATCH SIZE
+======================================================================
+
+Finding optimal batch size for 90% GPU utilization...
+  Total GPU memory: 47.7 GB
+  Target memory: 42.9 GB
+  Batch size 8032: OOM
+  Batch size 4047: OOM
+  Batch size 2055: 45.4 GB (95.2%) (too high)
+  Batch size 1059: 23.5 GB (49.2%) ✓
+  Batch size 1557: 34.4 GB (72.2%) ✓
+  Batch size 1806: 39.8 GB (83.4%) ✓
+  Batch size 1930: 42.4 GB (89.0%) ✓
+  Batch size 1992: 43.7 GB (91.7%) (too high)
+  Batch size 1961: 43.1 GB (90.3%) (too high)
+  Batch size 1945: 42.7 GB (89.6%) ✓
+  Batch size 1953: 42.9 GB (90.0%) ✓
+  Batch size 1957: 43.0 GB (90.1%) (too high)
+  Batch size 1955: 42.9 GB (90.1%) (too high)
+  Batch size 1954: 42.9 GB (90.1%) (too high)
+
+  Optimal batch size: 1900
+
+Recreating data loaders with batch_size=1900...
+  Train batches: 322
+  Val batches: 68
+
+======================================================================
+TRAINING
+======================================================================
+
+Initial validation (before training)...
+  Model (untrained): 22.9990
+  Random Model:      25.7929
+  Dead Reckoning:    5.3607
+  Last Position:     8.0843
+
+  >>> VALIDATION at step 1 (batch 1):
+      Train Loss:     22.3040
+      ---
+      Model:          22.9990  (vs DR: -329.0%, vs LP: -184.5%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_1.pt
+      New best model!
+
+  >>> VALIDATION at step 3 (batch 3):
+      Train Loss:     23.0946
+      ---
+      Model:          19.2023  (vs DR: -258.2%, vs LP: -137.5%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_3.pt
+      New best model!
+
+  >>> VALIDATION at step 7 (batch 7):
+      Train Loss:     15.4922
+      ---
+      Model:          11.6051  (vs DR: -116.5%, vs LP: -43.6%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_7.pt
+      New best model!
+
+  >>> VALIDATION at step 15 (batch 15):
+      Train Loss:     9.7159
+      ---
+      Model:          9.2889  (vs DR: -73.3%, vs LP: -14.9%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_15.pt
+      New best model!
+
+  >>> VALIDATION at step 31 (batch 31):
+      Train Loss:     7.7691
+      ---
+      Model:          6.8710  (vs DR: -28.2%, vs LP: +15.0%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_31.pt
+      New best model!
+
+  >>> VALIDATION at step 63 (batch 63):
+      Train Loss:     5.4383
+      ---
+      Model:          4.8448  (vs DR: +9.6%, vs LP: +40.1%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_63.pt
+      New best model!
+  Epoch 1, Batch 100/322, Loss: 4.2809, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 127 (batch 127):
+      Train Loss:     4.1775
+      ---
+      Model:          4.0498  (vs DR: +24.5%, vs LP: +49.9%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_127.pt
+      New best model!
+  Epoch 1, Batch 200/322, Loss: 3.8321, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 255 (batch 255):
+      Train Loss:     3.7490
+      ---
+      Model:          3.7563  (vs DR: +29.9%, vs LP: +53.5%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_255.pt
+      New best model!
+  Epoch 1, Batch 300/322, Loss: 3.4750, LR: 3.00e-04, GPU: 42.9GB
+Epoch 1/100 complete, Time=377.8s
+  Epoch 2, Batch 100/322, Loss: 3.3670, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 511 (batch 511):
+      Train Loss:     3.2999
+      ---
+      Model:          3.4625  (vs DR: +35.4%, vs LP: +57.2%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_511.pt
+      New best model!
+  Epoch 2, Batch 200/322, Loss: 3.2481, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 2, Batch 300/322, Loss: 3.1172, LR: 3.00e-04, GPU: 42.9GB
+Epoch 2/100 complete, Time=341.1s
+  Epoch 3, Batch 100/322, Loss: 3.0566, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 833 (batch 833):
+      Train Loss:     3.0399
+      ---
+      Model:          3.2269  (vs DR: +39.8%, vs LP: +60.1%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_833.pt
+      New best model!
+  Epoch 3, Batch 200/322, Loss: 2.9193, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 3, Batch 300/322, Loss: 2.9519, LR: 3.00e-04, GPU: 42.9GB
+Epoch 3/100 complete, Time=340.4s
+  Epoch 4, Batch 100/322, Loss: 2.8938, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 1155 (batch 1155):
+      Train Loss:     2.8757
+      ---
+      Model:          3.2152  (vs DR: +40.0%, vs LP: +60.2%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_1155.pt
+      No improvement (1/10)
+  Epoch 4, Batch 200/322, Loss: 2.8229, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 4, Batch 300/322, Loss: 2.7794, LR: 3.00e-04, GPU: 42.9GB
+Epoch 4/100 complete, Time=338.9s
+  Epoch 5, Batch 100/322, Loss: 2.7306, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 1477 (batch 1477):
+      Train Loss:     2.7326
+      ---
+      Model:          3.0456  (vs DR: +43.2%, vs LP: +62.3%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_1477.pt
+      New best model!
+  Epoch 5, Batch 200/322, Loss: 2.7517, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 5, Batch 300/322, Loss: 2.6637, LR: 3.00e-04, GPU: 42.9GB
+Epoch 5/100 complete, Time=339.9s
+  Epoch 6, Batch 100/322, Loss: 2.6760, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 1799 (batch 1799):
+      Train Loss:     2.6759
+      ---
+      Model:          3.0375  (vs DR: +43.3%, vs LP: +62.4%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_1799.pt
+      No improvement (1/10)
+  Epoch 6, Batch 200/322, Loss: 2.5996, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 6, Batch 300/322, Loss: 2.6840, LR: 3.00e-04, GPU: 42.9GB
+Epoch 6/100 complete, Time=340.1s
+  Epoch 7, Batch 100/322, Loss: 2.6390, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 2121 (batch 2121):
+      Train Loss:     2.6244
+      ---
+      Model:          2.9684  (vs DR: +44.6%, vs LP: +63.3%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_2121.pt
+      New best model!
+  Epoch 7, Batch 200/322, Loss: 2.5379, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 7, Batch 300/322, Loss: 2.5549, LR: 3.00e-04, GPU: 42.9GB
+Epoch 7/100 complete, Time=339.6s
+  Epoch 8, Batch 100/322, Loss: 2.5433, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 2443 (batch 2443):
+      Train Loss:     2.5434
+      ---
+      Model:          3.0036  (vs DR: +44.0%, vs LP: +62.8%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_2443.pt
+      No improvement (1/10)
+  Epoch 8, Batch 200/322, Loss: 2.5569, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 8, Batch 300/322, Loss: 2.5703, LR: 3.00e-04, GPU: 42.9GB
+Epoch 8/100 complete, Time=339.6s
+  Epoch 9, Batch 100/322, Loss: 2.5463, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 2765 (batch 2765):
+      Train Loss:     2.5448
+      ---
+      Model:          2.9901  (vs DR: +44.2%, vs LP: +63.0%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_2765.pt
+      No improvement (2/10)
+  Epoch 9, Batch 200/322, Loss: 2.5849, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 9, Batch 300/322, Loss: 2.5141, LR: 3.00e-04, GPU: 42.9GB
+Epoch 9/100 complete, Time=339.9s
+  Epoch 10, Batch 100/322, Loss: 2.4821, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 3087 (batch 3087):
+      Train Loss:     2.4753
+      ---
+      Model:          2.9450  (vs DR: +45.1%, vs LP: +63.6%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_3087.pt
+      No improvement (3/10)
+  Epoch 10, Batch 200/322, Loss: 2.5082, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 10, Batch 300/322, Loss: 2.4820, LR: 3.00e-04, GPU: 42.9GB
+Epoch 10/100 complete, Time=340.1s
+  Epoch 11, Batch 100/322, Loss: 2.4561, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 3409 (batch 3409):
+      Train Loss:     2.4592
+      ---
+      Model:          3.0179  (vs DR: +43.7%, vs LP: +62.7%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_3409.pt
+      No improvement (4/10)
+  Epoch 11, Batch 200/322, Loss: 2.4105, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 11, Batch 300/322, Loss: 2.4265, LR: 3.00e-04, GPU: 42.9GB
+Epoch 11/100 complete, Time=339.9s
+  Epoch 12, Batch 100/322, Loss: 2.4091, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 3731 (batch 3731):
+      Train Loss:     2.4103
+      ---
+      Model:          2.9195  (vs DR: +45.5%, vs LP: +63.9%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_3731.pt
+      New best model!
+  Epoch 12, Batch 200/322, Loss: 2.3740, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 12, Batch 300/322, Loss: 2.3869, LR: 3.00e-04, GPU: 42.9GB
+Epoch 12/100 complete, Time=340.4s
+  Epoch 13, Batch 100/322, Loss: 2.3684, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 4053 (batch 4053):
+      Train Loss:     2.3616
+      ---
+      Model:          2.9333  (vs DR: +45.3%, vs LP: +63.7%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_4053.pt
+      No improvement (1/10)
+  Epoch 13, Batch 200/322, Loss: 2.2378, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 13, Batch 300/322, Loss: 2.3629, LR: 3.00e-04, GPU: 42.9GB
+Epoch 13/100 complete, Time=340.1s
+  Epoch 14, Batch 100/322, Loss: 2.3621, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 4375 (batch 4375):
+      Train Loss:     2.3594
+      ---
+      Model:          3.0257  (vs DR: +43.6%, vs LP: +62.6%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_4375.pt
+      No improvement (2/10)
+  Epoch 14, Batch 200/322, Loss: 2.4004, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 14, Batch 300/322, Loss: 2.3751, LR: 3.00e-04, GPU: 42.9GB
+Epoch 14/100 complete, Time=340.7s
+  Epoch 15, Batch 100/322, Loss: 2.3518, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 4697 (batch 4697):
+      Train Loss:     2.3444
+      ---
+      Model:          3.0718  (vs DR: +42.7%, vs LP: +62.0%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_4697.pt
+      No improvement (3/10)
+  Epoch 15, Batch 200/322, Loss: 2.5383, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 15, Batch 300/322, Loss: 2.3317, LR: 3.00e-04, GPU: 42.9GB
+Epoch 15/100 complete, Time=340.1s
+  Epoch 16, Batch 100/322, Loss: 2.3060, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 5019 (batch 5019):
+      Train Loss:     2.3042
+      ---
+      Model:          2.9222  (vs DR: +45.5%, vs LP: +63.9%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_5019.pt
+      No improvement (4/10)
+  Epoch 16, Batch 200/322, Loss: 2.1971, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 16, Batch 300/322, Loss: 2.2648, LR: 3.00e-04, GPU: 42.9GB
+Epoch 16/100 complete, Time=340.2s
+  Epoch 17, Batch 100/322, Loss: 2.2768, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 5341 (batch 5341):
+      Train Loss:     2.2746
+      ---
+      Model:          3.0298  (vs DR: +43.5%, vs LP: +62.5%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_5341.pt
+      No improvement (5/10)
+  Epoch 17, Batch 200/322, Loss: 2.2621, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 17, Batch 300/322, Loss: 2.2550, LR: 3.00e-04, GPU: 42.9GB
+Epoch 17/100 complete, Time=340.3s
+  Epoch 18, Batch 100/322, Loss: 2.2428, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 5663 (batch 5663):
+      Train Loss:     2.2435
+      ---
+      Model:          3.0266  (vs DR: +43.5%, vs LP: +62.6%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_5663.pt
+      No improvement (6/10)
+  Epoch 18, Batch 200/322, Loss: 2.3260, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 18, Batch 300/322, Loss: 2.2557, LR: 3.00e-04, GPU: 42.9GB
+Epoch 18/100 complete, Time=339.8s
+  Epoch 19, Batch 100/322, Loss: 2.2357, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 5985 (batch 5985):
+      Train Loss:     2.2306
+      ---
+      Model:          2.9808  (vs DR: +44.4%, vs LP: +63.1%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_5985.pt
+      No improvement (7/10)
+  Epoch 19, Batch 200/322, Loss: 2.1694, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 19, Batch 300/322, Loss: 2.2332, LR: 3.00e-04, GPU: 42.9GB
+Epoch 19/100 complete, Time=340.0s
+  Epoch 20, Batch 100/322, Loss: 2.2566, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 6307 (batch 6307):
+      Train Loss:     2.2430
+      ---
+      Model:          3.1529  (vs DR: +41.2%, vs LP: +61.0%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_6307.pt
+      No improvement (8/10)
+  Epoch 20, Batch 200/322, Loss: 2.3418, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 20, Batch 300/322, Loss: 2.2785, LR: 3.00e-04, GPU: 42.9GB
+Epoch 20/100 complete, Time=340.5s
+  Epoch 21, Batch 100/322, Loss: 2.2306, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 6629 (batch 6629):
+      Train Loss:     2.2120
+      ---
+      Model:          3.1721  (vs DR: +40.8%, vs LP: +60.8%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_6629.pt
+      No improvement (9/10)
+  Epoch 21, Batch 200/322, Loss: 2.2138, LR: 3.00e-04, GPU: 42.9GB
+  Epoch 21, Batch 300/322, Loss: 2.2220, LR: 3.00e-04, GPU: 42.9GB
+Epoch 21/100 complete, Time=340.0s
+  Epoch 22, Batch 100/322, Loss: 2.1857, LR: 3.00e-04, GPU: 42.9GB
+
+  >>> VALIDATION at step 6951 (batch 6951):
+      Train Loss:     2.1785
+      ---
+      Model:          3.0035  (vs DR: +44.0%, vs LP: +62.8%)
+      Dead Reckoning: 5.3607
+      Last Position:  8.0843
+      Random Model:   25.7929
+
+      Saved checkpoint: checkpoint_step_6951.pt
+      No improvement (10/10)
+
+  >>> EARLY STOPPING: No improvement for 10 validation checks
+      Best validation loss: 2.9195
+Epoch 22/100 complete, Time=201.6s
+
+Training stopped early at epoch 22
+
+Final validation...
+
+  FINAL RESULTS:
+  Model:          3.0035  (vs DR: +44.0%, vs LP: +62.8%)
+  Dead Reckoning: 5.3607
+  Last Position:  8.0843
+  Random Model:   25.7929
+
+======================================================================
+EVALUATION
+======================================================================
+  horizon_100_error_deg: 0.0081
+  horizon_100_error_km: 0.9007
+  horizon_10_error_deg: 0.0023
+  horizon_10_error_km: 0.2531
+  horizon_1_error_deg: 0.0042
+  horizon_1_error_km: 0.4646
+  horizon_200_error_deg: 0.0191
+  horizon_200_error_km: 2.1242
+  horizon_400_error_deg: 0.1084
+  horizon_400_error_km: 12.0315
+  horizon_50_error_deg: 0.0044
+  horizon_50_error_km: 0.4851
+
+======================================================================
+SAVING RESULTS
+======================================================================
+
+  Results saved to: /home/ec2-user/trackfm-toy studies/experiments/10_long_horizon/experiments/large_model_overnight
+    - Checkpoints: /home/ec2-user/trackfm-toy studies/experiments/10_long_horizon/experiments/large_model_overnight/checkpoints
+    - Results: /home/ec2-user/trackfm-toy studies/experiments/10_long_horizon/experiments/large_model_overnight/results
+======================================================================
+DONE
+======================================================================

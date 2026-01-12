@@ -5,9 +5,11 @@ This repository contains experiments on vessel trajectory prediction using causa
 ## Key Results
 
 - **Experiment 10**: Long-horizon prediction (up to 1 hour ahead) on real AIS data
-  - **~40% improvement** over dead reckoning baseline (with fair sigma comparison)
+  - **44% improvement** over dead reckoning baseline (large model, 18M params)
+  - **63% improvement** over last position baseline
   - Predicts probability distributions over 64x64 grids covering ±33km
   - Trained on 3,754 vessel tracks (23M positions) from Danish maritime zone
+  - Prediction error: 0.9 km at 17 min, 12 km at 1 hour
 
 ## Repository Structure
 
@@ -58,8 +60,9 @@ These experiments use real vessel tracking data from the Danish maritime zone.
 - **Data**: 3,754 tracks, 23M positions (filtered for moving vessels)
 - **Horizon**: 400 steps (~1 hour ahead)
 - **Grid**: ±33km prediction range
-- **Features**: Early stopping, fair baseline comparison, random horizon sampling
-- **Result**: ~40% improvement over dead reckoning (with optimized baseline sigma)
+- **Model sizes**: Small (1M), Medium (5M), Large (18M params)
+- **Features**: Early stopping, fair baseline comparison, random horizon sampling, auto batch size
+- **Result**: 44% improvement over DR, 63% over LP (large model)
 
 See `experiments/10_long_horizon/README.md` for full details.
 
@@ -67,12 +70,20 @@ See `experiments/10_long_horizon/README.md` for full details.
 
 ```
 CausalAISModel
-├── Input Projection: 6 features → 128 dim
+├── Input Projection: 6 features → d_model
 ├── Positional Encoding: Sinusoidal
-├── Transformer Encoder: 4 layers, 8 heads, causal masking
+├── Transformer Encoder: num_layers layers, nhead heads, causal masking
 ├── Cumulative Time Encoding: For arbitrary horizon prediction
 └── Fourier Head 2D: Outputs 64x64 probability grid
 ```
+
+### Model Scales (Experiment 10)
+
+| Scale | d_model | nhead | layers | dim_ff | Params |
+|-------|---------|-------|--------|--------|--------|
+| small | 128 | 8 | 4 | 512 | ~1M |
+| medium | 256 | 8 | 6 | 1024 | ~5M |
+| large | 384 | 16 | 8 | 2048 | ~18M |
 
 ### Input Features
 | Feature | Description |
@@ -88,28 +99,29 @@ CausalAISModel
 # Activate environment
 source /opt/pytorch/bin/activate
 
-# Run experiment 10 (long horizon on real AIS data)
+# Run experiment 10 with large model (recommended)
 cd experiments/10_long_horizon
-./run_all.sh my_experiment 100  # 100 epochs with early stopping
-
-# Or run individual steps:
-python run_experiment.py --exp-name my_exp --num-epochs 100
+python run_experiment.py --exp-name my_exp --model-scale large --batch-size 0 --num-epochs 100
 python visualize_predictions.py --exp-name my_exp
 python make_horizon_videos.py --exp-name my_exp --max-horizon 400
+
+# Or use run_all.sh for full pipeline:
+./run_all.sh my_experiment 100  # 100 epochs with early stopping
 ```
 
 ## Key Learnings
 
 1. **Random horizon sampling works** - Train on 40 random samples from 400 horizons per batch
-2. **Cumulative time encoding** - Enables prediction at any horizon, including beyond training
-3. **Fair baseline comparison matters** - DR baseline needs appropriate sigma (~0.05° vs 0.003°)
-4. **Early stopping essential** - Validation loss plateaus quickly (4-10 checks)
-5. **Large batch + chunked loss** - 8000 batch size with 512-chunk loss computation for GPU efficiency
+2. **Larger models help** - 18M param model significantly outperforms 1M param model
+3. **Auto batch size** - Binary search for ~90% GPU utilization maximizes training efficiency
+4. **Cumulative time encoding** - Enables prediction at any horizon, including beyond training
+5. **Fair baseline comparison matters** - DR baseline needs appropriate sigma (~0.05° vs 0.003°)
+6. **Early stopping essential** - Validation loss plateaus quickly (4-10 checks)
 
 ## Hardware
 
 - NVIDIA L40S GPU (48GB)
-- ~44GB GPU memory used for experiment 10
+- ~43GB GPU memory used for large model (90% utilization)
 - FSx for Lustre for AIS data storage
 
 ## Data
