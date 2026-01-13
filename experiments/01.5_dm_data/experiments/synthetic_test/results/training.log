@@ -1,0 +1,229 @@
+
+Experiment: synthetic_test
+Output directory: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_test
+  Checkpoints: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_test/checkpoints
+  Results: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_test/results
+  Log file: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_test/results/training.log
+
+Configuration:
+  data_path: /mnt/fsx/data
+  catalog_path: /mnt/fsx/data/track_catalog.parquet
+  synthetic_data_path: ./data
+  use_synthetic: True
+  min_track_length: 528
+  max_seq_len: 128
+  min_sog: 3.0
+  d_model: 128
+  nhead: 8
+  num_layers: 4
+  dim_feedforward: 512
+  dropout: 0.1
+  grid_size: 64
+  num_freqs: 12
+  grid_range: 0.3
+  max_horizon: 400
+  num_horizon_samples: 40
+  batch_size: 2000
+  learning_rate: 0.0003
+  weight_decay: 1e-05
+  num_epochs: 5
+  warmup_steps: 20
+  val_every_n_batches: 20
+  val_max_batches: 10
+  sigma: 0.003
+  dr_sigma: 0.05
+  early_stop_patience: 4
+  early_stop_min_delta: 0.01
+  use_amp: True
+  num_workers: 0
+  pin_memory: True
+  gradient_accumulation: 1
+  lat_mean: 30.0
+  lat_std: 1.5
+  lon_mean: -70.0
+  lon_std: 1.8
+  sog_max: 30.0
+  dt_max: 300.0
+
+======================================================================
+LOADING DATA
+======================================================================
+Loading synthetic data...
+  Loading train data...
+    Loaded 5775 train tracks
+  Loading validation data...
+    Loaded 576 val tracks
+  Total train positions: 8,560,754
+  Total val positions: 853,075
+
+Creating datasets...
+  Created 175,221 training samples from 5775 tracks
+  Created 17,459 training samples from 576 tracks
+  Train batches: 88
+  Val batches: 18
+
+======================================================================
+CREATING MODEL
+======================================================================
+  Parameters: 1,004,898
+  Architecture: d_model=128, nhead=8, num_layers=4, dim_ff=512
+
+======================================================================
+TRAINING
+======================================================================
+
+Initial validation (before training)...
+  Model (untrained): 10.3309
+  Random Model:      11.1861
+  Dead Reckoning:    4.6256
+  Last Position:     12.0449
+
+  >>> VALIDATION at step 1 (batch 1):
+      Train Loss:     10.3071
+      ---
+      Model:          10.3309  (vs DR: -123.3%, vs LP: +14.2%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.1861
+
+      Saved checkpoint: checkpoint_step_1.pt
+      New best model!
+
+  >>> VALIDATION at step 3 (batch 3):
+      Train Loss:     10.2349
+      ---
+      Model:          9.5926  (vs DR: -107.4%, vs LP: +20.4%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.1861
+
+      Saved checkpoint: checkpoint_step_3.pt
+      New best model!
+
+  >>> VALIDATION at step 7 (batch 7):
+      Train Loss:     9.1788
+      ---
+      Model:          8.0317  (vs DR: -73.6%, vs LP: +33.3%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.1861
+
+      Saved checkpoint: checkpoint_step_7.pt
+      New best model!
+
+  >>> VALIDATION at step 15 (batch 15):
+      Train Loss:     7.4198
+      ---
+      Model:          6.5349  (vs DR: -41.3%, vs LP: +45.7%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.1861
+
+      Saved checkpoint: checkpoint_step_15.pt
+      New best model!
+
+  >>> VALIDATION at step 31 (batch 31):
+      Train Loss:     5.9998
+      ---
+      Model:          5.1621  (vs DR: -11.6%, vs LP: +57.1%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.1861
+
+      Saved checkpoint: checkpoint_step_31.pt
+      New best model!
+
+  >>> VALIDATION at step 63 (batch 63):
+      Train Loss:     4.7064
+      ---
+      Model:          3.9814  (vs DR: +13.9%, vs LP: +66.9%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.1861
+
+      Saved checkpoint: checkpoint_step_63.pt
+      New best model!
+Epoch 1/5 complete, Time=51.6s
+
+  >>> VALIDATION at step 127 (batch 127):
+      Train Loss:     3.7446
+      ---
+      Model:          3.1901  (vs DR: +31.0%, vs LP: +73.5%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.1861
+
+      Saved checkpoint: checkpoint_step_127.pt
+      New best model!
+Epoch 2/5 complete, Time=37.2s
+
+  >>> VALIDATION at step 215 (batch 215):
+      Train Loss:     3.1698
+      ---
+      Model:          2.6712  (vs DR: +42.3%, vs LP: +77.8%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.1861
+
+      Saved checkpoint: checkpoint_step_215.pt
+      New best model!
+Epoch 3/5 complete, Time=37.0s
+
+  >>> VALIDATION at step 303 (batch 303):
+      Train Loss:     2.7365
+      ---
+      Model:          2.3383  (vs DR: +49.4%, vs LP: +80.6%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.1861
+
+      Saved checkpoint: checkpoint_step_303.pt
+      New best model!
+Epoch 4/5 complete, Time=36.9s
+
+  >>> VALIDATION at step 391 (batch 391):
+      Train Loss:     2.4717
+      ---
+      Model:          2.1410  (vs DR: +53.7%, vs LP: +82.2%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.1861
+
+      Saved checkpoint: checkpoint_step_391.pt
+      New best model!
+Epoch 5/5 complete, Time=36.8s
+
+Final validation...
+
+  FINAL RESULTS:
+  Model:          2.1304  (vs DR: +53.9%, vs LP: +82.3%)
+  Dead Reckoning: 4.6256
+  Last Position:  12.0449
+  Random Model:   11.1861
+
+======================================================================
+EVALUATION
+======================================================================
+  horizon_100_error_deg: 0.0049
+  horizon_100_error_km: 0.5442
+  horizon_10_error_deg: 0.0016
+  horizon_10_error_km: 0.1762
+  horizon_1_error_deg: 0.0041
+  horizon_1_error_km: 0.4564
+  horizon_200_error_deg: 0.0658
+  horizon_200_error_km: 7.3041
+  horizon_400_error_deg: 0.3206
+  horizon_400_error_km: 35.5857
+  horizon_50_error_deg: 0.0024
+  horizon_50_error_km: 0.2653
+
+======================================================================
+SAVING RESULTS
+======================================================================
+
+  Results saved to: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_test
+    - Checkpoints: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_test/checkpoints
+    - Results: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_test/results
+======================================================================
+DONE
+======================================================================

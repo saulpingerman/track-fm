@@ -1,0 +1,167 @@
+========================================================================
+EXPERIMENT 01.5: SYNTHETIC DATA VALIDATION PIPELINE
+========================================================================
+Experiment name: synthetic_test
+Epochs: 5
+Max horizon for video: 100
+Number of tracks: 3
+Data: Synthetic linear tracks
+========================================================================
+
+[1/3] Running training on synthetic data...
+========================================================================
+/opt/pytorch/lib64/python3.12/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+Using device: cuda
+GPU: NVIDIA L40S
+GPU Memory: 47.7 GB
+======================================================================
+EXPERIMENT 01.5: SYNTHETIC DATA VALIDATION
+Testing transformer + Fourier head on linear tracks
+======================================================================
+
+Experiment: synthetic_test
+Output directory: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_test
+  Checkpoints: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_test/checkpoints
+  Results: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_test/results
+  Log file: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_test/results/training.log
+
+Configuration:
+  data_path: /mnt/fsx/data
+  catalog_path: /mnt/fsx/data/track_catalog.parquet
+  synthetic_data_path: ./data
+  use_synthetic: True
+  min_track_length: 528
+  max_seq_len: 128
+  min_sog: 3.0
+  d_model: 128
+  nhead: 8
+  num_layers: 4
+  dim_feedforward: 512
+  dropout: 0.1
+  grid_size: 64
+  num_freqs: 12
+  grid_range: 0.3
+  max_horizon: 400
+  num_horizon_samples: 40
+  batch_size: 8000
+  learning_rate: 0.0003
+  weight_decay: 1e-05
+  num_epochs: 5
+  warmup_steps: 20
+  val_every_n_batches: 20
+  val_max_batches: 10
+  sigma: 0.003
+  dr_sigma: 0.05
+  early_stop_patience: 4
+  early_stop_min_delta: 0.01
+  use_amp: True
+  num_workers: 0
+  pin_memory: True
+  gradient_accumulation: 1
+  lat_mean: 30.0
+  lat_std: 1.5
+  lon_mean: -70.0
+  lon_std: 1.8
+  sog_max: 30.0
+  dt_max: 300.0
+
+======================================================================
+LOADING DATA
+======================================================================
+Loading synthetic data...
+  Loading train data...
+/home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/run_experiment.py:341: RuntimeWarning: divide by zero encountered in divide
+  sog[1:] = np.where(valid_dt, dist_arr / dt_seconds[1:] * METERS_PER_SECOND_TO_KNOTS, 0.0)
+    Loaded 5775 train tracks
+  Loading validation data...
+    Loaded 576 val tracks
+  Total train positions: 8,560,754
+  Total val positions: 853,075
+
+Creating datasets...
+  Created 175,221 training samples from 5775 tracks
+  Created 17,459 training samples from 576 tracks
+  Train batches: 22
+  Val batches: 18
+
+======================================================================
+CREATING MODEL
+======================================================================
+/opt/pytorch/lib64/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+  Parameters: 1,004,898
+  Architecture: d_model=128, nhead=8, num_layers=4, dim_ff=512
+
+======================================================================
+TRAINING
+======================================================================
+
+Initial validation (before training)...
+  Model (untrained): 10.3309
+  Random Model:      11.1861
+  Dead Reckoning:    4.6256
+  Last Position:     12.0449
+/opt/pytorch/lib64/python3.12/site-packages/torch/optim/lr_scheduler.py:192: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn(
+
+  >>> VALIDATION at step 1 (batch 1):
+      Train Loss:     10.3439
+      ---
+      Model:          10.3309  (vs DR: -123.3%, vs LP: +14.2%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.1861
+
+      Saved checkpoint: checkpoint_step_1.pt
+      New best model!
+
+  >>> VALIDATION at step 3 (batch 3):
+      Train Loss:     10.3636
+      ---
+      Model:          9.6071  (vs DR: -107.7%, vs LP: +20.2%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.1861
+
+      Saved checkpoint: checkpoint_step_3.pt
+      New best model!
+
+  >>> VALIDATION at step 7 (batch 7):
+      Train Loss:     9.1329
+      ---
+      Model:          8.0595  (vs DR: -74.2%, vs LP: +33.1%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.1861
+
+      Saved checkpoint: checkpoint_step_7.pt
+      New best model!
+
+  >>> VALIDATION at step 15 (batch 15):
+      Train Loss:     7.5230
+      ---
+      Model:          6.5647  (vs DR: -41.9%, vs LP: +45.5%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.1861
+
+      Saved checkpoint: checkpoint_step_15.pt
+      New best model!
+Epoch 1/5 complete, Time=54.8s
+Traceback (most recent call last):
+  File "/home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/run_experiment.py", line 1534, in <module>
+    main()
+  File "/home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/run_experiment.py", line 1466, in main
+    history = train_model(model, train_loader, val_loader, config, output_dir, checkpoints_dir)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/run_experiment.py", line 952, in train_model
+    scaler.scale(loss).backward()
+  File "/opt/pytorch/lib64/python3.12/site-packages/torch/_tensor.py", line 625, in backward
+    torch.autograd.backward(
+  File "/opt/pytorch/lib64/python3.12/site-packages/torch/autograd/__init__.py", line 354, in backward
+    _engine_run_backward(
+  File "/opt/pytorch/lib64/python3.12/site-packages/torch/autograd/graph.py", line 841, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 4.88 GiB. GPU 0 has a total capacity of 44.39 GiB of which 961.38 MiB is free. Including non-PyTorch memory, this process has 43.45 GiB memory in use. Of the allocated memory 35.72 GiB is allocated by PyTorch, and 7.22 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

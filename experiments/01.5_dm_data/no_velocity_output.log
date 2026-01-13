@@ -1,0 +1,244 @@
+/opt/pytorch/lib64/python3.12/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+Using device: cuda
+GPU: NVIDIA L40S
+GPU Memory: 47.7 GB
+======================================================================
+EXPERIMENT 01.5: SYNTHETIC DATA VALIDATION
+Testing transformer + Fourier head on linear tracks
+======================================================================
+Using position-only features: [lat, lon, dt]
+
+Experiment: synthetic_no_velocity
+Output directory: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_no_velocity
+  Checkpoints: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_no_velocity/checkpoints
+  Results: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_no_velocity/results
+  Log file: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_no_velocity/results/training.log
+
+Configuration:
+  data_path: /mnt/fsx/data
+  catalog_path: /mnt/fsx/data/track_catalog.parquet
+  synthetic_data_path: ./data
+  use_synthetic: True
+  no_velocity_features: True
+  min_track_length: 528
+  max_seq_len: 128
+  min_sog: 3.0
+  d_model: 128
+  nhead: 8
+  num_layers: 4
+  dim_feedforward: 512
+  dropout: 0.1
+  grid_size: 64
+  num_freqs: 12
+  grid_range: 0.3
+  max_horizon: 400
+  num_horizon_samples: 40
+  batch_size: 2000
+  learning_rate: 0.0003
+  weight_decay: 1e-05
+  num_epochs: 5
+  warmup_steps: 20
+  val_every_n_batches: 20
+  val_max_batches: 10
+  sigma: 0.003
+  dr_sigma: 0.05
+  early_stop_patience: 4
+  early_stop_min_delta: 0.01
+  use_amp: True
+  num_workers: 0
+  pin_memory: True
+  gradient_accumulation: 1
+  lat_mean: 30.0
+  lat_std: 1.5
+  lon_mean: -70.0
+  lon_std: 1.8
+  sog_max: 30.0
+  dt_max: 300.0
+
+======================================================================
+LOADING DATA
+======================================================================
+Loading synthetic data...
+  Loading train data...
+/home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/run_experiment.py:350: RuntimeWarning: divide by zero encountered in divide
+  sog[1:] = np.where(valid_dt, dist_arr / dt_seconds[1:] * METERS_PER_SECOND_TO_KNOTS, 0.0)
+    Loaded 5775 train tracks
+  Loading validation data...
+    Loaded 576 val tracks
+  Total train positions: 8,560,754
+  Total val positions: 853,075
+
+Creating datasets...
+  Created 175,221 training samples from 5775 tracks
+  Created 17,459 training samples from 576 tracks
+  Train batches: 88
+  Val batches: 18
+
+======================================================================
+CREATING MODEL
+======================================================================
+/opt/pytorch/lib64/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+  Parameters: 1,004,514
+  Architecture: d_model=128, nhead=8, num_layers=4, dim_ff=512
+
+======================================================================
+TRAINING
+======================================================================
+
+Initial validation (before training)...
+  Model (untrained): 10.5078
+  Random Model:      11.5072
+  Dead Reckoning:    4.6256
+  Last Position:     12.0449
+
+  >>> VALIDATION at step 1 (batch 1):
+      Train Loss:     10.3592
+      ---
+      Model:          10.5078  (vs DR: -127.2%, vs LP: +12.8%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.5072
+
+      Saved checkpoint: checkpoint_step_1.pt
+      New best model!
+
+  >>> VALIDATION at step 3 (batch 3):
+      Train Loss:     10.3047
+      ---
+      Model:          9.8640  (vs DR: -113.2%, vs LP: +18.1%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.5072
+
+      Saved checkpoint: checkpoint_step_3.pt
+      New best model!
+
+  >>> VALIDATION at step 7 (batch 7):
+      Train Loss:     9.2975
+      ---
+      Model:          8.2122  (vs DR: -77.5%, vs LP: +31.8%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.5072
+
+      Saved checkpoint: checkpoint_step_7.pt
+      New best model!
+
+  >>> VALIDATION at step 15 (batch 15):
+      Train Loss:     7.6314
+      ---
+      Model:          6.8756  (vs DR: -48.6%, vs LP: +42.9%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.5072
+
+      Saved checkpoint: checkpoint_step_15.pt
+      New best model!
+
+  >>> VALIDATION at step 31 (batch 31):
+      Train Loss:     6.5811
+      ---
+      Model:          6.0169  (vs DR: -30.1%, vs LP: +50.0%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.5072
+
+      Saved checkpoint: checkpoint_step_31.pt
+      New best model!
+
+  >>> VALIDATION at step 63 (batch 63):
+      Train Loss:     6.0109
+      ---
+      Model:          5.6240  (vs DR: -21.6%, vs LP: +53.3%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.5072
+
+      Saved checkpoint: checkpoint_step_63.pt
+      New best model!
+Epoch 1/5 complete, Time=50.2s
+
+  >>> VALIDATION at step 127 (batch 127):
+      Train Loss:     5.5902
+      ---
+      Model:          5.2750  (vs DR: -14.0%, vs LP: +56.2%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.5072
+
+      Saved checkpoint: checkpoint_step_127.pt
+      New best model!
+Epoch 2/5 complete, Time=36.0s
+
+  >>> VALIDATION at step 215 (batch 215):
+      Train Loss:     5.2137
+      ---
+      Model:          4.6553  (vs DR: -0.6%, vs LP: +61.4%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.5072
+
+      Saved checkpoint: checkpoint_step_215.pt
+      New best model!
+Epoch 3/5 complete, Time=35.8s
+
+  >>> VALIDATION at step 303 (batch 303):
+      Train Loss:     4.6091
+      ---
+      Model:          3.7352  (vs DR: +19.2%, vs LP: +69.0%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.5072
+
+      Saved checkpoint: checkpoint_step_303.pt
+      New best model!
+Epoch 4/5 complete, Time=35.8s
+
+  >>> VALIDATION at step 391 (batch 391):
+      Train Loss:     3.7029
+      ---
+      Model:          3.1981  (vs DR: +30.9%, vs LP: +73.4%)
+      Dead Reckoning: 4.6256
+      Last Position:  12.0449
+      Random Model:   11.5072
+
+      Saved checkpoint: checkpoint_step_391.pt
+      New best model!
+Epoch 5/5 complete, Time=36.0s
+
+Final validation...
+
+  FINAL RESULTS:
+  Model:          3.0730  (vs DR: +33.6%, vs LP: +74.5%)
+  Dead Reckoning: 4.6256
+  Last Position:  12.0449
+  Random Model:   11.5072
+
+======================================================================
+EVALUATION
+======================================================================
+  horizon_100_error_deg: 0.0107
+  horizon_100_error_km: 1.1829
+  horizon_10_error_deg: 0.0015
+  horizon_10_error_km: 0.1641
+  horizon_1_error_deg: 0.0043
+  horizon_1_error_km: 0.4765
+  horizon_200_error_deg: 0.0683
+  horizon_200_error_km: 7.5829
+  horizon_400_error_deg: 0.3038
+  horizon_400_error_km: 33.7239
+  horizon_50_error_deg: 0.0053
+  horizon_50_error_km: 0.5936
+
+======================================================================
+SAVING RESULTS
+======================================================================
+
+  Results saved to: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_no_velocity
+    - Checkpoints: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_no_velocity/checkpoints
+    - Results: /home/ec2-user/trackfm-toy studies/experiments/01.5_dm_data/experiments/synthetic_no_velocity/results
+======================================================================
+DONE
+======================================================================
