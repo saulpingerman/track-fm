@@ -1,6 +1,6 @@
 # TrackFM: Vessel Trajectory Prediction with Transformers
 
-This repository contains experiments on vessel trajectory prediction using causal transformers with 2D Fourier density heads. Starting with synthetic data experiments (01-08) and progressing to real AIS vessel tracking data (09-10).
+This repository contains experiments on vessel trajectory prediction using causal transformers with 2D Fourier density heads. Starting with synthetic data experiments (01-08) and progressing to real AIS vessel tracking data (09-11).
 
 ## Key Results
 
@@ -15,6 +15,11 @@ This repository contains experiments on vessel trajectory prediction using causa
   - Predicts probability distributions over 64x64 grids covering +/-33km
   - Trained on 3,754 vessel tracks (23M positions) from Danish maritime zone
   - Prediction error: 0.9 km at 17 min, 12 km at 1 hour
+
+- **Experiment 11**: Extended training with 69 days of data + causal subwindow training
+  - 10x more data than Experiment 10 (~580M positions, ~185K tracks)
+  - Causal subwindow training: predicts from all positions, not just the last one
+  - ~30x more training signal per batch
 
 ## Repository Structure
 
@@ -33,7 +38,8 @@ track-fm/
     ├── 07_decoder_transformer/  # Synthetic: Causal vs bidirectional
     ├── 08_causal_multihorizon/  # Synthetic: Causal + multi-horizon
     ├── 09_ais_real_data/        # Real AIS: Short-horizon (20 steps)
-    └── 10_long_horizon/         # Real AIS: Long-horizon (400 steps, ~1 hour)
+    ├── 10_long_horizon/         # Real AIS: Long-horizon (400 steps, ~1 hour)
+    └── 11_long_horizon_69_days/ # Real AIS: 69 days + causal training
 ```
 
 ## Experiments
@@ -68,7 +74,7 @@ Key insight: Model genuinely learns trajectory patterns - it can beat dead recko
 
 See `experiments/01.5_dm_data/README.md` for full details.
 
-### Real AIS Data (09-10)
+### Real AIS Data (09-11)
 
 These experiments use real vessel tracking data from the Danish maritime zone.
 
@@ -87,6 +93,14 @@ These experiments use real vessel tracking data from the Danish maritime zone.
 
 See `experiments/10_long_horizon/README.md` for full details.
 
+#### Experiment 11: 69 Days + Causal Subwindow Training
+- **Data**: 69 days (~580M positions, ~185K tracks)
+- **Training**: Causal subwindow training - predicts from all positions, not just last
+- **Benefits**: ~30x more training signal per batch, learns with varying context lengths
+- **Features**: Lazy loading option for memory efficiency
+
+See `experiments/11_long_horizon_69_days/README.md` for full details.
+
 ## Model Architecture
 
 ```
@@ -98,7 +112,7 @@ CausalAISModel
 └── Fourier Head 2D: Outputs 64x64 probability grid
 ```
 
-### Model Scales (Experiment 10)
+### Model Scales (Experiment 10/11)
 
 | Scale | d_model | nhead | layers | dim_ff | Params |
 |-------|---------|-------|--------|--------|--------|
@@ -131,6 +145,10 @@ python run_experiment.py --exp-name my_exp --model-scale large --batch-size 0 --
 python visualize_predictions.py --exp-name my_exp
 python make_horizon_videos.py --exp-name my_exp --max-horizon 400
 
+# Run experiment 11 with causal training (69 days of data)
+cd experiments/11_long_horizon_69_days
+python run_experiment.py --exp-name my_exp --model-scale large --batch-size 0 --num-epochs 100 --num-horizons 8
+
 # Or use run_all.sh for full pipeline:
 ./run_all.sh my_experiment 100  # 100 epochs with early stopping
 ```
@@ -138,12 +156,13 @@ python make_horizon_videos.py --exp-name my_exp --max-horizon 400
 ## Key Learnings
 
 1. **Model learns genuine patterns** - Not just memorizing velocity; beats DR even without explicit velocity features
-2. **Random horizon sampling works** - Train on 40 random samples from 400 horizons per batch
+2. **Random horizon sampling works** - Train on random samples from 400 horizons per batch
 3. **Larger models help** - 18M param model significantly outperforms 1M param model
 4. **Auto batch size** - Binary search for ~90% GPU utilization maximizes training efficiency
 5. **Cumulative time encoding** - Enables prediction at any horizon, including beyond training
 6. **Fair baseline comparison matters** - DR baseline needs appropriate sigma (~0.05 deg vs 0.003 deg)
 7. **Early stopping essential** - Validation loss plateaus quickly (4-10 checks)
+8. **Causal subwindow training** - Uses all positions in sequence for ~30x more training signal
 
 ## Hardware
 
