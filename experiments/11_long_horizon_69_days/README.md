@@ -1,5 +1,9 @@
 # Experiment 11: Long Horizon Prediction (69 Days of Data)
 
+![Vessel Trajectory Prediction](experiments/69days_causal_v4_100M/results/horizon_video_track100.gif)
+
+*116M parameter model predicting vessel position up to 1 hour ahead. Yellow/blue heatmap shows predicted probability distribution, green dot is actual position, red X is dead reckoning baseline.*
+
 ## Overview
 
 This experiment extends Experiment 10 to use **69 days of AIS data** (10x more than Exp 10's 7 days) and adds **causal subwindow training** for more efficient learning.
@@ -162,6 +166,29 @@ A leak test was performed to verify the model isn't cheating by seeing future po
 - Zeroed out all position/velocity data for future timesteps
 - Kept only time deltas (so model knows *when* to predict, not *where*)
 - Predictions matched the full-data version, confirming no data leakage
+
+### Featured Track (track100)
+
+An interesting visualization track showing a vessel navigating through the Øresund strait:
+
+| Property | Value |
+|----------|-------|
+| Sample Index | 43140 |
+| Track ID | 305980000_7 |
+| Start Position | 14144 |
+| Location | ~56.07°N, 12.60°E (Øresund) |
+
+To reproduce this specific track:
+
+```bash
+# Generate with make_horizon_videos.py
+python make_horizon_videos.py --exp-name 69days_causal_v4_100M --seed 888 --start-num 100 --num-tracks 1
+
+# Or access directly via the dataset:
+# sample_idx = 43140 maps to track_id='305980000_7', start=14144
+```
+
+The 800-horizon extended version (`horizon_video_track100_800_horizons.gif`) shows predictions up to ~2 hours ahead, demonstrating the model's ability to extrapolate beyond its training horizon of 400 steps.
 
 ## Files
 
