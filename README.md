@@ -1,5 +1,9 @@
 # TrackFM: Vessel Trajectory Prediction with Transformers
 
+![Vessel Trajectory Prediction](experiments/11_long_horizon_69_days/experiments/69days_causal_v4_100M/results/horizon_video_track100.gif)
+
+*116M parameter model predicting vessel position up to 1 hour ahead. Yellow/blue heatmap shows predicted probability distribution, green dot is actual position, red X is dead reckoning baseline.*
+
 This repository contains experiments on vessel trajectory prediction using causal transformers with 2D Fourier density heads. Starting with synthetic data experiments (01-08) and progressing to real AIS vessel tracking data (09-11).
 
 ## Key Results
