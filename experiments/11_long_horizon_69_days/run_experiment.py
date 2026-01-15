@@ -674,53 +674,54 @@ class CausalAISModel(nn.Module):
             features[:, seq_len:seq_len+max_horizon, 0] * self.config.lat_std + self.config.lat_mean,
             features[:, seq_len:seq_len+max_horizon, 1] * self.config.lon_std + self.config.lon_mean
         ], dim=-1)  # (batch, max_horizon, 2)
-        future_dt = features[:, seq_len:seq_len+max_horizon, 5] * self.config.dt_max
-        future_cumsum = cumsum_dt[:, -1:] + torch.cumsum(future_dt, dim=1)
 
         if causal:
-            # Causal subwindow training: use ALL valid positions for each horizon
+            # Causal subwindow training: predict from ALL positions for each horizon
+            # This ensures equal training signal across all horizons (seq_len predictions each)
+
+            # Combine input and future positions for easier indexing
+            all_positions = torch.cat([positions, future_pos], dim=1)  # (batch, seq_len + max_horizon, 2)
+
             all_embeddings = []
             all_cum_dt = []
             all_targets = []
-            future_mask_list = []  # Track which predictions are "future" (from last position)
+            future_mask_list = []
 
             for h in horizon_indices:
                 h_val = h.item()
 
-                # Within-sequence predictions (if horizon is small enough)
-                if h_val < seq_len:
-                    valid_pos = seq_len - h_val
-                    # Source: positions 0 to valid_pos-1
-                    # Target: positions h_val to seq_len-1
-                    src_emb = embeddings[:, :valid_pos, :]  # (batch, valid_pos, d_model)
-                    src_cumsum = cumsum_dt[:, :valid_pos]
-                    tgt_cumsum = cumsum_dt[:, h_val:h_val+valid_pos]
-                    cum_dt_within = tgt_cumsum - src_cumsum  # (batch, valid_pos)
+                # ALL seq_len positions predict h steps ahead
+                # Source: positions 0 to seq_len-1
+                # Target: positions h to seq_len-1+h (may be within-sequence or future)
+                src_emb = embeddings  # (batch, seq_len, d_model)
+                src_cumsum = cumsum_dt[:, :seq_len]  # (batch, seq_len)
+                tgt_cumsum = cumsum_dt[:, h_val:seq_len+h_val]  # (batch, seq_len)
+                cum_dt_h = tgt_cumsum - src_cumsum  # (batch, seq_len)
 
-                    src_pos = positions[:, :valid_pos, :]
-                    tgt_pos = positions[:, h_val:h_val+valid_pos, :]
-                    tgt_rel = tgt_pos - src_pos  # (batch, valid_pos, 2)
+                src_pos = positions  # (batch, seq_len, 2)
+                tgt_pos = all_positions[:, h_val:seq_len+h_val, :]  # (batch, seq_len, 2)
+                tgt_rel = tgt_pos - src_pos  # (batch, seq_len, 2)
 
-                    all_embeddings.append(src_emb)
-                    all_cum_dt.append(cum_dt_within)
-                    all_targets.append(tgt_rel)
-                    future_mask_list.extend([False] * valid_pos)  # Within-sequence
+                all_embeddings.append(src_emb)
+                all_cum_dt.append(cum_dt_h)
+                all_targets.append(tgt_rel)
 
-                # Future prediction from last position
-                last_emb = embeddings[:, -1:, :]  # (batch, 1, d_model)
-                last_cumsum = cumsum_dt[:, seq_len-1:seq_len]  # (batch, 1)
-                cum_dt_future = future_cumsum[:, h_val-1:h_val] - last_cumsum  # (batch, 1)
-                tgt_rel_future = future_pos[:, h_val-1:h_val, :] - positions[:, -1:, :]  # (batch, 1, 2)
-
-                all_embeddings.append(last_emb)
-                all_cum_dt.append(cum_dt_future)
-                all_targets.append(tgt_rel_future)
-                future_mask_list.append(True)  # Future prediction
+                # Mark which predictions are future (target index >= seq_len)
+                # Position i predicts position i+h, which is future if i+h >= seq_len
+                if h_val >= seq_len:
+                    # All predictions are future
+                    future_mask_list.extend([True] * seq_len)
+                else:
+                    # Positions 0 to (seq_len-h_val-1) predict within-sequence
+                    # Positions (seq_len-h_val) to (seq_len-1) predict future
+                    num_within = seq_len - h_val
+                    num_future = h_val
+                    future_mask_list.extend([False] * num_within + [True] * num_future)
 
             # Concatenate all predictions
-            all_embeddings = torch.cat(all_embeddings, dim=1)  # (batch, num_pairs, d_model)
-            all_cum_dt = torch.cat(all_cum_dt, dim=1)  # (batch, num_pairs)
-            all_targets = torch.cat(all_targets, dim=1)  # (batch, num_pairs, 2)
+            all_embeddings = torch.cat(all_embeddings, dim=1)  # (batch, num_horizons * seq_len, d_model)
+            all_cum_dt = torch.cat(all_cum_dt, dim=1)  # (batch, num_horizons * seq_len)
+            all_targets = torch.cat(all_targets, dim=1)  # (batch, num_horizons * seq_len, 2)
             future_mask = torch.tensor(future_mask_list, dtype=torch.bool, device=device)
 
             num_pairs = all_embeddings.shape[1]
@@ -752,8 +753,8 @@ class CausalAISModel(nn.Module):
 
             for h in horizon_indices:
                 h_val = h.item()
-                # Future prediction
-                cum_time = future_cumsum[:, h_val-1] - last_cumsum
+                # Future prediction - use cumsum_dt directly (covers all positions)
+                cum_time = cumsum_dt[:, seq_len + h_val - 1] - last_cumsum
                 tgt_rel = future_pos[:, h_val-1, :] - src_pos
 
                 targets.append(tgt_rel)
@@ -947,32 +948,27 @@ def compute_last_position_loss(features: torch.Tensor, targets: torch.Tensor,
     return loss.mean()
 
 
-def validate_with_baselines(model: nn.Module, random_model: nn.Module,
-                            val_loader: DataLoader, config: Config,
+def validate_with_baselines(model: nn.Module, val_loader: DataLoader, config: Config,
                             max_batches: int = None) -> dict:
     """
     Validate model AND compute ALL baselines on SAME data.
+    Memory-optimized: no random model, compute baseline targets directly.
 
     Returns dict with:
     - model: trained model loss
-    - random: untrained model loss
     - dead_reckoning: velocity * horizon extrapolation
     - last_position: predict zero displacement
-
-    IMPORTANT: All losses computed on SAME subset of targets for fair comparison.
-    Uses fixed horizon samples for consistent validation.
     """
     model.eval()
-    random_model.eval()
 
     results = {
         'model': [],
-        'random': [],
         'dead_reckoning': [],
         'last_position': []
     }
 
     max_batches = max_batches or len(val_loader)
+    seq_len = config.max_seq_len
 
     # Use fixed horizons for validation (evenly spaced for coverage)
     fixed_horizons = torch.linspace(1, config.max_horizon, config.num_horizon_samples).long().to(DEVICE)
@@ -985,9 +981,8 @@ def validate_with_baselines(model: nn.Module, random_model: nn.Module,
             features = features.to(DEVICE, non_blocking=True)
 
             with autocast('cuda', enabled=config.use_amp):
-                # Validation uses causal=True (same as training)
-                # Note: val loss will be lower than train because fixed horizons always include h=1 (easy)
-                log_densities, targets, _, future_mask = model.forward_train(features, fixed_horizons, causal=True)
+                # Model validation uses causal=True (same as training)
+                log_densities, targets, _, _ = model.forward_train(features, fixed_horizons, causal=True)
 
                 model_loss = compute_soft_target_loss(
                     log_densities, targets,
@@ -995,23 +990,35 @@ def validate_with_baselines(model: nn.Module, random_model: nn.Module,
                 )
                 results['model'].append(model_loss.item())
 
-                # Random (untrained) model with same horizons
-                random_log_densities, _, _, _ = random_model.forward_train(features, fixed_horizons, causal=True)
-                random_loss = compute_soft_target_loss(
-                    random_log_densities, targets,
-                    config.grid_range, config.grid_size, config.sigma
-                )
-                results['random'].append(random_loss.item())
+                # Free memory immediately
+                del log_densities, targets
 
-                # Dead reckoning baseline (computed only on future predictions)
-                # Extract only the future targets for fair comparison with DR
-                future_targets = targets[:, future_mask, :]
-                dr_loss = compute_dead_reckoning_loss(features, future_targets, fixed_horizons, config)
+                # Compute baseline targets directly from features (no forward pass needed)
+                # Just need future_pos - src_pos for each horizon
+                src_pos = torch.stack([
+                    features[:, seq_len-1, 0] * config.lat_std + config.lat_mean,
+                    features[:, seq_len-1, 1] * config.lon_std + config.lon_mean
+                ], dim=-1)  # (batch, 2)
+
+                baseline_targets = []
+                for h in fixed_horizons:
+                    h_val = h.item()
+                    future_pos = torch.stack([
+                        features[:, seq_len + h_val - 1, 0] * config.lat_std + config.lat_mean,
+                        features[:, seq_len + h_val - 1, 1] * config.lon_std + config.lon_mean
+                    ], dim=-1)  # (batch, 2)
+                    baseline_targets.append(future_pos - src_pos)
+                baseline_targets = torch.stack(baseline_targets, dim=1)  # (batch, num_horizons, 2)
+
+                # Dead reckoning baseline
+                dr_loss = compute_dead_reckoning_loss(features, baseline_targets, fixed_horizons, config)
                 results['dead_reckoning'].append(dr_loss.item())
 
-                # Last position baseline (computed only on future predictions)
-                lp_loss = compute_last_position_loss(features, future_targets, config)
+                # Last position baseline
+                lp_loss = compute_last_position_loss(features, baseline_targets, config)
                 results['last_position'].append(lp_loss.item())
+
+                del baseline_targets
 
     return {k: np.mean(v) for k, v in results.items()}
 
@@ -1028,12 +1035,6 @@ def train_model(model: nn.Module, train_loader: DataLoader,
         checkpoints_dir.mkdir(parents=True, exist_ok=True)
 
     model.to(DEVICE)
-
-    # Create random model for baseline comparison (fixed throughout training)
-    random_model = CausalAISModel(config).to(DEVICE)
-    random_model.eval()
-    for param in random_model.parameters():
-        param.requires_grad = False
 
     optimizer = torch.optim.AdamW(
         model.parameters(),
@@ -1055,7 +1056,6 @@ def train_model(model: nn.Module, train_loader: DataLoader,
     history = {
         'train_loss': [],
         'val_loss': [],
-        'random_loss': [],
         'dr_loss': [],
         'lp_loss': [],
         'lr': [],
@@ -1077,14 +1077,12 @@ def train_model(model: nn.Module, train_loader: DataLoader,
 
     # Initial validation with ALL baselines
     print("\nInitial validation (before training)...", flush=True)
-    val_results = validate_with_baselines(model, random_model, val_loader, config, config.val_max_batches)
+    val_results = validate_with_baselines(model, val_loader, config, config.val_max_batches)
     print(f"  Model (untrained): {val_results['model']:.4f}", flush=True)
-    print(f"  Random Model:      {val_results['random']:.4f}", flush=True)
     print(f"  Dead Reckoning:    {val_results['dead_reckoning']:.4f}", flush=True)
     print(f"  Last Position:     {val_results['last_position']:.4f}", flush=True)
 
     history['val_loss'].append(val_results['model'])
-    history['random_loss'].append(val_results['random'])
     history['dr_loss'].append(val_results['dead_reckoning'])
     history['lp_loss'].append(val_results['last_position'])
     history['train_loss'].append(float('nan'))
@@ -1149,16 +1147,14 @@ def train_model(model: nn.Module, train_loader: DataLoader,
             global_batch = epoch * batches_per_epoch + (batch_idx + 1)
             if global_batch == next_val_batch:
                 avg_train = running_loss / max(running_count, 1)
-                val_results = validate_with_baselines(model, random_model, val_loader, config, config.val_max_batches)
+                val_results = validate_with_baselines(model, val_loader, config, config.val_max_batches)
 
                 val_loss = val_results['model']
                 dr_loss = val_results['dead_reckoning']
                 lp_loss = val_results['last_position']
-                random_loss = val_results['random']
 
                 history['train_loss'].append(avg_train)
                 history['val_loss'].append(val_loss)
-                history['random_loss'].append(random_loss)
                 history['dr_loss'].append(dr_loss)
                 history['lp_loss'].append(lp_loss)
                 history['lr'].append(scheduler.get_last_lr()[0])
@@ -1172,8 +1168,7 @@ def train_model(model: nn.Module, train_loader: DataLoader,
                 print(f"      ---", flush=True)
                 print(f"      Model:          {val_loss:.4f}  (vs DR: {vs_dr:+.1f}%, vs LP: {vs_lp:+.1f}%)", flush=True)
                 print(f"      Dead Reckoning: {dr_loss:.4f}", flush=True)
-                print(f"      Last Position:  {lp_loss:.4f}", flush=True)
-                print(f"      Random Model:   {random_loss:.4f}\n", flush=True)
+                print(f"      Last Position:  {lp_loss:.4f}\n", flush=True)
 
                 # Save checkpoint at every validation
                 checkpoint_path = checkpoints_dir / f'checkpoint_step_{total_steps}.pt'
@@ -1220,15 +1215,13 @@ def train_model(model: nn.Module, train_loader: DataLoader,
 
     # Final validation
     print("\nFinal validation...", flush=True)
-    val_results = validate_with_baselines(model, random_model, val_loader, config, config.val_max_batches)
+    val_results = validate_with_baselines(model, val_loader, config, config.val_max_batches)
 
     val_loss = val_results['model']
     dr_loss = val_results['dead_reckoning']
     lp_loss = val_results['last_position']
-    random_loss = val_results['random']
 
     history['val_loss'].append(val_loss)
-    history['random_loss'].append(random_loss)
     history['dr_loss'].append(dr_loss)
     history['lp_loss'].append(lp_loss)
     history['train_loss'].append(running_loss / max(running_count, 1))
@@ -1242,7 +1235,6 @@ def train_model(model: nn.Module, train_loader: DataLoader,
     print(f"  Model:          {val_loss:.4f}  (vs DR: {vs_dr:+.1f}%, vs LP: {vs_lp:+.1f}%)", flush=True)
     print(f"  Dead Reckoning: {dr_loss:.4f}", flush=True)
     print(f"  Last Position:  {lp_loss:.4f}", flush=True)
-    print(f"  Random Model:   {random_loss:.4f}", flush=True)
 
     return history
 
@@ -1699,7 +1691,6 @@ def main():
     ax.plot(steps_log, [history['val_loss'][i] for i in valid_idx], 'b-o', label='Val', markersize=4)
     ax.plot(steps_log, [history['dr_loss'][i] for i in valid_idx], 'r--s', label='Dead Reckoning', markersize=4)
     ax.plot(steps_log, [history['lp_loss'][i] for i in valid_idx], 'g--^', label='Last Position', markersize=4)
-    ax.plot(steps_log, [history['random_loss'][i] for i in valid_idx], 'gray', linestyle=':', label='Random Model', alpha=0.7)
 
     ax.set_xlabel('Training Step')
     ax.set_ylabel('Loss (KL Divergence)')

@@ -14,12 +14,13 @@ This repository contains experiments on vessel trajectory prediction using causa
   - **63% improvement** over last position baseline
   - Predicts probability distributions over 64x64 grids covering +/-33km
   - Trained on 3,754 vessel tracks (23M positions) from Danish maritime zone
-  - Prediction error: 0.9 km at 17 min, 12 km at 1 hour
 
-- **Experiment 11**: Extended training with 69 days of data + causal subwindow training
-  - 10x more data than Experiment 10 (~580M positions, ~185K tracks)
-  - Causal subwindow training: predicts from all positions, not just the last one
-  - ~30x more training signal per batch
+- **Experiment 11**: Extended training with 69 days of data + 116M parameter model
+  - **65% improvement** over dead reckoning (116M param model)
+  - **76% improvement** over last position baseline
+  - 10x more data than Experiment 10 (13K tracks, 140M positions after filtering)
+  - Causal subwindow training: ~30x more training signal per batch
+  - Leak test verified: model makes genuine predictions, no data leakage
 
 ## Repository Structure
 
@@ -93,11 +94,12 @@ These experiments use real vessel tracking data from the Danish maritime zone.
 
 See `experiments/10_long_horizon/README.md` for full details.
 
-#### Experiment 11: 69 Days + Causal Subwindow Training
-- **Data**: 69 days (~580M positions, ~185K tracks)
-- **Training**: Causal subwindow training - predicts from all positions, not just last
-- **Benefits**: ~30x more training signal per batch, learns with varying context lengths
-- **Features**: Lazy loading option for memory efficiency
+#### Experiment 11: 69 Days + 116M Parameter Model
+- **Data**: 69 days (13K tracks, 140M positions after filtering)
+- **Model**: 116M parameters (xlarge scale)
+- **Result**: **65% improvement** over DR, **76% over LP**
+- **Training**: Causal subwindow training - ~30x more training signal per batch
+- **Verification**: Leak test confirms model makes genuine predictions
 
 See `experiments/11_long_horizon_69_days/README.md` for full details.
 
@@ -119,6 +121,7 @@ CausalAISModel
 | small | 128 | 8 | 4 | 512 | ~1M |
 | medium | 256 | 8 | 6 | 1024 | ~5M |
 | large | 384 | 16 | 8 | 2048 | ~18M |
+| **xlarge** | **768** | **16** | **16** | **3072** | **~116M** |
 
 ### Input Features
 
@@ -157,12 +160,13 @@ python run_experiment.py --exp-name my_exp --model-scale large --batch-size 0 --
 
 1. **Model learns genuine patterns** - Not just memorizing velocity; beats DR even without explicit velocity features
 2. **Random horizon sampling works** - Train on random samples from 400 horizons per batch
-3. **Larger models help** - 18M param model significantly outperforms 1M param model
+3. **Larger models help significantly** - 116M params achieves 65% vs 44% improvement over 18M params
 4. **Auto batch size** - Binary search for ~90% GPU utilization maximizes training efficiency
 5. **Cumulative time encoding** - Enables prediction at any horizon, including beyond training
 6. **Fair baseline comparison matters** - DR baseline needs appropriate sigma (~0.05 deg vs 0.003 deg)
 7. **Early stopping essential** - Validation loss plateaus quickly (4-10 checks)
 8. **Causal subwindow training** - Uses all positions in sequence for ~30x more training signal
+9. **Leak testing is crucial** - Verified model doesn't cheat by seeing future positions
 
 ## Hardware
 

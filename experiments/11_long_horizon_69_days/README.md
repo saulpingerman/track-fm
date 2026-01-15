@@ -4,11 +4,20 @@
 
 This experiment extends Experiment 10 to use **69 days of AIS data** (10x more than Exp 10's 7 days) and adds **causal subwindow training** for more efficient learning.
 
+## Key Results
+
+| Model | Parameters | vs Dead Reckoning | vs Last Position |
+|-------|------------|-------------------|------------------|
+| Large (v3) | 18M | +44% | +63% |
+| **XLarge (v4)** | **116M** | **+65%** | **+76%** |
+
+The 116M parameter model achieves **65% improvement** over dead reckoning and **76% improvement** over last position baseline on 1-hour horizon predictions.
+
 **Key changes from Experiment 10:**
 - 69 days of data instead of 7 days (~10x more positions)
 - Added **lazy loading** mode for memory-efficient training
 - Added **causal subwindow training** - uses all positions in the sequence, not just the last one
-- Same model architecture
+- Scaled to **116M parameter** model (6x larger than Exp 10)
 
 ## Causal Subwindow Training
 
@@ -129,36 +138,62 @@ CausalAISModel
 | small | 128 | 8 | 4 | 512 | ~1M |
 | medium | 256 | 8 | 6 | 1024 | ~5M |
 | large | 384 | 16 | 8 | 2048 | ~18M |
+| **xlarge** | **768** | **16** | **16** | **3072** | **~116M** |
 
-## Expected Results
+## Results
 
-With 10x more data and causal training, we expect:
-- Better generalization (more diverse tracks)
-- More efficient training (more signal per batch)
-- Potentially higher accuracy
+### 116M Parameter Model (v4)
+
+| Metric | Value |
+|--------|-------|
+| Model Loss | 1.75 |
+| Dead Reckoning Loss | 5.01 |
+| Last Position Loss | 7.37 |
+| **vs Dead Reckoning** | **+65.1%** |
+| **vs Last Position** | **+76.3%** |
+| Training Steps | ~80K |
+| GPU Memory | 46.9 GB |
+
+The model significantly outperforms both baselines across all 400 horizons (up to 1 hour ahead).
+
+### Leak Test Verification
+
+A leak test was performed to verify the model isn't cheating by seeing future positions:
+- Zeroed out all position/velocity data for future timesteps
+- Kept only time deltas (so model knows *when* to predict, not *where*)
+- Predictions matched the full-data version, confirming no data leakage
 
 ## Files
 
 ```
 11_long_horizon_69_days/
 ├── run_experiment.py          # Training script with causal training
-├── visualize_predictions.py   # Training history plot
-├── make_horizon_videos.py     # Animated GIFs
+├── make_horizon_videos.py     # Animated GIFs with map background
+├── leak_test_video.py         # Data leakage verification
 ├── run_all.sh                 # Full pipeline
 ├── README.md                  # This file
 └── experiments/
     └── <exp-name>/
         ├── config.json
         ├── checkpoints/
+        │   ├── best_model.pt
+        │   └── checkpoint_step_*.pt
         └── results/
+            ├── training.log
+            ├── training_history.png
+            ├── horizon_video_track*.gif
+            └── leak_test_input_only.gif
 ```
 
 ## Comparison with Previous Experiments
 
 | Aspect | Exp 10 | Exp 11 |
 |--------|--------|--------|
-| Data | 7 days | 69 days |
+| Data | 7 days | **69 days** |
+| Max Parameters | 18M | **116M** |
 | Training | Last position only | **Causal subwindows** |
 | Predictions/batch | ~8 per sample | **~240 per sample** |
+| vs Dead Reckoning | +44% | **+65%** |
+| vs Last Position | +63% | **+76%** |
 | Loading | Eager only | Eager + Lazy |
 | RAM (eager) | ~1 GB | ~6-8 GB |

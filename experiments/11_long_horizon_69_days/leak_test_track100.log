@@ -1,0 +1,74 @@
+/opt/pytorch/lib64/python3.12/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+Using device: cuda
+GPU: NVIDIA L40S
+GPU Memory: 47.7 GB
+======================================================================
+LEAK TEST: GENERATING VIDEO WITH INPUT ONLY (NO FUTURE DATA)
+======================================================================
+
+Experiment: 69days_causal_v4_100M
+
+Loading validation data...
+Loading track catalog...
+  Selected 2000 tracks for training
+Loading track data from FSx (streaming)...
+    Processed tracks.parquet, tracks so far: 54
+    Processed tracks.parquet, tracks so far: 84
+    Processed tracks.parquet, tracks so far: 100
+    Processed tracks.parquet, tracks so far: 118
+    Processed tracks.parquet, tracks so far: 127
+    Processed tracks.parquet, tracks so far: 139
+    Processed tracks.parquet, tracks so far: 144
+    Processed tracks.parquet, tracks so far: 158
+    Processed tracks.parquet, tracks so far: 171
+    Processed tracks.parquet, tracks so far: 183
+    Processed tracks.parquet, tracks so far: 191
+    Processed tracks.parquet, tracks so far: 206
+    Processed tracks.parquet, tracks so far: 214
+    Processed tracks.parquet, tracks so far: 224
+    Processed tracks.parquet, tracks so far: 234
+    Processed tracks.parquet, tracks so far: 240
+    Processed tracks.parquet, tracks so far: 245
+    Processed tracks.parquet, tracks so far: 254
+    Processed tracks.parquet, tracks so far: 257
+    Processed tracks.parquet, tracks so far: 262
+    Processed tracks.parquet, tracks so far: 265
+    Processed tracks.parquet, tracks so far: 273
+    Processed tracks.parquet, tracks so far: 282
+    Processed tracks.parquet, tracks so far: 292
+    Processed tracks.parquet, tracks so far: 299
+    Processed tracks.parquet, tracks so far: 305
+    Processed tracks.parquet, tracks so far: 310
+    Processed tracks.parquet, tracks so far: 317
+    Processed tracks.parquet, tracks so far: 323
+    Processed tracks.parquet, tracks so far: 328
+    Processed tracks.parquet, tracks so far: 335
+    Processed tracks.parquet, tracks so far: 341
+    Processed tracks.parquet, tracks so far: 346
+    Processed tracks.parquet, tracks so far: 354
+    Processed tracks.parquet, tracks so far: 359
+    Processed tracks.parquet, tracks so far: 364
+    Processed tracks.parquet, tracks so far: 367
+    Processed tracks.parquet, tracks so far: 368
+  Loaded 368 tracks in 46.6s
+  Total positions: 19,441,739
+  Train tracks: 329, Val tracks: 37
+/opt/pytorch/lib64/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+  Created 53,430 training samples from 37 tracks
+  Validation samples: 53430
+
+Loading trained model...
+
+Generating LEAK TEST video (sample 43140)...
+    Pre-computing 400 horizon predictions (INPUT ONLY - NO FUTURE DATA)...
+  Saved: leak_test_input_only.gif
+
+======================================================================
+LEAK TEST COMPLETE
+======================================================================
+
+Output: /home/ec2-user/trackfm-toy studies/experiments/11_long_horizon_69_days/experiments/69days_causal_v4_100M/results/leak_test_input_only.gif
+
+If predictions look reasonable, the model is NOT leaking future data.
