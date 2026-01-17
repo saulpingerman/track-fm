@@ -1,0 +1,10 @@
+comparison,metric,mean_diff,std_diff,t_statistic,t_pvalue,wilcoxon_pvalue,effect_size,significant
+pretrained vs random_init,auroc,-0.37717121588089325,0.0,,,1.0,-3771712158.8089323,False
+pretrained vs random_init,auprc,-0.07236585182467198,0.0,,,1.0,-723658518.2467197,False
+pretrained vs random_init,f1_optimal,-0.14586496606998617,0.0,,,1.0,-1458649660.6998615,False
+pretrained vs frozen_pretrained,auroc,0.08964019851116628,0.0,,,1.0,896401985.1116627,False
+pretrained vs frozen_pretrained,auprc,0.006222835169779305,0.0,,,1.0,62228351.697793044,False
+pretrained vs frozen_pretrained,f1_optimal,0.0014373177438341267,0.0,,,1.0,14373177.438341266,False
+random_init vs frozen_pretrained,auroc,0.46681141439205953,0.0,,,1.0,4668114143.920595,False
+random_init vs frozen_pretrained,auprc,0.07858868699445129,0.0,,,1.0,785886869.9445128,False
+random_init vs frozen_pretrained,f1_optimal,0.14730228381382027,0.0,,,1.0,1473022838.1382027,False

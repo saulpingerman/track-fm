@@ -1,0 +1,62 @@
+{
+  "pretrained": [
+    {
+      "outer_fold": 0,
+      "inner_fold": 0,
+      "seed": 0,
+      "test_metrics": {
+        "auroc": 0.38678660049627794,
+        "auprc": 0.041687600262583835,
+        "f1_optimal": 0.09737827714429435,
+        "optimal_threshold": 0.29573413729667664,
+        "precision": 0.051181102362204724,
+        "recall": 1.0,
+        "precision_at_recall_90": 0.051181102362204724,
+        "precision_at_recall_80": 0.051181102362204724,
+        "recall_at_precision_90": 0.0,
+        "recall_at_precision_80": 0.0,
+        "loss": 1.884055369430118
+      }
+    }
+  ],
+  "random_init": [
+    {
+      "outer_fold": 0,
+      "inner_fold": 0,
+      "seed": 0,
+      "test_metrics": {
+        "auroc": 0.7639578163771712,
+        "auprc": 0.11405345208725581,
+        "f1_optimal": 0.2432432432142805,
+        "optimal_threshold": 0.006689009722322226,
+        "precision": 0.14754098360655737,
+        "recall": 0.6923076923076923,
+        "precision_at_recall_90": 0.09448818897637795,
+        "precision_at_recall_80": 0.09649122807017543,
+        "recall_at_precision_90": 0.0,
+        "recall_at_precision_80": 0.0,
+        "loss": 7.172551872001754
+      }
+    }
+  ],
+  "frozen_pretrained": [
+    {
+      "outer_fold": 0,
+      "inner_fold": 0,
+      "seed": 0,
+      "test_metrics": {
+        "auroc": 0.29714640198511166,
+        "auprc": 0.03546476509280453,
+        "f1_optimal": 0.09594095940046023,
+        "optimal_threshold": 0.30991703271865845,
+        "precision": 0.050387596899224806,
+        "recall": 1.0,
+        "precision_at_recall_90": 0.050387596899224806,
+        "precision_at_recall_80": 0.050387596899224806,
+        "recall_at_precision_90": 0.0,
+        "recall_at_precision_80": 0.0,
+        "loss": 1.8500900003645155
+      }
+    }
+  ]
+}

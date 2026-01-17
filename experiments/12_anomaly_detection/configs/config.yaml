@@ -1,0 +1,145 @@
+# =============================================================================
+# Experiment 12: Anomaly Detection Fine-tuning
+# =============================================================================
+
+experiment:
+  name: "pretraining_impact"
+  seed: 42
+  num_seeds: 1              # 1 seed per fold (15 total runs)
+  device: "cuda"
+
+# -----------------------------------------------------------------------------
+# Data Configuration
+# -----------------------------------------------------------------------------
+data:
+  # DTU Danish Waters dataset
+  dtu_url: "https://data.dtu.dk/ndownloader/articles/19446300/versions/1"
+  raw_path: "data/raw/"
+  processed_path: "data/processed/"
+  splits_path: "data/splits/"
+
+  # Match TrackFM preprocessing from experiment 11
+  features: ["lat", "lon", "sog", "cog_sin", "cog_cos", "dt"]
+  max_seq_length: 512
+
+  # Normalization (from experiment 11)
+  lat_mean: 56.25
+  lat_std: 1.0
+  lon_mean: 11.5
+  lon_std: 2.0
+  sog_max: 30.0
+  dt_max: 300.0
+
+  # Cross-validation
+  outer_folds: 5
+  inner_folds: 1            # Reduced from 4 (no hyperparam tuning)
+
+# -----------------------------------------------------------------------------
+# Augmentation (only applied to training data)
+# -----------------------------------------------------------------------------
+augmentation:
+  enabled: true
+  temporal_crop:
+    enabled: true
+    min_ratio: 0.5
+    max_ratio: 1.0
+  speed_scaling:
+    enabled: true
+    min_scale: 0.85
+    max_scale: 1.15
+  coordinate_jitter:
+    enabled: true
+    std_degrees: 0.0001
+  point_dropout:
+    enabled: true
+    dropout_rate: 0.15
+
+# -----------------------------------------------------------------------------
+# Model Configuration
+# -----------------------------------------------------------------------------
+model:
+  # Encoder: MUST match experiment 11 architecture exactly
+  encoder:
+    # From experiment 11 xlarge scale (116M params)
+    d_model: 768
+    nhead: 16
+    num_layers: 16
+    dim_feedforward: 3072
+    dropout: 0.1
+    max_seq_length: 512
+    input_features: 6  # lat, lon, sog, cog_sin, cog_cos, dt
+
+  # Classification head (new)
+  classifier:
+    hidden_dims: [384, 128]
+    dropout: 0.3
+    pooling: "mean"  # Options: mean, max, last
+
+  # Path to pre-trained weights from experiment 11
+  pretrained_checkpoint: "../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt"
+
+# -----------------------------------------------------------------------------
+# Training Configuration
+# -----------------------------------------------------------------------------
+training:
+  # Conditions to compare
+  conditions:
+    - "pretrained"         # Load exp 11 weights, fine-tune all
+    - "random_init"        # Random init, train from scratch
+    - "frozen_pretrained"  # Load exp 11 weights, freeze encoder
+
+  # Optimizer
+  optimizer: "adamw"
+  weight_decay: 0.01
+
+  # Differential learning rates (for pretrained condition)
+  encoder_lr: 1.0e-5       # Lower for pre-trained encoder
+  classifier_lr: 1.0e-4    # Higher for new head
+
+  # For random_init, use single higher LR
+  random_init_lr: 1.0e-4
+
+  # Scheduler
+  scheduler: "cosine"
+  warmup_epochs: 5
+
+  # Training
+  max_epochs: 100
+  batch_size: 64           # Increased for better GPU utilization
+  num_workers: 4           # DataLoader workers
+  early_stopping_patience: 15
+  early_stopping_metric: "val_auprc"
+
+  # Performance
+  use_amp: true            # Automatic mixed precision (FP16)
+  use_compile: true        # torch.compile() optimization
+  pin_memory: true         # Faster CPU->GPU transfer
+
+  # Class imbalance handling
+  positive_weight: 10.0  # ~55 positives vs ~500 negatives
+
+  # Loss
+  loss: "bce_weighted"
+
+# -----------------------------------------------------------------------------
+# Evaluation
+# -----------------------------------------------------------------------------
+evaluation:
+  metrics:
+    - "auroc"
+    - "auprc"
+    - "f1_optimal"
+    - "recall_at_precision_90"
+    - "precision_at_recall_90"
+
+  # Statistical testing
+  significance_level: 0.05
+  bootstrap_samples: 10000
+
+  # Ablations
+  learning_curve_sizes: [10, 20, 30, 40, 55]  # Num positive examples
+
+  # Visualization
+  generate_tsne: true
+  generate_roc_curves: true
+  generate_learning_curves: true

@@ -1,0 +1,98 @@
+augmentation:
+  coordinate_jitter:
+    enabled: true
+    std_degrees: 0.0001
+  enabled: true
+  point_dropout:
+    dropout_rate: 0.15
+    enabled: true
+  speed_scaling:
+    enabled: true
+    max_scale: 1.15
+    min_scale: 0.85
+  temporal_crop:
+    enabled: true
+    max_ratio: 1.0
+    min_ratio: 0.5
+data:
+  dt_max: 300.0
+  dtu_url: https://data.dtu.dk/ndownloader/articles/19446300/versions/1
+  features:
+  - lat
+  - lon
+  - sog
+  - cog_sin
+  - cog_cos
+  - dt
+  inner_folds: 4
+  lat_mean: 56.25
+  lat_std: 1.0
+  lon_mean: 11.5
+  lon_std: 2.0
+  max_seq_length: 512
+  outer_folds: 5
+  processed_path: data/processed/
+  raw_path: data/raw/
+  sog_max: 30.0
+  splits_path: data/splits/
+evaluation:
+  bootstrap_samples: 10000
+  generate_learning_curves: true
+  generate_roc_curves: true
+  generate_tsne: true
+  learning_curve_sizes:
+  - 10
+  - 20
+  - 30
+  - 40
+  - 55
+  metrics:
+  - auroc
+  - auprc
+  - f1_optimal
+  - recall_at_precision_90
+  - precision_at_recall_90
+  significance_level: 0.05
+experiment:
+  device: cuda
+  name: pretraining_impact
+  num_seeds: 5
+  seed: 42
+model:
+  classifier:
+    dropout: 0.3
+    hidden_dims:
+    - 384
+    - 128
+    pooling: mean
+  encoder:
+    d_model: 768
+    dim_feedforward: 3072
+    dropout: 0.1
+    input_features: 6
+    max_seq_length: 512
+    nhead: 16
+    num_layers: 16
+  pretrained_checkpoint: ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+training:
+  batch_size: 64
+  classifier_lr: 0.0001
+  conditions:
+  - pretrained
+  - random_init
+  - frozen_pretrained
+  early_stopping_metric: val_auprc
+  early_stopping_patience: 15
+  encoder_lr: 1.0e-05
+  loss: bce_weighted
+  max_epochs: 100
+  num_workers: 4
+  optimizer: adamw
+  pin_memory: true
+  positive_weight: 10.0
+  random_init_lr: 0.0001
+  scheduler: cosine
+  use_amp: true
+  use_compile: true
+  warmup_epochs: 5
+  weight_decay: 0.01

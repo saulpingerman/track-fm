@@ -25,6 +25,9 @@ Thumbs.db
 
 # Large data files (keep on FSx, not git)
 *.parquet
+*.pt
+*.pth
+*.pkl
 
 # Logs can get large - keep training.log but exclude others
 **/run.log

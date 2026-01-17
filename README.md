@@ -26,6 +26,12 @@ This repository contains experiments on vessel trajectory prediction using causa
   - Causal subwindow training: ~30x more training signal per batch
   - Leak test verified: model makes genuine predictions, no data leakage
 
+- **Experiment 12**: Anomaly detection transfer learning
+  - Fine-tuned 116M encoder on DTU Danish Waters anomaly dataset (521 trajectories, 25 anomalies)
+  - **Pretrained encoder achieves 0.498 AUPRC** (~10x better than random baseline of 0.05)
+  - Fine-tuning significantly outperforms frozen encoder (p=0.036)
+  - Pre-training vs random initialization: inconclusive due to small dataset
+
 ## Repository Structure
 
 ```
@@ -44,7 +50,8 @@ track-fm/
     ├── 08_causal_multihorizon/  # Synthetic: Causal + multi-horizon
     ├── 09_ais_real_data/        # Real AIS: Short-horizon (20 steps)
     ├── 10_long_horizon/         # Real AIS: Long-horizon (400 steps, ~1 hour)
-    └── 11_long_horizon_69_days/ # Real AIS: 69 days + causal training
+    ├── 11_long_horizon_69_days/ # Real AIS: 69 days + causal training
+    └── 12_anomaly_detection/    # Transfer learning: Anomaly detection fine-tuning
 ```
 
 ## Experiments
@@ -106,6 +113,16 @@ See `experiments/10_long_horizon/README.md` for full details.
 - **Verification**: Leak test confirms model makes genuine predictions
 
 See `experiments/11_long_horizon_69_days/README.md` for full details.
+
+#### Experiment 12: Anomaly Detection Transfer Learning
+- **Task**: Binary classification (normal vs anomalous vessel behavior)
+- **Data**: DTU Danish Waters dataset (521 trajectories, 25 labeled anomalies)
+- **Model**: 116M encoder from Exp 11 + MLP classifier head
+- **Conditions**: pretrained (fine-tune all), random_init (from scratch), frozen_pretrained (freeze encoder)
+- **Result**: Pretrained achieves **0.498 AUPRC** (10x better than random baseline)
+- **Finding**: Fine-tuning significantly outperforms frozen encoder (p=0.036); pre-training vs random init inconclusive
+
+See `experiments/12_anomaly_detection/README.md` for full details.
 
 ## Model Architecture
 
