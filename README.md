@@ -32,6 +32,12 @@ This repository contains experiments on vessel trajectory prediction using causa
   - Fine-tuning significantly outperforms frozen encoder (p=0.036)
   - Pre-training vs random initialization: inconclusive due to small dataset
 
+- **Experiment 13**: Vessel type classification
+  - 4-class classification: Fishing, Cargo, Tanker, Passenger (2,257 trajectories)
+  - **Random initialization (68.6%) outperforms pretrained (66.3%)**
+  - Tested multiple transfer techniques: attention pooling, MHA pooling, LoRA, two-stage fine-tuning
+  - **Finding**: Pre-training on trajectory forecasting provides no benefit for classification
+
 ## Repository Structure
 
 ```
@@ -51,7 +57,8 @@ track-fm/
     ├── 09_ais_real_data/        # Real AIS: Short-horizon (20 steps)
     ├── 10_long_horizon/         # Real AIS: Long-horizon (400 steps, ~1 hour)
     ├── 11_long_horizon_69_days/ # Real AIS: 69 days + causal training
-    └── 12_anomaly_detection/    # Transfer learning: Anomaly detection fine-tuning
+    ├── 12_anomaly_detection/    # Transfer learning: Anomaly detection fine-tuning
+    └── 13_vessel_classification/# Transfer learning: Vessel type classification
 ```
 
 ## Experiments
@@ -123,6 +130,30 @@ See `experiments/11_long_horizon_69_days/README.md` for full details.
 - **Finding**: Fine-tuning significantly outperforms frozen encoder (p=0.036); pre-training vs random init inconclusive
 
 See `experiments/12_anomaly_detection/README.md` for full details.
+
+#### Experiment 13: Vessel Type Classification
+- **Task**: 4-class classification (Fishing, Cargo, Tanker, Passenger)
+- **Data**: DMA AIS data (2,257 trajectories from same domain as pre-training)
+- **Model**: 116M encoder from Exp 11 + MLP classifier head
+- **Conditions**: pretrained, random_init, frozen_pretrained, two_stage, + pooling ablations + LoRA
+- **Result**: Random init achieves **68.6% accuracy**, outperforming best pretrained (65.7%)
+- **Finding**: Pre-training on trajectory forecasting provides no benefit for vessel classification
+
+**Key Results:**
+
+| Condition | Accuracy | F1 Macro |
+|-----------|----------|----------|
+| **random_init** | **68.6%** | **0.56** |
+| pretrained_attention | 65.7% | 0.57 |
+| pretrained | 66.3% | 0.55 |
+| pretrained_lora | 63.4% | 0.52 |
+
+**Why No Transfer Benefit:**
+1. Sequence length mismatch (128 vs 512 positions)
+2. Task mismatch (local prediction vs global classification)
+3. Class similarity (Cargo/Tanker nearly indistinguishable)
+
+See `experiments/13_vessel_classification/README.md` for full details.
 
 ## Model Architecture
 

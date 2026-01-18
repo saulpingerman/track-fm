@@ -1,0 +1,15 @@
+{
+  "total_trajectories": 2257,
+  "class_distribution": {
+    "Fishing": 717,
+    "Cargo": 624,
+    "Tanker": 271,
+    "Passenger": 645
+  },
+  "classes": [
+    "Fishing",
+    "Cargo",
+    "Tanker",
+    "Passenger"
+  ]
+}

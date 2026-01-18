@@ -1,0 +1,138 @@
+# =============================================================================
+# Experiment 13: Vessel Type Classification
+# =============================================================================
+
+experiment:
+  name: "vessel_classification"
+  seed: 42
+  device: "cuda"
+
+# -----------------------------------------------------------------------------
+# Data Configuration
+# -----------------------------------------------------------------------------
+data:
+  # Path to DMA data (parquet format)
+  raw_path: "/mnt/fsx/data/"
+  processed_path: "data/processed/"
+
+  # Date range (use subset of pre-training data)
+  year: 2025
+  month: 1  # January only - plenty of data
+
+  # Class mapping (string labels in parquet)
+  classes: ["Fishing", "Cargo", "Tanker", "Passenger"]
+  num_classes: 4
+
+  # Filtering
+  min_trajectory_length: 50       # Minimum points per trajectory
+  max_trajectory_length: 512      # Match pre-training
+  min_vessels_per_class: 200      # Ensure enough data
+
+  # Features (same as pre-training)
+  features: ["lat", "lon", "sog", "cog_sin", "cog_cos", "dt"]
+
+  # Splits
+  train_ratio: 0.70
+  val_ratio: 0.15
+  test_ratio: 0.15
+
+  # Sample size per class (for balanced training)
+  max_trajectories_per_class: 2000  # Limit to prevent imbalance issues
+  balance_classes: true
+
+# -----------------------------------------------------------------------------
+# Model Configuration
+# -----------------------------------------------------------------------------
+model:
+  # Encoder: MUST match experiment 11 architecture
+  encoder:
+    d_model: 768
+    nhead: 16
+    num_layers: 16
+    dim_feedforward: 3072
+    dropout: 0.1
+    max_seq_length: 512
+    input_features: 6
+
+  # Classification head
+  classifier:
+    hidden_dims: [384, 128]
+    dropout: 0.3
+    num_classes: 4
+    pooling: "mean"  # mean, max, last, attention
+
+  # Pre-trained weights
+  pretrained_checkpoint: "../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt"
+
+# -----------------------------------------------------------------------------
+# LoRA Configuration
+# -----------------------------------------------------------------------------
+lora:
+  rank: 4           # Low-rank dimension (lower = fewer params)
+  alpha: 1.0        # Scaling factor
+
+# -----------------------------------------------------------------------------
+# Training Configuration
+# -----------------------------------------------------------------------------
+training:
+  # Conditions to compare
+  conditions:
+    - "pretrained"           # Load exp 11 weights, fine-tune all
+    - "random_init"          # Random init, train from scratch
+    - "frozen_pretrained"    # Load exp 11 weights, freeze encoder
+    - "two_stage"            # Stage 1: freeze encoder, train head; Stage 2: unfreeze all
+
+  # Also test with limited data (ablation)
+  limited_data_fractions: [0.01, 0.05, 0.1, 0.25, 0.5, 1.0]
+
+  # Optimizer
+  optimizer: "adamw"
+  weight_decay: 0.01
+
+  # Learning rates
+  encoder_lr: 1.0e-5
+  classifier_lr: 1.0e-3
+  random_init_lr: 1.0e-4
+
+  # Two-stage fine-tuning settings
+  two_stage_warmup_epochs: 10  # Epochs to train head only before unfreezing encoder
+
+  # Scheduler
+  scheduler: "cosine"
+  warmup_epochs: 3
+
+  # Training
+  max_epochs: 50
+  batch_size: 64
+  early_stopping_patience: 10
+  early_stopping_metric: "val_f1_macro"
+
+  # Loss
+  loss: "cross_entropy"
+  label_smoothing: 0.1
+
+  # Performance
+  num_workers: 4
+  pin_memory: true
+  use_amp: true
+  use_compile: false  # Can be slow for first run
+
+# -----------------------------------------------------------------------------
+# Evaluation
+# -----------------------------------------------------------------------------
+evaluation:
+  metrics:
+    - "accuracy"
+    - "f1_macro"
+    - "f1_weighted"
+    - "precision_macro"
+    - "recall_macro"
+
+  # Per-class metrics
+  per_class_metrics: true
+
+  # Confusion matrix
+  generate_confusion_matrix: true
+
+  # Learning curves (performance vs data size)
+  generate_learning_curves: true

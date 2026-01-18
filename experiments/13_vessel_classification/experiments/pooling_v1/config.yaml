@@ -1,0 +1,91 @@
+data:
+  balance_classes: true
+  classes:
+  - Fishing
+  - Cargo
+  - Tanker
+  - Passenger
+  features:
+  - lat
+  - lon
+  - sog
+  - cog_sin
+  - cog_cos
+  - dt
+  max_trajectories_per_class: 2000
+  max_trajectory_length: 512
+  min_trajectory_length: 50
+  min_vessels_per_class: 200
+  month: 1
+  num_classes: 4
+  processed_path: data/processed/
+  raw_path: /mnt/fsx/data/
+  test_ratio: 0.15
+  train_ratio: 0.7
+  val_ratio: 0.15
+  year: 2025
+evaluation:
+  generate_confusion_matrix: true
+  generate_learning_curves: true
+  metrics:
+  - accuracy
+  - f1_macro
+  - f1_weighted
+  - precision_macro
+  - recall_macro
+  per_class_metrics: true
+experiment:
+  device: cuda
+  name: vessel_classification
+  seed: 42
+lora:
+  alpha: 1.0
+  rank: 4
+model:
+  classifier:
+    dropout: 0.3
+    hidden_dims:
+    - 384
+    - 128
+    num_classes: 4
+    pooling: mean
+  encoder:
+    d_model: 768
+    dim_feedforward: 3072
+    dropout: 0.1
+    input_features: 6
+    max_seq_length: 512
+    nhead: 16
+    num_layers: 16
+  pretrained_checkpoint: ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+training:
+  batch_size: 64
+  classifier_lr: 0.001
+  conditions:
+  - pretrained
+  - random_init
+  - frozen_pretrained
+  - two_stage
+  early_stopping_metric: val_f1_macro
+  early_stopping_patience: 10
+  encoder_lr: 1.0e-05
+  label_smoothing: 0.1
+  limited_data_fractions:
+  - 0.01
+  - 0.05
+  - 0.1
+  - 0.25
+  - 0.5
+  - 1.0
+  loss: cross_entropy
+  max_epochs: 50
+  num_workers: 4
+  optimizer: adamw
+  pin_memory: true
+  random_init_lr: 0.0001
+  scheduler: cosine
+  two_stage_warmup_epochs: 10
+  use_amp: true
+  use_compile: false
+  warmup_epochs: 3
+  weight_decay: 0.01
