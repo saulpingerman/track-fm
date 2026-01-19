@@ -10,12 +10,27 @@ This experiment extends Experiment 10 to use **69 days of AIS data** (10x more t
 
 ## Key Results
 
-| Model | Parameters | vs Dead Reckoning | vs Last Position |
-|-------|------------|-------------------|------------------|
-| Large (v3) | 18M | +44% | +63% |
-| **XLarge (v4)** | **116M** | **+65%** | **+76%** |
+| Model | Parameters | Best Val Loss | vs Dead Reckoning | vs Last Position |
+|-------|------------|---------------|-------------------|------------------|
+| Tiny | 194K | 1.8555 | +62.8% | +72.0% |
+| Small | 1.0M | _TBD_ | _TBD_ | _TBD_ |
+| Medium | 5.0M | _TBD_ | _TBD_ | _TBD_ |
+| Large (v3) | 18M | 1.8127 | +63.8% | +75.4% |
+| **XLarge (v4)** | **116M** | **1.7467** | **+65.2%** | **+76.3%** |
 
 The 116M parameter model achieves **65% improvement** over dead reckoning and **76% improvement** over last position baseline on 1-hour horizon predictions.
+
+### Scaling Study
+
+Running experiments across 5 model scales (194K to 116M parameters) to understand scaling behavior.
+
+| Scale | d_model | nhead | layers | dim_ff | Parameters | Training Steps | Best Val Loss |
+|-------|---------|-------|--------|--------|------------|----------------|---------------|
+| tiny | 64 | 4 | 2 | 256 | 194K | 82,610 | 1.8555 |
+| small | 128 | 8 | 4 | 512 | 1.0M | _TBD_ | _TBD_ |
+| medium | 256 | 8 | 6 | 1024 | 5.0M | _TBD_ | _TBD_ |
+| large | 384 | 16 | 8 | 2048 | 18M | 28,998 | 1.8127 |
+| xlarge | 768 | 16 | 16 | 3072 | 116M | 79,458 | 1.7467 |
 
 **Key changes from Experiment 10:**
 - 69 days of data instead of 7 days (~10x more positions)

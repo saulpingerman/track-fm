@@ -254,7 +254,8 @@ def load_ais_data(config: Config, max_tracks: int = None) -> Tuple[Dict[str, np.
     print(f"  Total positions: {total_positions:,}", flush=True)
 
     # Split into train/val (90/10 by track)
-    track_ids = list(track_data.keys())
+    track_ids = sorted(track_data.keys())  # Sort for deterministic order
+    np.random.seed(42)  # Fixed seed for reproducible train/val split
     np.random.shuffle(track_ids)
     split_idx = int(0.9 * len(track_ids))
 
@@ -464,6 +465,8 @@ def load_ais_data_lazy(config: Config, max_tracks: int = None) -> Tuple[List, Li
     print(f"  {len(valid_track_ids):,} tracks have sufficient length after filtering", flush=True)
 
     # Split into train/val (90/10)
+    valid_track_ids = sorted(valid_track_ids)  # Sort for deterministic order
+    np.random.seed(42)  # Fixed seed for reproducible train/val split
     np.random.shuffle(valid_track_ids)
     split_idx = int(0.9 * len(valid_track_ids))
     train_ids = set(valid_track_ids[:split_idx])
@@ -1333,6 +1336,10 @@ def find_optimal_batch_size(model: nn.Module, config: Config, target_gpu_pct: fl
             # Create synthetic batch
             features = torch.randn(mid_bs, seq_len, 6, device=DEVICE)
 
+            # Create optimizer to test full training memory (optimizer state uses memory)
+            optimizer = torch.optim.AdamW(model.parameters(), lr=config.learning_rate)
+            scaler = GradScaler('cuda') if config.use_amp else None
+
             # Forward pass with gradient computation
             model.train()
             with autocast('cuda', enabled=config.use_amp):
@@ -1343,17 +1350,22 @@ def find_optimal_batch_size(model: nn.Module, config: Config, target_gpu_pct: fl
                 )
 
             # Backward pass
-            scaler = GradScaler('cuda') if config.use_amp else None
             if config.use_amp:
                 scaler.scale(loss).backward()
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                scaler.step(optimizer)
+                scaler.update()
             else:
                 loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                optimizer.step()
 
             # Check peak memory
             peak_mem = torch.cuda.max_memory_allocated()
 
             # Clean up
-            del features, log_densities, targets, loss
+            del features, log_densities, targets, loss, optimizer, scaler
             model.zero_grad()
             torch.cuda.empty_cache()
             gc.collect()
