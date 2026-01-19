@@ -1,0 +1,404 @@
+/opt/pytorch/lib64/python3.12/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+[INFO 01-18 19:10:07] ax.generation_strategy.dispatch_utils: Using Generators.BOTORCH_MODULAR since there is at least one ordered parameter and there are no unordered categorical parameters.
+[INFO 01-18 19:10:07] ax.generation_strategy.dispatch_utils: Using Bayesian Optimization generation strategy: GenerationStrategy(name='Sobol+BoTorch', steps=[Sobol for 10 trials, BoTorch for subsequent trials]). Iterations after 10 will take longer to generate due to model-fitting.
+
+============================================================
+Bayesian Optimization for RANDOM_INIT
+============================================================
+Device: cuda
+Loading data...
+Train batches: 25, Val batches: 6
+
+Running 30 trials...
+
+Trial 1/30:
+  lr=2.02e-05, wd=1.43e-04, β1=0.824, β2=0.9517, pool=last
+  Result: F1=0.5384, Acc=0.6786
+
+Trial 2/30:
+  lr=4.08e-04, wd=6.12e-03, β1=0.939, β2=0.9982, pool=mean
+  Result: F1=0.4627, Acc=0.5804
+
+Trial 3/30:
+  lr=1.29e-04, wd=2.90e-03, β1=0.864, β2=0.9716, pool=mean
+  Result: F1=0.5388, Acc=0.6667
+
+Trial 4/30:
+  lr=6.40e-05, wd=5.46e-02, β1=0.899, β2=0.9752, pool=last
+  Result: F1=0.5970, Acc=0.7024
+
+Trial 5/30:
+  lr=3.53e-05, wd=8.55e-04, β1=0.920, β2=0.9825, pool=last
+  Result: F1=0.6010, Acc=0.6964
+
+Trial 6/30:
+  lr=2.34e-04, wd=3.67e-02, β1=0.805, β2=0.9674, pool=mean
+  Result: F1=0.5619, Acc=0.6696
+
+Trial 7/30:
+  lr=7.39e-04, wd=5.40e-04, β1=0.880, β2=0.9902, pool=mean
+  Result: F1=0.4779, Acc=0.5982
+
+Trial 8/30:
+  lr=1.12e-05, wd=1.01e-02, β1=0.845, β2=0.9567, pool=last
+  Result: F1=0.5249, Acc=0.6607
+
+Trial 9/30:
+  lr=1.55e-05, wd=1.71e-03, β1=0.892, β2=0.9632, pool=mean
+  Result: F1=0.5494, Acc=0.6637
+
+Trial 10/30:
+  lr=7.68e-04, wd=9.08e-02, β1=0.852, β2=0.9852, pool=last
+  Result: F1=0.4721, Acc=0.5893
+
+Trial 11/30:
+  lr=4.00e-05, wd=1.00e-01, β1=0.950, β2=0.9695, pool=last
+  Result: F1=0.5599, Acc=0.6667
+
+Trial 12/30:
+  lr=4.46e-05, wd=2.17e-03, β1=0.856, β2=0.9834, pool=last
+  Result: F1=0.6024, Acc=0.7083
+
+Trial 13/30:
+  lr=6.57e-05, wd=1.00e-04, β1=0.849, β2=0.9771, pool=last
+  Result: F1=0.5932, Acc=0.7083
+
+Trial 14/30:
+  lr=6.04e-05, wd=1.00e-01, β1=0.950, β2=0.9841, pool=last
+  Result: F1=0.5808, Acc=0.6935
+
+Trial 15/30:
+  lr=4.31e-05, wd=1.04e-04, β1=0.894, β2=0.9936, pool=last
+  Result: F1=0.5791, Acc=0.6905
+
+Trial 16/30:
+  lr=3.45e-05, wd=1.00e-01, β1=0.874, β2=0.9811, pool=last
+  Result: F1=0.5351, Acc=0.6577
+
+Trial 17/30:
+  lr=6.70e-05, wd=2.78e-03, β1=0.950, β2=0.9740, pool=last
+  Result: F1=0.5841, Acc=0.6756
+
+Trial 18/30:
+  lr=1.07e-04, wd=1.00e-01, β1=0.872, β2=0.9558, pool=last
+  Result: F1=0.5728, Acc=0.6845
+
+Trial 19/30:
+  lr=4.22e-05, wd=4.67e-04, β1=0.800, β2=0.9781, pool=last
+  Result: F1=0.5768, Acc=0.6994
+
+Trial 20/30:
+  lr=5.39e-05, wd=1.87e-03, β1=0.879, β2=0.9711, pool=last
+  Result: F1=0.5928, Acc=0.6964
+
+Trial 21/30:
+  lr=4.09e-05, wd=5.14e-03, β1=0.950, β2=0.9868, pool=last
+  Result: F1=0.5896, Acc=0.6815
+
+Trial 22/30:
+  lr=6.49e-05, wd=2.68e-03, β1=0.871, β2=0.9847, pool=last
+  Result: F1=0.5984, Acc=0.6935
+
+Trial 23/30:
+  lr=1.07e-04, wd=1.00e-01, β1=0.824, β2=0.9827, pool=last
+  Result: F1=0.5925, Acc=0.6964
+
+Trial 24/30:
+  lr=9.36e-05, wd=1.00e-01, β1=0.879, β2=0.9768, pool=mean
+  Result: F1=0.5734, Acc=0.6964
+
+Trial 25/30:
+  lr=4.73e-05, wd=1.13e-03, β1=0.898, β2=0.9831, pool=last
+  Result: F1=0.5958, Acc=0.6905
+
+Trial 26/30:
+  lr=7.81e-05, wd=1.83e-02, β1=0.849, β2=0.9820, pool=last
+  Result: F1=0.6181, Acc=0.7083
+
+Trial 27/30:
+  lr=8.48e-05, wd=1.70e-02, β1=0.800, β2=0.9911, pool=last
+  Result: F1=0.6066, Acc=0.7054
+
+Trial 28/30:
+  lr=8.93e-05, wd=1.74e-02, β1=0.800, β2=0.9746, pool=last
+  Result: F1=0.6064, Acc=0.7054
+
+Trial 29/30:
+  lr=9.58e-05, wd=2.37e-02, β1=0.875, β2=0.9826, pool=last
+  Result: F1=0.5871, Acc=0.6905
+
+Trial 30/30:
+  lr=7.05e-05, wd=2.58e-02, β1=0.800, β2=0.9990, pool=last
+[INFO 01-18 21:55:43] ax.generation_strategy.dispatch_utils: Using Generators.BOTORCH_MODULAR since there is at least one ordered parameter and there are no unordered categorical parameters.
+[INFO 01-18 21:55:43] ax.generation_strategy.dispatch_utils: Using Bayesian Optimization generation strategy: GenerationStrategy(name='Sobol+BoTorch', steps=[Sobol for 10 trials, BoTorch for subsequent trials]). Iterations after 10 will take longer to generate due to model-fitting.
+  Result: F1=0.6078, Acc=0.7054
+
+============================================================
+BEST OBSERVED PARAMETERS for random_init (Trial 26):
+============================================================
+  learning_rate: 7.81e-05
+  weight_decay:  1.83e-02
+  beta1:         0.8490
+  beta2:         0.98200
+  pooling:       last
+  Best F1:       0.6181
+  Best Accuracy: 0.7083
+
+Results saved to /home/ec2-user/trackfm/experiments/13_vessel_classification/experiments/bayesian_opt_v1/random_init_optimization.json
+
+============================================================
+Bayesian Optimization for PRETRAINED
+============================================================
+Device: cuda
+Loading data...
+Train batches: 25, Val batches: 6
+
+Running 30 trials...
+
+Trial 1/30:
+  lr=8.61e-04, wd=6.00e-04, β1=0.871, β2=0.9921, pool=last
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.4665, Acc=0.5863
+
+Trial 2/30:
+  lr=2.61e-05, wd=4.04e-02, β1=0.928, β2=0.9513, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.3782, Acc=0.4821
+
+Trial 3/30:
+  lr=5.67e-05, wd=3.19e-04, β1=0.830, β2=0.9807, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.5083, Acc=0.6369
+
+Trial 4/30:
+  lr=1.88e-04, wd=1.39e-02, β1=0.885, β2=0.9737, pool=last
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.5033, Acc=0.6339
+
+Trial 5/30:
+  lr=1.33e-04, wd=1.61e-04, β1=0.945, β2=0.9660, pool=last
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.4669, Acc=0.5863
+
+Trial 6/30:
+  lr=4.00e-05, wd=4.56e-03, β1=0.849, β2=0.9762, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.5043, Acc=0.6339
+
+Trial 7/30:
+  lr=1.55e-05, wd=2.63e-03, β1=0.911, β2=0.9590, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.4083, Acc=0.5149
+
+Trial 8/30:
+  lr=5.13e-04, wd=4.83e-02, β1=0.818, β2=0.9967, pool=last
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.5257, Acc=0.6607
+
+Trial 9/30:
+  lr=3.70e-04, wd=4.19e-04, β1=0.900, β2=0.9782, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.6354, Acc=0.7202
+
+Trial 10/30:
+  lr=1.20e-05, wd=9.57e-03, β1=0.805, β2=0.9638, pool=last
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.3521, Acc=0.4524
+
+Trial 11/30:
+  lr=4.17e-04, wd=1.00e-01, β1=0.899, β2=0.9805, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.6414, Acc=0.7381
+
+Trial 12/30:
+  lr=3.15e-04, wd=4.05e-02, β1=0.950, β2=0.9859, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.4992, Acc=0.6280
+
+Trial 13/30:
+  lr=5.19e-04, wd=9.39e-03, β1=0.873, β2=0.9797, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.5439, Acc=0.6696
+
+Trial 14/30:
+  lr=7.17e-04, wd=1.00e-01, β1=0.909, β2=0.9752, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.6064, Acc=0.7143
+
+Trial 15/30:
+  lr=3.11e-04, wd=6.12e-02, β1=0.905, β2=0.9941, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.4646, Acc=0.5833
+
+Trial 16/30:
+  lr=6.86e-05, wd=4.67e-02, β1=0.908, β2=0.9801, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.4870, Acc=0.6101
+
+Trial 17/30:
+  lr=5.22e-04, wd=1.00e-01, β1=0.848, β2=0.9799, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.5481, Acc=0.6905
+
+Trial 18/30:
+  lr=4.48e-04, wd=1.00e-02, β1=0.909, β2=0.9802, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.6315, Acc=0.7440
+
+Trial 19/30:
+  lr=3.57e-04, wd=1.00e-01, β1=0.903, β2=0.9774, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.5635, Acc=0.6935
+
+Trial 20/30:
+  lr=5.27e-04, wd=9.24e-04, β1=0.899, β2=0.9808, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.5158, Acc=0.6458
+
+Trial 21/30:
+  lr=5.48e-04, wd=1.39e-04, β1=0.950, β2=0.9720, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.5678, Acc=0.6726
+
+Trial 22/30:
+  lr=4.50e-04, wd=1.19e-04, β1=0.871, β2=0.9711, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.6116, Acc=0.7024
+
+Trial 23/30:
+  lr=4.21e-04, wd=1.00e-01, β1=0.851, β2=0.9699, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.4513, Acc=0.5714
+
+Trial 24/30:
+  lr=4.06e-04, wd=1.09e-03, β1=0.903, β2=0.9791, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.5316, Acc=0.6696
+
+Trial 25/30:
+  lr=1.00e-03, wd=1.00e-01, β1=0.949, β2=0.9779, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.3924, Acc=0.5149
+
+Trial 26/30:
+  lr=3.49e-04, wd=2.14e-04, β1=0.897, β2=0.9777, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.4958, Acc=0.6220
+
+Trial 27/30:
+  lr=5.01e-04, wd=7.49e-02, β1=0.919, β2=0.9767, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.4889, Acc=0.6131
+
+Trial 28/30:
+  lr=1.00e-03, wd=7.44e-02, β1=0.893, β2=0.9792, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.4494, Acc=0.5655
+
+Trial 29/30:
+  lr=4.40e-04, wd=1.00e-04, β1=0.904, β2=0.9768, pool=last
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.4910, Acc=0.6190
+
+Trial 30/30:
+  lr=3.75e-04, wd=1.00e-04, β1=0.950, β2=0.9659, pool=mean
+Loading pretrained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+Loaded 195 weight tensors
+Skipped 14 keys (non-encoder weights)
+  Result: F1=0.5517, Acc=0.6964
+
+============================================================
+BEST OBSERVED PARAMETERS for pretrained (Trial 11):
+============================================================
+  learning_rate: 4.17e-04
+  weight_decay:  1.00e-01
+  beta1:         0.8990
+  beta2:         0.98050
+  pooling:       mean
+  Best F1:       0.6414
+  Best Accuracy: 0.7381
+
+Results saved to /home/ec2-user/trackfm/experiments/13_vessel_classification/experiments/bayesian_opt_v1/pretrained_optimization.json
+
+============================================================
+COMPARISON SUMMARY
+============================================================
+
+random_init (Trial 26):
+  Best F1:       0.6181
+  Best Accuracy: 0.7083
+  LR:            7.81e-05
+  WD:            1.83e-02
+  β1:            0.849
+  β2:            0.982
+  Pooling:       last
+
+pretrained (Trial 11):
+  Best F1:       0.6414
+  Best Accuracy: 0.7381
+  LR:            4.17e-04
+  WD:            1.00e-01
+  β1:            0.899
+  β2:            0.9805
+  Pooling:       mean
+
+WINNER: pretrained (+3.0% accuracy, +3.7% F1)

@@ -1,0 +1,22 @@
+{
+  "random_init": {
+    "best_parameters": {
+      "learning_rate": 8.480109731126334e-05,
+      "weight_decay": 0.017011881357070487,
+      "beta1": 0.8,
+      "beta2": 0.9910515232645734,
+      "pooling": "last"
+    },
+    "best_f1": 0.6098584677819532
+  },
+  "pretrained": {
+    "best_parameters": {
+      "learning_rate": 0.0004064388009124117,
+      "weight_decay": 0.0010899300298628004,
+      "beta1": 0.9034805336507868,
+      "beta2": 0.9790971503535636,
+      "pooling": "mean"
+    },
+    "best_f1": 0.5629089634599209
+  }
+}

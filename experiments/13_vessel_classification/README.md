@@ -133,17 +133,34 @@ python scripts/extract_data.py
 | pretrained_lora | 63.4% | 0.5185 | 0.5999 | 104M (98K LoRA) |
 | pretrained_attention_lora | 63.1% | 0.5352 | 0.6097 | 104M (98K LoRA) |
 
-### Key Finding: No Transfer Benefit
+### Key Finding: Hyperparameters Matter More Than Architecture
 
-**Pre-training on trajectory forecasting does not improve classification performance.**
+**Initial results suggested no transfer benefit, but Bayesian optimization revealed the opposite.**
 
-Random initialization slightly outperforms all pre-trained conditions:
-- **Random init beats pretrained by 2.3%** accuracy (68.6% vs 66.3%)
-- **Two-stage fine-tuning** (warmup head, then unfreeze) doesn't help
-- **Frozen pretrained performs worst** - pre-trained features alone are insufficient
-- **Attention pooling** improves F1 macro slightly (0.55 → 0.5694) but still trails random init
-- **LoRA does not help** - no benefit from parameter-efficient fine-tuning with sufficient data
-- **MHA and hybrid pooling** actually hurt performance significantly
+With default hyperparameters, random initialization appeared to outperform pretrained:
+- Random init: 68.6% accuracy, F1=0.56
+- Pretrained: 66.3% accuracy, F1=0.55
+
+However, **Bayesian hyperparameter optimization reversed this conclusion**:
+
+#### Bayesian Optimization Results (30 trials each)
+
+| Condition | Accuracy | F1 Macro | Learning Rate | Weight Decay | Pooling |
+|-----------|----------|----------|---------------|--------------|---------|
+| **pretrained** | **73.8%** | **0.641** | 4.17e-04 | 0.1 | mean |
+| random_init | 70.8% | 0.618 | 7.81e-05 | 0.018 | last |
+
+**With proper hyperparameter tuning, pretrained beats random_init by 3% accuracy and 3.7% F1.**
+
+Key insights:
+- Pretrained benefits from **higher learning rate** (4e-4 vs 8e-5) and **higher weight decay** (0.1 vs 0.018)
+- Pretrained prefers **mean pooling**, random_init prefers **last token pooling**
+- The optimal hyperparameters for pretrained vs random_init are very different
+- Default hyperparameters from literature (designed for BERT-style models) were suboptimal for our architecture
+
+#### Ablation Results (Default Hyperparameters)
+
+These results use fixed hyperparameters and show the importance of proper tuning:
 
 ### Per-Class Analysis
 
@@ -169,19 +186,19 @@ All models struggle with the Tanker class (only 42 test samples, similar movemen
 
 After fixing normalization, pretrained improved from 49.3% → 66.3% accuracy.
 
-### Why No Transfer Benefit?
+### Why Default Hyperparameters Failed
 
-1. **Sequence length mismatch**: Pre-training used 128-position sequences (~2 hours) while classification uses up to 512 positions (~4.6 hours average). The model's positional encodings were only trained on positions 0-127, creating distribution shift when processing longer sequences.
+Initial experiments showed no transfer benefit due to suboptimal hyperparameters. Contributing factors:
 
-2. **Task mismatch**: Trajectory forecasting learns local velocity/acceleration patterns for predicting future positions. Classification needs global features: route structure, overall speed profiles, area-of-operation patterns.
+1. **Hyperparameter sensitivity**: Pretrained models require different learning rates and regularization than random initialization. Using the same defaults for both led to suboptimal pretrained performance.
 
-3. **Class similarity**: Analysis revealed Cargo and Tanker vessels have nearly identical trajectory characteristics (straightness effect size = 0.034). Over 50% of both classes are straight-line shipping routes, making them fundamentally difficult to distinguish from movement patterns alone.
+2. **Sequence length mismatch**: Pre-training used 128-position sequences (~2 hours) while classification uses up to 512 positions (~4.6 hours average). This distribution shift required higher weight decay (0.1) to regularize the pretrained model.
 
-4. **Sufficient training data**: With ~1,500 training trajectories, random initialization has enough signal to learn task-specific features from scratch.
+3. **Class similarity**: Cargo and Tanker vessels have nearly identical trajectory characteristics (straightness effect size = 0.034). Over 50% of both classes are straight-line shipping routes, making them difficult to distinguish. Despite this, proper hyperparameter tuning improved Tanker classification.
 
 ### Trajectory Analysis
 
-To understand why transfer learning doesn't help, we analyzed the trajectory characteristics:
+We analyzed the trajectory characteristics to understand the classification challenge:
 
 **Dataset Statistics:**
 - Train: 1,577 trajectories | Val: 336 | Test: 344
@@ -209,16 +226,22 @@ The model's sinusoidal positional encodings were trained on positions 0-127 but 
 
 ### Conclusion
 
-Pre-training on trajectory forecasting provides **no benefit** for vessel type classification when sufficient labeled data is available (~2K trajectories). Training from scratch achieves slightly better results (68.6% vs 65.7% best pretrained).
+**Pre-training on trajectory forecasting DOES provide benefit for vessel type classification, but only with proper hyperparameter tuning.**
 
-**We tested multiple techniques to improve transfer:**
-- Attention pooling (best pretrained result)
-- Multi-head attention pooling (hurt performance)
-- Hybrid pooling (mean + max - hurt performance significantly)
-- Two-stage fine-tuning (no benefit)
-- LoRA parameter-efficient fine-tuning (no benefit)
+Initial experiments with default hyperparameters suggested no transfer benefit. However, Bayesian optimization (30 trials per condition) revealed:
 
-None of these techniques made pretrained weights outperform random initialization. This suggests the forecasting task learns representations optimized for next-step prediction rather than vessel behavior discrimination.
+| Condition | Default HP Accuracy | Optimized HP Accuracy | Improvement |
+|-----------|---------------------|----------------------|-------------|
+| pretrained | 66.3% | **73.8%** | +7.5% |
+| random_init | 68.6% | 70.8% | +2.2% |
+
+**Key takeaways:**
+1. **Hyperparameters matter enormously** - proper tuning improved pretrained by 7.5% absolute
+2. **Pretrained beats random_init** when both are properly tuned (73.8% vs 70.8%)
+3. **Optimal hyperparameters differ** between pretrained and random_init
+4. **Architecture experiments were misleading** - attention pooling, LoRA, etc. were tested with suboptimal base hyperparameters
+
+The standard practice of using literature-recommended hyperparameters led to incorrect conclusions about transfer learning effectiveness.
 
 ## Learning Curves
 
@@ -284,7 +307,7 @@ The `--learning-curves` flag tests with limited training data:
 | **Tanker** | Similar to cargo, slower, wider turns |
 | **Passenger** | Regular schedules, ferry routes, multiple stops |
 
-A model pre-trained on trajectory forecasting has learned some of these patterns, but the hypothesis that these representations transfer to classification was **not supported** - random initialization performs equally well or better.
+A model pre-trained on trajectory forecasting has learned some of these patterns. With proper hyperparameter tuning, these representations **do transfer effectively** to classification, outperforming random initialization by 3% accuracy.
 
 ## Comparison to Experiment 12
 

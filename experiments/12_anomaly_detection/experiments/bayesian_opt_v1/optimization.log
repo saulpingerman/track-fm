@@ -1,0 +1,1656 @@
+/opt/pytorch/lib64/python3.12/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+[INFO 01-19 00:43:49] ax.generation_strategy.dispatch_utils: Using Generators.BOTORCH_MODULAR since there is at least one ordered parameter and there are no unordered categorical parameters.
+[INFO 01-19 00:43:49] ax.generation_strategy.dispatch_utils: Using Bayesian Optimization generation strategy: GenerationStrategy(name='Sobol+BoTorch', steps=[Sobol for 10 trials, BoTorch for subsequent trials]). Iterations after 10 will take longer to generate due to model-fitting.
+Loading processed data from /home/ec2-user/trackfm/experiments/12_anomaly_detection/data/processed
+Loading CV splits from /home/ec2-user/trackfm/experiments/12_anomaly_detection/data/splits/splits.json
+
+============================================================
+Bayesian Optimization for RANDOM_INIT
+============================================================
+Device: cuda
+Dataset: 521 trajectories, 25 anomalies
+
+Running 30 trials (5-fold CV per trial)...
+
+Trial 1/30:
+  lr=2.00e-06, wd=0.2338, β1=0.905, β2=0.99612, pool=mean
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.5437 ± 0.1495
+
+Trial 2/30:
+  lr=2.14e-03, wd=0.0814, β1=0.893, β2=0.99395, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.6703 ± 0.0644
+
+Trial 3/30:
+  lr=1.13e-04, wd=0.2203, β1=0.976, β2=0.99955, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.6059 ± 0.2759
+
+Trial 4/30:
+  lr=1.22e-05, wd=0.0669, β1=0.822, β2=0.99057, pool=mean
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.5750 ± 0.1404
+
+Trial 5/30:
+  lr=3.73e-05, wd=0.1840, β1=0.857, β2=0.99164, pool=mean
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.6067 ± 0.1369
+
+Trial 6/30:
+  lr=3.46e-04, wd=0.0353, β1=0.940, β2=0.99816, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.6685 ± 0.1866
+
+Trial 7/30:
+  lr=6.67e-03, wd=0.2631, β1=0.833, β2=0.99255, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.2425 ± 0.1854
+
+Trial 8/30:
+  lr=6.24e-06, wd=0.1153, β1=0.963, β2=0.99721, pool=mean
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.5869 ± 0.1204
+
+Trial 9/30:
+  lr=3.94e-06, wd=0.2030, β1=0.836, β2=0.99783, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.5422 ± 0.1348
+
+Trial 10/30:
+  lr=3.19e-03, wd=0.0561, β1=0.943, β2=0.99194, pool=mean
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.5366 ± 0.0829
+
+Trial 11/30:
+  lr=3.80e-04, wd=0.0936, β1=0.962, β2=0.99726, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.6554 ± 0.1880
+
+Trial 12/30:
+  lr=2.12e-04, wd=0.0289, β1=0.895, β2=0.99288, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7145 ± 0.2374
+
+Trial 13/30:
+  lr=1.00e-02, wd=0.0000, β1=0.990, β2=0.99294, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.0769 ± 0.0423
+
+Trial 14/30:
+  lr=1.94e-04, wd=0.0863, β1=0.897, β2=0.99821, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7525 ± 0.1677
+
+Trial 15/30:
+  lr=2.54e-04, wd=0.0653, β1=0.879, β2=0.99990, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7331 ± 0.1431
+
+Trial 16/30:
+  lr=1.17e-04, wd=0.0967, β1=0.906, β2=0.99990, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.6498 ± 0.2276
+
+Trial 17/30:
+  lr=4.27e-04, wd=0.0697, β1=0.876, β2=0.99675, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.6610 ± 0.2151
+
+Trial 18/30:
+  lr=1.94e-04, wd=0.0000, β1=0.800, β2=0.99972, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.6607 ± 0.1651
+
+Trial 19/30:
+  lr=2.99e-04, wd=0.0381, β1=0.873, β2=0.99990, pool=mean
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7523 ± 0.1588
+
+Trial 20/30:
+  lr=2.01e-04, wd=0.0619, β1=0.886, β2=0.99990, pool=mean
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.6702 ± 0.1477
+
+Trial 21/30:
+  lr=1.30e-04, wd=0.0670, β1=0.889, β2=0.99990, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.6352 ± 0.2311
+
+Trial 22/30:
+  lr=4.43e-04, wd=0.0000, β1=0.855, β2=0.99000, pool=mean
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7119 ± 0.1650
+
+Trial 23/30:
+  lr=2.18e-04, wd=0.1186, β1=0.815, β2=0.99000, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7303 ± 0.1043
+
+Trial 24/30:
+  lr=3.39e-04, wd=0.1535, β1=0.831, β2=0.99990, pool=mean
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.6152 ± 0.2172
+
+Trial 25/30:
+  lr=3.07e-04, wd=0.0174, β1=0.800, β2=0.99000, pool=mean
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.5092 ± 0.0960
+
+Trial 26/30:
+  lr=2.25e-04, wd=0.1745, β1=0.902, β2=0.99489, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.6454 ± 0.2407
+
+Trial 27/30:
+  lr=2.92e-04, wd=0.0227, β1=0.900, β2=0.99990, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7401 ± 0.1748
+
+Trial 28/30:
+  lr=2.37e-04, wd=0.0753, β1=0.910, β2=0.99990, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.6597 ± 0.2078
+
+Trial 29/30:
+  lr=5.95e-04, wd=0.0000, β1=0.888, β2=0.99000, pool=mean
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7241 ± 0.1149
+
+Trial 30/30:
+  lr=1.94e-04, wd=0.0000, β1=0.851, β2=0.99000, pool=last
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Model created: random_init
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+[INFO 01-19 03:05:56] ax.generation_strategy.dispatch_utils: Using Generators.BOTORCH_MODULAR since there is at least one ordered parameter and there are no unordered categorical parameters.
+[INFO 01-19 03:05:56] ax.generation_strategy.dispatch_utils: Using Bayesian Optimization generation strategy: GenerationStrategy(name='Sobol+BoTorch', steps=[Sobol for 10 trials, BoTorch for subsequent trials]). Iterations after 10 will take longer to generate due to model-fitting.
+  Result: AUPRC=0.6852 ± 0.2147
+
+============================================================
+BEST OBSERVED PARAMETERS for random_init (Trial 14):
+============================================================
+  learning_rate: 1.94e-04
+  weight_decay:  0.0863
+  beta1:         0.8971
+  beta2:         0.99821
+  pooling:       last
+  Best AUPRC:    0.7525 ± 0.1677
+
+Results saved to /home/ec2-user/trackfm/experiments/12_anomaly_detection/experiments/bayesian_opt_v1/random_init_optimization.json
+
+============================================================
+Bayesian Optimization for PRETRAINED
+============================================================
+Device: cuda
+Dataset: 521 trajectories, 25 anomalies
+
+Running 30 trials (5-fold CV per trial)...
+
+Trial 1/30:
+  lr=2.53e-04, wd=0.0887, β1=0.889, β2=0.99378, pool=last
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.8119 ± 0.1634
+
+Trial 2/30:
+  lr=3.26e-06, wd=0.1836, β1=0.936, β2=0.99614, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.5142 ± 0.2431
+
+Trial 3/30:
+  lr=8.52e-05, wd=0.0141, β1=0.808, β2=0.99202, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7777 ± 0.2239
+
+Trial 4/30:
+  lr=1.10e-03, wd=0.2567, β1=0.951, β2=0.99786, pool=last
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.5935 ± 0.2389
+
+Trial 5/30:
+  lr=9.16e-03, wd=0.0446, β1=0.909, β2=0.99899, pool=last
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.0894 ± 0.0573
+
+Trial 6/30:
+  lr=1.19e-05, wd=0.2825, β1=0.861, β2=0.99091, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7710 ± 0.1612
+
+Trial 7/30:
+  lr=3.14e-06, wd=0.1144, β1=0.977, β2=0.99734, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.3007 ± 0.2163
+
+Trial 8/30:
+  lr=4.07e-04, wd=0.2141, β1=0.835, β2=0.99259, pool=last
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7869 ± 0.1388
+
+Trial 9/30:
+  lr=7.69e-04, wd=0.0255, β1=0.984, β2=0.99049, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7227 ± 0.2512
+
+Trial 10/30:
+  lr=1.06e-06, wd=0.2283, β1=0.840, β2=0.99942, pool=last
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.0701 ± 0.0271
+
+Trial 11/30:
+  lr=6.87e-03, wd=0.2811, β1=0.990, β2=0.99449, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.1126 ± 0.0257
+
+Trial 12/30:
+  lr=1.30e-04, wd=0.3000, β1=0.990, β2=0.99353, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.8190 ± 0.1538
+
+Trial 13/30:
+  lr=1.30e-06, wd=0.3000, β1=0.800, β2=0.99138, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.1486 ± 0.0777
+
+Trial 14/30:
+  lr=3.30e-05, wd=0.3000, β1=0.800, β2=0.99990, pool=last
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.8172 ± 0.1550
+
+Trial 15/30:
+  lr=3.52e-05, wd=0.3000, β1=0.990, β2=0.99000, pool=last
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7376 ± 0.2672
+
+Trial 16/30:
+  lr=2.09e-04, wd=0.3000, β1=0.800, β2=0.99990, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.8221 ± 0.1643
+
+Trial 17/30:
+  lr=2.37e-04, wd=0.0000, β1=0.990, β2=0.99990, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.8592 ± 0.1199
+
+Trial 18/30:
+  lr=2.68e-04, wd=0.3000, β1=0.990, β2=0.99000, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.8102 ± 0.1264
+
+Trial 19/30:
+  lr=2.33e-05, wd=0.3000, β1=0.800, β2=0.99990, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7790 ± 0.1557
+
+Trial 20/30:
+  lr=2.72e-04, wd=0.0000, β1=0.800, β2=0.99990, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.8201 ± 0.1141
+
+Trial 21/30:
+  lr=2.18e-04, wd=0.0000, β1=0.990, β2=0.99990, pool=last
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.6779 ± 0.1849
+
+Trial 22/30:
+  lr=2.15e-04, wd=0.3000, β1=0.800, β2=0.99000, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.8078 ± 0.1493
+
+Trial 23/30:
+  lr=2.88e-04, wd=0.0000, β1=0.800, β2=0.99000, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7821 ± 0.1961
+
+Trial 24/30:
+  lr=2.58e-05, wd=0.0000, β1=0.800, β2=0.99000, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7722 ± 0.1709
+
+Trial 25/30:
+  lr=3.78e-05, wd=0.3000, β1=0.800, β2=0.99000, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7925 ± 0.1818
+
+Trial 26/30:
+  lr=2.22e-04, wd=0.0000, β1=0.930, β2=0.99990, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.8715 ± 0.1057
+
+Trial 27/30:
+  lr=9.65e-05, wd=0.3000, β1=0.898, β2=0.99990, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.8288 ± 0.1517
+
+Trial 28/30:
+  lr=4.79e-05, wd=0.2224, β1=0.802, β2=0.99990, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.7853 ± 0.1477
+
+Trial 29/30:
+  lr=2.63e-04, wd=0.3000, β1=0.896, β2=0.99990, pool=mean
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.8023 ± 0.2086
+
+Trial 30/30:
+  lr=1.13e-04, wd=0.3000, β1=0.800, β2=0.99000, pool=last
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+Loading pre-trained weights from ../11_long_horizon_69_days/experiments/69days_causal_v4_100M/checkpoints/best_model.pt
+  Truncated pos_encoder.pe: torch.Size([1, 5000, 768]) -> torch.Size([1, 512, 768])
+  Loaded 195 encoder parameters
+Model created: pretrained
+  Total parameters: 113,756,033
+  Trainable parameters: 113,756,033
+  Result: AUPRC=0.8322 ± 0.1413
+
+============================================================
+BEST OBSERVED PARAMETERS for pretrained (Trial 26):
+============================================================
+  learning_rate: 2.22e-04
+  weight_decay:  0.0000
+  beta1:         0.9296
+  beta2:         0.99990
+  pooling:       mean
+  Best AUPRC:    0.8715 ± 0.1057
+
+Results saved to /home/ec2-user/trackfm/experiments/12_anomaly_detection/experiments/bayesian_opt_v1/pretrained_optimization.json
+
+============================================================
+COMPARISON SUMMARY
+============================================================
+
+random_init:
+  Best AUPRC: 0.7525
+  LR: 1.94e-04
+  WD: 0.0863
+  Pooling: last
+
+pretrained:
+  Best AUPRC: 0.8715
+  LR: 2.22e-04
+  WD: 0.0000
+  Pooling: mean
+
+WINNER: pretrained (+0.1189 AUPRC)

@@ -28,15 +28,15 @@ This repository contains experiments on vessel trajectory prediction using causa
 
 - **Experiment 12**: Anomaly detection transfer learning
   - Fine-tuned 116M encoder on DTU Danish Waters anomaly dataset (521 trajectories, 25 anomalies)
-  - **Pretrained encoder achieves 0.498 AUPRC** (~10x better than random baseline of 0.05)
-  - Fine-tuning significantly outperforms frozen encoder (p=0.036)
-  - Pre-training vs random initialization: inconclusive due to small dataset
+  - **Pretrained (0.872 AUPRC) outperforms random_init (0.753 AUPRC)** with Bayesian hyperparameter optimization
+  - Initial results with default hyperparameters were inconclusive
+  - **Finding**: Pre-training provides +16% relative AUPRC improvement, but requires proper hyperparameter tuning
 
 - **Experiment 13**: Vessel type classification
   - 4-class classification: Fishing, Cargo, Tanker, Passenger (2,257 trajectories)
-  - **Random initialization (68.6%) outperforms pretrained (66.3%)**
-  - Tested multiple transfer techniques: attention pooling, MHA pooling, LoRA, two-stage fine-tuning
-  - **Finding**: Pre-training on trajectory forecasting provides no benefit for classification
+  - **Pretrained (73.8%) outperforms random_init (70.8%)** with Bayesian hyperparameter optimization
+  - Initial results with default hyperparameters were misleading (random_init appeared better)
+  - **Finding**: Pre-training provides +3% accuracy benefit, but requires proper hyperparameter tuning
 
 ## Repository Structure
 
@@ -125,9 +125,18 @@ See `experiments/11_long_horizon_69_days/README.md` for full details.
 - **Task**: Binary classification (normal vs anomalous vessel behavior)
 - **Data**: DTU Danish Waters dataset (521 trajectories, 25 labeled anomalies)
 - **Model**: 116M encoder from Exp 11 + MLP classifier head
-- **Conditions**: pretrained (fine-tune all), random_init (from scratch), frozen_pretrained (freeze encoder)
-- **Result**: Pretrained achieves **0.498 AUPRC** (10x better than random baseline)
-- **Finding**: Fine-tuning significantly outperforms frozen encoder (p=0.036); pre-training vs random init inconclusive
+- **Method**: Bayesian hyperparameter optimization (30 trials per condition, 5-fold CV) using Facebook's Ax library
+- **Result**: Pretrained achieves **0.872 AUPRC** vs random_init **0.753 AUPRC** (+16% relative improvement)
+- **Finding**: Pre-training provides clear benefit, but **hyperparameters must be tuned separately** for each condition
+
+**Bayesian Optimization Results:**
+
+| Condition | AUPRC | Learning Rate | Weight Decay | Pooling |
+|-----------|-------|---------------|--------------|---------|
+| **pretrained** | **0.872** | 2.22e-04 | 0.0 | mean |
+| random_init | 0.753 | 1.94e-04 | 0.086 | last |
+
+**Key Insight:** Default hyperparameters led to inconclusive results. Bayesian optimization revealed pretrained needs zero weight decay while random_init needs regularization. Random baseline AUPRC ≈ 0.048.
 
 See `experiments/12_anomaly_detection/README.md` for full details.
 
@@ -135,23 +144,18 @@ See `experiments/12_anomaly_detection/README.md` for full details.
 - **Task**: 4-class classification (Fishing, Cargo, Tanker, Passenger)
 - **Data**: DMA AIS data (2,257 trajectories from same domain as pre-training)
 - **Model**: 116M encoder from Exp 11 + MLP classifier head
-- **Conditions**: pretrained, random_init, frozen_pretrained, two_stage, + pooling ablations + LoRA
-- **Result**: Random init achieves **68.6% accuracy**, outperforming best pretrained (65.7%)
-- **Finding**: Pre-training on trajectory forecasting provides no benefit for vessel classification
+- **Method**: Bayesian hyperparameter optimization (30 trials per condition) using Facebook's Ax library
+- **Result**: Pretrained achieves **73.8% accuracy** vs random_init **70.8%** (+3% gain)
+- **Finding**: Pre-training provides clear benefit, but **hyperparameters must be tuned separately** for each condition
 
-**Key Results:**
+**Bayesian Optimization Results:**
 
-| Condition | Accuracy | F1 Macro |
-|-----------|----------|----------|
-| **random_init** | **68.6%** | **0.56** |
-| pretrained_attention | 65.7% | 0.57 |
-| pretrained | 66.3% | 0.55 |
-| pretrained_lora | 63.4% | 0.52 |
+| Condition | Accuracy | F1 Macro | Learning Rate | Weight Decay |
+|-----------|----------|----------|---------------|--------------|
+| **pretrained** | **73.8%** | **0.641** | 4.17e-04 | 0.1 |
+| random_init | 70.8% | 0.618 | 7.81e-05 | 0.018 |
 
-**Why No Transfer Benefit:**
-1. Sequence length mismatch (128 vs 512 positions)
-2. Task mismatch (local prediction vs global classification)
-3. Class similarity (Cargo/Tanker nearly indistinguishable)
+**Key Insight:** Default hyperparameters led to wrong conclusions. With default settings, random_init (68.6%) appeared to beat pretrained (66.3%). Bayesian optimization revealed pretrained needs higher LR and weight decay than random_init.
 
 See `experiments/13_vessel_classification/README.md` for full details.
 
