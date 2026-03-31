@@ -1,5 +1,33 @@
-# Checkpoints (except best_model.pt)
-**/checkpoint_step_*.pt
+# Model checkpoints and weights
+*.pt
+*.pth
+*.ckpt
+
+# Data files
+*.parquet
+*.pkl
+*.npz
+*.h5
+*.hdf5
+
+# Numpy files (except small finetuning datasets)
+*.npy
+!experiments/12_anomaly_detection/data/processed/labels.npy
+!experiments/13_vessel_classification/data/processed/labels.npy
+!experiments/13_vessel_classification/data/processed/trajectories.npy
+
+# Large media files (stored in zip bundle, not git)
+*.gif
+*.mp4
+*.avi
+
+# Large images (keep PNGs in results/ for now)
+# *.png
+
+# Log files (except training.log which has metrics)
+*.log
+!**/results/training.log
+!**/optimization.log
 
 # Python
 __pycache__/
@@ -23,11 +51,10 @@ venv/
 .DS_Store
 Thumbs.db
 
-# Large data files (keep on FSx, not git)
-*.parquet
-*.pt
-*.pth
-*.pkl
+# MDS cache
+mds-cache/
 
-# Logs can get large - keep training.log but exclude others
-**/run.log
+# Root-level scratch files
+/train.log
+/train_100M.log
+/train_resume.log

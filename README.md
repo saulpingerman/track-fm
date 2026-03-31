@@ -1,239 +1,156 @@
-# TrackFM: Vessel Trajectory Prediction with Transformers
+# TrackFM: A Foundation Model for Vessel Trajectory Understanding
 
-![Vessel Trajectory Prediction](experiments/11_long_horizon_69_days/experiments/69days_causal_v4_100M/results/horizon_video_track100.gif)
+A decoder-only causal transformer with 2D Fourier density heads, pre-trained via next-position prediction on AIS data. Pre-trained representations transfer to downstream maritime tasks.
 
-*116M parameter model predicting vessel position up to 1 hour ahead. Yellow/blue heatmap shows predicted probability distribution, green dot is actual position, red X is dead reckoning baseline.*
-
-This repository contains experiments on vessel trajectory prediction using causal transformers with 2D Fourier density heads. Starting with synthetic data experiments (01-08) and progressing to real AIS vessel tracking data (09-11).
+**Paper**: [`paper/trackfm.tex`](paper/trackfm.tex)
 
 ## Key Results
 
-- **Experiment 01.5**: Synthetic data validation (linear tracks)
-  - **54% improvement** over dead reckoning with velocity features
-  - **34% improvement** without velocity features (model infers velocity from positions)
-  - Validates architecture before real data testing
-
-- **Experiment 10**: Long-horizon prediction (up to 1 hour ahead) on real AIS data
-  - **44% improvement** over dead reckoning baseline (large model, 18M params)
-  - **63% improvement** over last position baseline
-  - Predicts probability distributions over 64x64 grids covering +/-33km
-  - Trained on 3,754 vessel tracks (23M positions) from Danish maritime zone
-
-- **Experiment 11**: Extended training with 69 days of data + 116M parameter model
-  - **65% improvement** over dead reckoning (116M param model)
-  - **76% improvement** over last position baseline
-  - 10x more data than Experiment 10 (13K tracks, 140M positions after filtering)
-  - Causal subwindow training: ~30x more training signal per batch
-  - Leak test verified: model makes genuine predictions, no data leakage
-
-- **Experiment 12**: Anomaly detection transfer learning
-  - Fine-tuned 116M encoder on DTU Danish Waters anomaly dataset (521 trajectories, 25 anomalies)
-  - **Pretrained (0.872 AUPRC) outperforms random_init (0.753 AUPRC)** with Bayesian hyperparameter optimization
-  - Initial results with default hyperparameters were inconclusive
-  - **Finding**: Pre-training provides +16% relative AUPRC improvement, but requires proper hyperparameter tuning
-
-- **Experiment 13**: Vessel type classification
-  - 4-class classification: Fishing, Cargo, Tanker, Passenger (2,257 trajectories)
-  - **Pretrained (73.8%) outperforms random_init (70.8%)** with Bayesian hyperparameter optimization
-  - Initial results with default hyperparameters were misleading (random_init appeared better)
-  - **Finding**: Pre-training provides +3% accuracy benefit, but requires proper hyperparameter tuning
+| Task | Metric | Result |
+|------|--------|--------|
+| Trajectory forecasting (116M model) | vs Dead Reckoning | **2.9x lower loss** |
+| Trajectory forecasting (116M model) | vs Last Position | **4.2x lower loss** |
+| Anomaly detection (pretrained) | AUPRC | **0.872** (vs 0.753 from scratch, +15.8%) |
+| Vessel classification (pretrained) | Accuracy | **73.8%** (vs 70.8% from scratch, +3%) |
 
 ## Repository Structure
 
 ```
-track-fm/
-├── README.md                    # This file
-├── .gitignore
+trackfm/
+├── README.md                          # This file
+├── HYPERPARAMETERS.md                 # All hyperparameters for reproducing results
+├── MATERIALIZED_DATA.md               # Pre-shuffled training data format docs
+├── TRAINING_HANDOFF.md                # Training data loading guide
+├── paper/
+│   └── trackfm.tex                    # Journal paper (LaTeX)
 └── experiments/
-    ├── 01_fixed_dt_baseline/    # Synthetic: Fixed time horizon
-    ├── 01.5_dm_data/            # Synthetic: Linear track validation
-    ├── 02_variable_dt_methods/  # Synthetic: Variable dt conditioning
-    ├── 03_multi_horizon/        # Synthetic: Multi-horizon prediction
-    ├── 04_pointwise_nll/        # Synthetic: Loss function comparison
-    ├── 05_variable_dt_loss/     # Synthetic: Loss with variable dt
-    ├── 06_relative_displacement/# Synthetic: Relative displacement grids
-    ├── 07_decoder_transformer/  # Synthetic: Causal vs bidirectional
-    ├── 08_causal_multihorizon/  # Synthetic: Causal + multi-horizon
-    ├── 09_ais_real_data/        # Real AIS: Short-horizon (20 steps)
-    ├── 10_long_horizon/         # Real AIS: Long-horizon (400 steps, ~1 hour)
-    ├── 11_long_horizon_69_days/ # Real AIS: 69 days + causal training
-    ├── 12_anomaly_detection/    # Transfer learning: Anomaly detection fine-tuning
-    └── 13_vessel_classification/# Transfer learning: Vessel type classification
+    ├── 11_long_horizon_69_days/       # Pre-training: 69 days, 116M model
+    ├── 12_anomaly_detection/          # Downstream: anomaly detection fine-tuning
+    ├── 13_vessel_classification/      # Downstream: vessel classification fine-tuning
+    └── 14_800_horizon_1_year/         # Extended: 1-year data, 800-step horizon
 ```
 
-## Experiments
+## Paper → Code Mapping
 
-### Synthetic Data (01-08, 01.5)
+| Paper Section | Experiment | Key Files |
+|---|---|---|
+| Architecture (Sec 3) | `11_long_horizon_69_days` | `run_experiment.py` (model classes) |
+| Pre-training (Sec 4-5) | `11_long_horizon_69_days` | `run_experiment.py`, `config.json` in `experiments/69days_causal_v4_100M/` |
+| Scaling study (Table 1) | `11_long_horizon_69_days` | `run_scaling_study.sh` |
+| Anomaly detection (Sec 6.1) | `12_anomaly_detection` | `scripts/run_bayesian_optimization.py`, `configs/config.yaml` |
+| Vessel classification (Sec 6.2) | `13_vessel_classification` | `scripts/run_bayesian_optimization.py`, `configs/config.yaml` |
+| Extended horizon (not in paper) | `14_800_horizon_1_year` | `run_experiment.py`, configs in `experiments/` |
 
-These experiments use generated trajectories to validate the transformer + Fourier head approach.
+## Experiments Overview
 
-| Exp | Question | Key Finding |
-|-----|----------|-------------|
-| 01 | Can transformer + Fourier head learn dead reckoning? | YES with curriculum learning |
-| **01.5** | **Does architecture work on linear tracks?** | **YES, +54% vs DR with velocity, +34% without** |
-| 02 | How to incorporate variable dt? | Concat to input is best |
-| 03 | Can we predict multiple horizons efficiently? | YES, 4.7x faster than separate |
-| 04 | What loss function works best? | Soft targets (sigma=0.5) |
-| 05 | Does loss choice hold with variable dt? | Soft targets remain best |
-| 06 | Does relative displacement change results? | sigma must scale with grid range |
-| 07 | Causal vs bidirectional attention? | Causal works for trajectories |
-| 08 | Causal + multi-horizon together? | 99.4% MSE reduction vs baselines |
+### Experiment 11: Pre-training (Paper Backbone)
 
-#### Experiment 01.5: Synthetic Linear Track Validation
+The foundation model. 116M parameter causal transformer trained on 69 days of Danish maritime AIS data (13K tracks, 140M positions). This is the backbone used for all downstream tasks.
 
-Validates the architecture on constant-velocity linear tracks before testing on real data.
+- **Code**: `experiments/11_long_horizon_69_days/run_experiment.py`
+- **Config**: `experiments/11_long_horizon_69_days/experiments/69days_causal_v4_100M/config.json`
+- **Checkpoint**: `best_model.pt` (478MB, in download bundle)
+- **Result**: 2.9x lower loss than dead reckoning, 4.2x lower than last position
 
-| Variant | Features | vs Dead Reckoning |
-|---------|----------|-------------------|
-| With velocity | `[lat, lon, sog, cog, dt]` | **+53.9%** |
-| No velocity (dt) | `[lat, lon, dt]` | **+33.6%** |
-| No velocity (raw t) | `[lat, lon, t]` | **+29.3%** |
+### Experiment 12: Anomaly Detection (Downstream)
 
-Key insight: Model genuinely learns trajectory patterns - it can beat dead reckoning even without explicit velocity features.
+Binary classification of anomalous vessel behavior. Fine-tunes the Exp 11 encoder with an MLP head.
 
-See `experiments/01.5_dm_data/README.md` for full details.
+- **Code**: `experiments/12_anomaly_detection/src/` (modular: data, models, training, evaluation)
+- **Config**: `experiments/12_anomaly_detection/configs/config.yaml`
+- **Data**: DTU Danish Waters (521 trajectories, 25 anomalies) — included in `data/` directory
+- **Bayesian opt results**: `experiments/bayesian_opt_v1/comparison.json`
+- **Result**: Pretrained 0.872 AUPRC vs random 0.753 AUPRC (+15.8%)
 
-### Real AIS Data (09-11)
+### Experiment 13: Vessel Classification (Downstream)
 
-These experiments use real vessel tracking data from the Danish maritime zone.
+4-class vessel type classification (Fishing, Cargo, Tanker, Passenger).
 
-#### Experiment 9: Real AIS Data (Short Horizon)
-- **Data**: ~73M positions, ~7,775 valid tracks
-- **Horizon**: 20 steps (~3-10 minutes)
-- **Result**: 83.4% improvement over dead reckoning
+- **Code**: `experiments/13_vessel_classification/src/` (modular: data, models, training, evaluation)
+- **Config**: `experiments/13_vessel_classification/configs/config.yaml`
+- **Data**: 2,257 trajectories with labels — included in `data/processed/` directory
+- **Bayesian opt results**: `experiments/bayesian_opt_v1/comparison.json`
+- **Result**: Pretrained 73.8% accuracy vs random 70.8% (+3%)
 
-#### Experiment 10: Long Horizon Prediction (Up to 1 Hour)
-- **Data**: 3,754 tracks, 23M positions (filtered for moving vessels)
-- **Horizon**: 400 steps (~1 hour ahead)
-- **Grid**: +/-33km prediction range
-- **Model sizes**: Small (1M), Medium (5M), Large (18M params)
-- **Features**: Early stopping, fair baseline comparison, random horizon sampling, auto batch size
-- **Result**: 44% improvement over DR, 63% over LP (large model)
+### Experiment 14: Extended Horizon (Not in Paper)
 
-See `experiments/10_long_horizon/README.md` for full details.
+Trains a separate 18M model from scratch on 1 year of AIS data with 800-step (2-hour) horizons and 128x128 grids. Does NOT use the Exp 11 backbone.
 
-#### Experiment 11: 69 Days + 116M Parameter Model
-- **Data**: 69 days (13K tracks, 140M positions after filtering)
-- **Model**: 116M parameters (xlarge scale)
-- **Result**: **65% improvement** over DR, **76% over LP**
-- **Training**: Causal subwindow training - ~30x more training signal per batch
-- **Verification**: Leak test confirms model makes genuine predictions
-
-See `experiments/11_long_horizon_69_days/README.md` for full details.
-
-#### Experiment 12: Anomaly Detection Transfer Learning
-- **Task**: Binary classification (normal vs anomalous vessel behavior)
-- **Data**: DTU Danish Waters dataset (521 trajectories, 25 labeled anomalies)
-- **Model**: 116M encoder from Exp 11 + MLP classifier head
-- **Method**: Bayesian hyperparameter optimization (30 trials per condition, 5-fold CV) using Facebook's Ax library
-- **Result**: Pretrained achieves **0.872 AUPRC** vs random_init **0.753 AUPRC** (+16% relative improvement)
-- **Finding**: Pre-training provides clear benefit, but **hyperparameters must be tuned separately** for each condition
-
-**Bayesian Optimization Results:**
-
-| Condition | AUPRC | Learning Rate | Weight Decay | Pooling |
-|-----------|-------|---------------|--------------|---------|
-| **pretrained** | **0.872** | 2.22e-04 | 0.0 | mean |
-| random_init | 0.753 | 1.94e-04 | 0.086 | last |
-
-**Key Insight:** Default hyperparameters led to inconclusive results. Bayesian optimization revealed pretrained needs zero weight decay while random_init needs regularization. Random baseline AUPRC ≈ 0.048.
-
-See `experiments/12_anomaly_detection/README.md` for full details.
-
-#### Experiment 13: Vessel Type Classification
-- **Task**: 4-class classification (Fishing, Cargo, Tanker, Passenger)
-- **Data**: DMA AIS data (2,257 trajectories from same domain as pre-training)
-- **Model**: 116M encoder from Exp 11 + MLP classifier head
-- **Method**: Bayesian hyperparameter optimization (30 trials per condition) using Facebook's Ax library
-- **Result**: Pretrained achieves **73.8% accuracy** vs random_init **70.8%** (+3% gain)
-- **Finding**: Pre-training provides clear benefit, but **hyperparameters must be tuned separately** for each condition
-
-**Bayesian Optimization Results:**
-
-| Condition | Accuracy | F1 Macro | Learning Rate | Weight Decay |
-|-----------|----------|----------|---------------|--------------|
-| **pretrained** | **73.8%** | **0.641** | 4.17e-04 | 0.1 |
-| random_init | 70.8% | 0.618 | 7.81e-05 | 0.018 |
-
-**Key Insight:** Default hyperparameters led to wrong conclusions. With default settings, random_init (68.6%) appeared to beat pretrained (66.3%). Bayesian optimization revealed pretrained needs higher LR and weight decay than random_init.
-
-See `experiments/13_vessel_classification/README.md` for full details.
+- **Code**: `experiments/14_800_horizon_1_year/run_experiment.py`
+- **Configs**: `experiments/14_800_horizon_1_year/experiments/run_*/config.json`
+- **Data**: 109M pre-shuffled samples from S3 (see `MATERIALIZED_DATA.md`)
 
 ## Model Architecture
 
 ```
-CausalAISModel
-├── Input Projection: 6 features -> d_model
+CausalAISModel (decoder-only transformer)
+├── Input Projection: Linear(6 → d_model)
+│   Features: [lat, lon, sog, sin(cog), cos(cog), dt]
 ├── Positional Encoding: Sinusoidal
-├── Transformer Encoder: num_layers layers, nhead heads, causal masking
-├── Cumulative Time Encoding: For arbitrary horizon prediction
-└── Fourier Head 2D: Outputs 64x64 probability grid
+├── Transformer Encoder: L layers, causal masking
+│   Each layer: MaskedMHA → LayerNorm → FFN → LayerNorm
+├── Cumulative Time Encoding: Sinusoidal time → concat with hidden state
+└── Fourier Head 2D: Linear → DCT coefficients → softmax → G×G probability grid
 ```
 
-### Model Scales (Experiment 10/11)
+### Model Scales
 
-| Scale | d_model | nhead | layers | dim_ff | Params |
-|-------|---------|-------|--------|--------|--------|
-| small | 128 | 8 | 4 | 512 | ~1M |
-| medium | 256 | 8 | 6 | 1024 | ~5M |
-| large | 384 | 16 | 8 | 2048 | ~18M |
-| **xlarge** | **768** | **16** | **16** | **3072** | **~116M** |
+| Scale | d_model | Heads | Layers | FFN Dim | Params | Grid |
+|-------|---------|-------|--------|---------|--------|------|
+| Small | 128 | 8 | 4 | 512 | ~1M | 64×64 |
+| Medium | 256 | 8 | 6 | 1024 | ~5M | 64×64 |
+| Large | 384 | 16 | 8 | 2048 | ~18M | 64×64 |
+| **XLarge** | **768** | **16** | **16** | **3072** | **~116M** | **64×64** |
 
-### Input Features
+### Feature Normalization (Exp 11)
 
-| Feature | Description |
-|---------|-------------|
-| lat, lon | Position (normalized) |
-| sog | Speed over ground |
-| cog_sin, cog_cos | Course over ground |
-| dt | Time since previous position |
+| Feature | Transform |
+|---------|-----------|
+| lat | `(lat - 56.25) / 1.0` |
+| lon | `(lon - 11.5) / 2.0` |
+| sog | `sog / 30.0` |
+| cog | `sin(cog × π/180)`, `cos(cog × π/180)` |
+| dt | `dt_seconds / 300.0` |
 
-## Quick Start
+See [`HYPERPARAMETERS.md`](HYPERPARAMETERS.md) for complete hyperparameter reference.
 
-```bash
-# Activate environment
-source /opt/pytorch/bin/activate
+## Data
 
-# Run experiment 01.5 (synthetic data validation)
-cd experiments/01.5_dm_data
-./run_all.sh my_exp 5  # 5 epochs
+### Pre-training Data (Exp 11)
 
-# Run experiment 10 with large model (recommended)
-cd experiments/10_long_horizon
-python run_experiment.py --exp-name my_exp --model-scale large --batch-size 0 --num-epochs 100
-python visualize_predictions.py --exp-name my_exp
-python make_horizon_videos.py --exp-name my_exp --max-horizon 400
+AIS data from the Danish maritime zone (54–58.5°N, 7–16°E), 69 days from Jan–Feb 2025. After filtering (SOG ≥ 0.5 knots, gap segmentation at 30min): 13,000 tracks, 140M positions. Split: 80% train, 10% val, 10% test.
 
-# Run experiment 11 with causal training (69 days of data)
-cd experiments/11_long_horizon_69_days
-python run_experiment.py --exp-name my_exp --model-scale large --batch-size 0 --num-epochs 100 --num-horizons 8
+Data lives on S3/FSx, not in this repo. See [`MATERIALIZED_DATA.md`](MATERIALIZED_DATA.md) and [`TRAINING_HANDOFF.md`](TRAINING_HANDOFF.md).
 
-# Or use run_all.sh for full pipeline:
-./run_all.sh my_experiment 100  # 100 epochs with early stopping
-```
+### Fine-tuning Datasets (Included in Repo)
 
-## Key Learnings
+**Anomaly Detection (Exp 12)**:
+- Location: `experiments/12_anomaly_detection/data/`
+- Source: [DTU Danish Waters AIS dataset](https://data.dtu.dk/articles/dataset/19446300)
+- Format: Pickle (raw) + NumPy (processed labels)
+- Size: 521 trajectories, ~10:1 class imbalance
 
-1. **Model learns genuine patterns** - Not just memorizing velocity; beats DR even without explicit velocity features
-2. **Random horizon sampling works** - Train on random samples from 400 horizons per batch
-3. **Larger models help significantly** - 116M params achieves 65% vs 44% improvement over 18M params
-4. **Auto batch size** - Binary search for ~90% GPU utilization maximizes training efficiency
-5. **Cumulative time encoding** - Enables prediction at any horizon, including beyond training
-6. **Fair baseline comparison matters** - DR baseline needs appropriate sigma (~0.05 deg vs 0.003 deg)
-7. **Early stopping essential** - Validation loss plateaus quickly (4-10 checks)
-8. **Causal subwindow training** - Uses all positions in sequence for ~30x more training signal
-9. **Leak testing is crucial** - Verified model doesn't cheat by seeing future positions
+**Vessel Classification (Exp 13)**:
+- Location: `experiments/13_vessel_classification/data/processed/`
+- Source: DMA Danish Maritime Authority
+- Format: NumPy arrays (`trajectories.npy`, `labels.npy`)
+- Size: 2,257 trajectories across 4 classes (Fishing: 717, Cargo: 624, Passenger: 645, Tanker: 271)
+
+## Critical Finding: Hyperparameters Differ Between Pretrained and Random Init
+
+A key finding of this work: **optimal hyperparameters are substantially different** for pretrained vs randomly-initialized models. Using the same hyperparameters for both conditions will produce misleading results (random init may appear to match or beat pretrained).
+
+| Setting | Pretrained | Random Init |
+|---------|-----------|-------------|
+| Pooling | mean | last |
+| Weight decay | low/zero | moderate |
+| Learning rate | higher | lower |
+
+Always tune hyperparameters separately for each condition. See [`HYPERPARAMETERS.md`](HYPERPARAMETERS.md) for the exact values from Bayesian optimization.
 
 ## Hardware
 
 - NVIDIA L40S GPU (48GB)
-- ~43GB GPU memory used for large model (90% utilization)
+- ~43GB GPU memory for XLarge model
 - FSx for Lustre for AIS data storage
-
-## Data
-
-Real AIS data from Danish maritime zone (not included in repo):
-- **Source**: FSx for Lustre linked to S3
-- **Path**: `/mnt/fsx/data/`
-- **Region**: 54-58.5N, 7-16E
-- **Time**: Jan-Feb 2025
+- AWS EC2 instance

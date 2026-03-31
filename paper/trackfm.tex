@@ -1,0 +1,401 @@
+\documentclass{article}
+
+% arXiv recommended packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{natbib}
+\usepackage{caption}
+\usepackage{subcaption}
+
+% Page setup for arXiv
+\usepackage[margin=1in]{geometry}
+
+\title{TrackFM: A Foundation Model for Vessel Trajectory Understanding}
+
+\author{
+  Paul Singerman\thanks{Corresponding author: pgs16@psu.edu} \\
+  Penn State University\\
+  \texttt{pgs16@psu.edu}
+  \and
+  Dennis Murphy \\
+  Penn State University\\
+  \texttt{djm6391@psu.edu}
+  \and
+  Carson Forsyth \\
+  Penn State University\\
+  \texttt{cpf5502@psu.edu}
+}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We present TrackFM, a foundation model for vessel trajectory understanding trained on Automatic Identification System (AIS) data. TrackFM employs a decoder-only causal transformer architecture with 2D Fourier density heads, pre-trained via the self-supervised task of next-position prediction. This pre-training objective requires the model to learn rich representations of vessel motion patterns, maritime traffic dynamics, and spatiotemporal dependencies---knowledge that transfers to diverse downstream tasks. We validate TrackFM through extensive experiments on real AIS data from the Danish maritime zone, demonstrating that our 116M parameter model achieves 2.9$\times$ lower prediction loss than dead reckoning baselines on trajectory forecasting. We further demonstrate transfer learning benefits on two downstream tasks: anomaly detection (0.872 vs 0.753 AUPRC, +15.8\% relative improvement over training from scratch) and vessel type classification (73.8\% vs 70.8\% accuracy). The learned representations encode fundamental properties of maritime vessel behavior, positioning TrackFM as a backbone for additional downstream tasks including trajectory imputation, destination prediction, ETA estimation, and collision risk assessment. We release our code and pre-trained models to accelerate research in maritime AI. Code is available at \url{https://github.com/saulpingerman/track-fm}.
+\end{abstract}
+
+\section{Introduction}
+
+The maritime industry forms the backbone of global trade, with over 80\% of international goods transported by sea \citep{unctad2023}. This vast network generates enormous volumes of spatiotemporal data through the Automatic Identification System (AIS), which broadcasts vessel positions, speeds, and courses at regular intervals. Effective analysis of this data is critical for maritime safety, port operations, traffic management, environmental monitoring, and security applications.
+
+Traditionally, each maritime analysis task---trajectory prediction, anomaly detection, vessel classification, collision risk assessment---has been addressed by specialized models trained from scratch on task-specific labeled data. This approach suffers from several limitations: labeled data is expensive to obtain, individual models cannot leverage knowledge from related tasks, and the resulting systems are brittle to distribution shifts. These challenges motivate a foundation model approach, where a single model learns general-purpose representations from large-scale unlabeled data that transfer effectively to diverse downstream tasks.
+
+Foundation models have transformed natural language processing \citep{devlin2019bert, brown2020gpt3} and computer vision \citep{radford2021clip}, demonstrating that models pre-trained on self-supervised objectives develop representations that excel across many downstream applications. Recent work has begun exploring this paradigm for trajectory data, including vehicle trajectories \citep{lin2024trajfm} and human mobility \citep{jiang2024pmt}. However, maritime vessel trajectories present unique challenges: ships operate in continuous space without road network constraints, exhibit complex multi-modal behavior depending on vessel type and mission, and follow implicit traffic patterns shaped by geography, weather, and international regulations.
+
+We introduce TrackFM, a foundation model specifically designed for vessel trajectory understanding. TrackFM is pre-trained via next-position prediction---a self-supervised objective that requires the model to forecast probability distributions over future vessel locations given historical trajectories. This pre-training task implicitly requires the model to learn vessel dynamics, maritime traffic patterns, the influence of geography and shipping lanes, and the behavioral signatures of different vessel types. The resulting representations provide a powerful foundation for fine-tuning on downstream tasks.
+
+Our key contributions are:
+
+\begin{enumerate}
+    \item \textbf{Architecture}: A decoder-only causal transformer with 2D Fourier density heads that outputs probability distributions over future positions, explicitly modeling prediction uncertainty.
+
+    \item \textbf{Multi-horizon inference}: A cumulative time encoding mechanism that enables predictions at \emph{multiple} time horizons simultaneously from a single forward pass through the transformer backbone. Given $K$ horizon times as input, the model produces $K$ probability distributions in one pass---providing up to $K\times$ speedup compared to methods requiring separate forward passes for each horizon.
+
+    \item \textbf{Pre-training methodology}: Causal subwindow training that extracts approximately 30$\times$ more training signal per batch than standard approaches, enabling efficient learning from limited data.
+
+    \item \textbf{Empirical validation}: Comprehensive experiments demonstrating 2.9$\times$ lower loss than dead reckoning baselines on trajectory forecasting using 69 days of Danish maritime AIS data.
+
+    \item \textbf{Transfer learning}: We demonstrate that pre-trained representations improve performance on downstream tasks: +15.8\% on anomaly detection (AUPRC) and +3\% on vessel classification (accuracy) compared to training from scratch.
+\end{enumerate}
+
+\section{Related Work}
+
+\paragraph{Deep Learning for Trajectory Prediction}
+Recurrent neural networks, particularly LSTMs, have been widely applied to vessel trajectory prediction \citep{nguyen2018geotracknet}. More recently, transformer architectures have achieved state-of-the-art results by capturing long-range temporal dependencies. TrAISformer \citep{nguyen2021traisformer} introduced a sparse, high-dimensional representation of AIS data with classification-based loss to handle trajectory multimodality, achieving prediction errors below 10 nautical miles at 10-hour horizons. TRFM-LS \citep{jiang2023trfmls} combined transformers with LSTM modules to capture both local temporal features and long-range dependencies. TPTrans \citep{wang2024tptrans} employed multi-head attention for spatial and temporal feature extraction. Graph neural networks have also been applied to model vessel interactions \citep{zhao2022kgcnlstm, wang2024stmgf}, constructing graphs based on proximity and risk relationships. Our work differs by framing trajectory prediction as a pre-training objective for learning transferable representations, rather than as an end goal.
+
+\paragraph{Foundation Models for Trajectories}
+The foundation model paradigm has recently been applied to trajectory data. TrajFM \citep{lin2024trajfm} proposed a vehicle trajectory foundation model using masking and recovery for task transferability across travel time estimation, path inference, and trajectory completion. The Pretrained Mobility Transformer (PMT) \citep{jiang2024pmt} applied GPT-style pre-training to human mobility data, demonstrating transfer to next-location prediction, trajectory imputation, and generation tasks. In the broader time series domain, foundation models have shown promise for prediction, imputation, and anomaly detection \citep{jin2024tsfm}. TrackFM extends this paradigm to maritime vessels, addressing the unique challenges of continuous spatial domains, irregular sampling, and complex multi-agent dynamics.
+
+\paragraph{Maritime Anomaly Detection and Behavior Analysis}
+Detecting anomalous vessel behavior is critical for maritime safety and security. Anomalies include positional deviations from expected routes, kinematic anomalies (unusual speed, course, or turns), contextual anomalies (unexpected vessel types in certain areas), and data-related anomalies from AIS signal gaps \citep{riveiro2018anomaly}. Detection approaches range from threshold-based methods using clustering and prediction residuals \citep{zhang2021transformer} to deep learning approaches using autoencoders and GANs \citep{chen2024wgananomalym}. Multi-task frameworks like AIS-LLM \citep{shin2025aisllm} jointly address trajectory prediction, anomaly detection, and collision risk assessment. TrackFM's pre-trained representations are well-suited for anomaly detection, as the model learns normal vessel behavior patterns during pre-training.
+
+\paragraph{Collision Risk Assessment}
+Traditional collision risk assessment relies on Closest Point of Approach (CPA) metrics---specifically Distance to CPA (DCPA) and Time to CPA (TCPA)---which evaluate risk based on current vessel states assuming constant velocity \citep{xue2014cpa}. These deterministic methods fail to account for trajectory uncertainty and complex multi-vessel interactions. Recent work has integrated deep learning trajectory predictions with probabilistic risk assessment \citep{zhang2025collisionrisk}, using prediction uncertainty bounds to compute collision probabilities. TrackFM's probabilistic outputs naturally support such uncertainty-aware risk assessment.
+
+\section{TrackFM Architecture}
+
+TrackFM employs a decoder-only transformer architecture with 2D Fourier density heads. The model processes sequences of vessel observations and outputs probability distributions over future positions at arbitrary time horizons.
+
+\subsection{Input Representation}
+
+Each AIS observation is represented as a 6-dimensional feature vector:
+\begin{equation}
+    \mathbf{x}_t = (\phi_t, \lambda_t, v_t, \sin(\theta_t), \cos(\theta_t), \Delta t_t)
+\end{equation}
+where $\phi_t$ and $\lambda_t$ are normalized latitude and longitude, $v_t$ is speed over ground (SOG), $\theta_t$ is course over ground (COG) encoded as sine and cosine to handle angular wraparound, and $\Delta t_t$ is the time elapsed since the previous observation. This representation captures both kinematic state and the irregular temporal sampling inherent in AIS data.
+
+\subsection{Transformer Backbone}
+
+The input features are projected to dimension $d_{\text{model}}$ and combined with sinusoidal positional encodings:
+\begin{equation}
+    \mathbf{h}_t^{(0)} = \text{Linear}(\mathbf{x}_t) + \text{PE}(t)
+\end{equation}
+
+The transformer backbone consists of $L$ decoder layers with causal (autoregressive) masking, ensuring position $t$ attends only to positions $\{1, \ldots, t\}$. Each layer applies masked multi-head self-attention followed by a position-wise feedforward network:
+\begin{align}
+    \mathbf{z}_t^{(l)} &= \text{LayerNorm}(\mathbf{h}_t^{(l-1)} + \text{MaskedMHA}(\mathbf{h}_t^{(l-1)})) \\
+    \mathbf{h}_t^{(l)} &= \text{LayerNorm}(\mathbf{z}_t^{(l)} + \text{FFN}(\mathbf{z}_t^{(l)}))
+\end{align}
+
+The causal structure is essential for both training efficiency (enabling parallel computation across all positions) and deployment (predictions can be made online without future information).
+
+\subsection{Cumulative Time Encoding for Multi-Horizon Prediction}
+
+A key architectural feature of TrackFM is the ability to predict at \emph{multiple} time horizons simultaneously from a single forward pass through the transformer backbone. This is achieved by decoupling the horizon prediction from the sequence encoding.
+
+The transformer processes the input sequence once, producing a final hidden state $\mathbf{h}_T^{(L)}$ that encodes the vessel's trajectory history. To predict at a set of $K$ horizons $\{h_1, h_2, \ldots, h_K\}$, we compute the cumulative times $\{\tau_{h_1}, \tau_{h_2}, \ldots, \tau_{h_K}\}$ from the last observation and encode each using sinusoidal functions:
+\begin{equation}
+    \mathbf{h}_{\text{out}}(\tau_{h_k}) = [\mathbf{h}_T^{(L)}; \text{TimeEnc}(\tau_{h_k})] \quad \text{for } k = 1, \ldots, K
+\end{equation}
+The Fourier head then maps each $\mathbf{h}_{\text{out}}(\tau_{h_k})$ to a probability distribution over positions at time $\tau_{h_k}$. Critically, all $K$ predictions share the same transformer forward pass---only the lightweight time encoding and Fourier head are computed per horizon.
+
+This design provides three key benefits:
+\begin{enumerate}
+    \item \textbf{Efficient multi-horizon inference}: Given $K$ horizon times, the model produces $K$ probability distributions with only one transformer forward pass plus $K$ lightweight head evaluations. In our experiments with $K=8$ horizons, this achieves 4.7$\times$ speedup compared to separate forward passes per horizon.
+
+    \item \textbf{Continuous horizon prediction}: The model can predict at any continuous time value, not just discrete steps seen during training.
+
+    \item \textbf{Horizon extrapolation}: The sinusoidal encoding enables generalization to horizons longer than those seen during training, though accuracy degrades for very long extrapolations.
+\end{enumerate}
+
+\subsection{2D Fourier Density Head}
+
+Rather than predicting point estimates, TrackFM outputs probability distributions over a $64 \times 64$ spatial grid covering $\pm$33km from the current position. We parameterize this distribution using 2D Fourier (discrete cosine transform) coefficients:
+\begin{equation}
+    p_{ij} = \text{softmax}\left(\sum_{m,n} \hat{a}_{mn} \cos\left(\frac{\pi m(2i+1)}{2G}\right) \cos\left(\frac{\pi n(2j+1)}{2G}\right)\right)
+\end{equation}
+where $\hat{a}_{mn} = \text{Linear}(\mathbf{h}_{\text{out}})_{mn}$ are predicted coefficients and $G=64$ is the grid size.
+
+This Fourier parameterization provides implicit smoothness regularization while maintaining the ability to represent sharp probability peaks. It prevents the model from overfitting to noise while allowing confident predictions when warranted.
+
+\subsection{Model Scales}
+
+We experiment with four model scales, shown in Table~\ref{tab:model_scales}. The XLarge configuration (116M parameters) achieves the best performance.
+
+\begin{table}[t]
+    \centering
+    \caption{TrackFM model configurations.}
+    \label{tab:model_scales}
+    \begin{tabular}{lccccc}
+        \toprule
+        Scale & $d_{\text{model}}$ & Heads & Layers & FFN Dim & Parameters \\
+        \midrule
+        Small & 128 & 8 & 4 & 512 & $\sim$1M \\
+        Medium & 256 & 8 & 6 & 1024 & $\sim$5M \\
+        Large & 384 & 16 & 8 & 2048 & $\sim$18M \\
+        XLarge & 768 & 16 & 16 & 3072 & $\sim$116M \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\section{Pre-training}
+
+\subsection{Self-Supervised Objective}
+
+TrackFM is pre-trained via next-position prediction: given a sequence of historical observations, predict the probability distribution over the vessel's position at a future time horizon. This objective requires the model to learn vessel dynamics (how ships move given their current state), traffic patterns (common routes and behaviors in different regions), and uncertainty (when predictions should be confident vs. diffuse).
+
+The training loss is cross-entropy between the predicted distribution and a soft target distribution centered on the true position:
+\begin{equation}
+    \mathcal{L} = -\sum_{i,j} q_{ij} \log p_{ij}
+\end{equation}
+where $q_{ij} \propto \exp(-(i-i^*)^2 + (j-j^*)^2) / 2\sigma^2)$ is a Gaussian soft target with $\sigma = 0.5$ grid cells centered on the ground truth cell $(i^*, j^*)$.
+
+\subsection{Causal Subwindow Training}
+
+Standard trajectory prediction training uses fixed input-output splits, yielding one training example per sequence per horizon. We introduce causal subwindow training, which exploits the causal masking structure to extract dramatically more training signal.
+
+For a sequence of length $N$, the causal structure allows predicting position $t+h$ from positions $1, \ldots, t$ for any valid $(t, h)$ pair. By randomly sampling starting positions and horizons within each sequence, we obtain approximately $(N - h_{\max})$ training examples per sequence---roughly 30$\times$ more than standard approaches. This is computed efficiently in a single forward pass using masked attention.
+
+\subsection{Random Horizon Sampling}
+
+During pre-training, we randomly sample horizons $h \sim \text{Uniform}(1, H_{\max})$ with $H_{\max} = 400$ steps (approximately one hour at typical AIS reporting intervals). This exposes the model to the full range of prediction difficulties, from short-term extrapolation to long-horizon forecasting requiring understanding of traffic patterns.
+
+\subsection{Pre-training Data}
+
+We pre-train on AIS data from the Danish maritime zone (54--58.5°N, 7--16°E) spanning 69 days from January--February 2025. After filtering for moving vessels (SOG $\geq$ 0.5 knots), removing position outliers, and segmenting at gaps exceeding 30 minutes, we obtain 13,000 vessel tracks comprising 140 million positions. Data is split temporally: 80\% training, 10\% validation, 10\% test.
+
+\section{Pre-training Experiments}
+
+\subsection{Baselines}
+
+We compare against two baselines that represent fundamental approaches to position prediction:
+
+\textbf{Dead Reckoning (DR)}: Predicts future position assuming constant velocity:
+\begin{equation}
+    \hat{\phi}_{t+h} = \phi_t + v_t \cos(\theta_t) \cdot \tau_h, \quad
+    \hat{\lambda}_{t+h} = \lambda_t + v_t \sin(\theta_t) \cdot \tau_h
+\end{equation}
+
+\textbf{Last Position (LP)}: Predicts future position equals current position (zero motion assumption).
+
+Both baselines output Gaussian distributions centered on their point predictions with standard deviation tuned on validation data.
+
+\subsection{Evaluation}
+
+We evaluate using mean squared error (MSE) between predicted distribution modes and actual positions, reporting percentage improvement over baselines.
+
+\subsection{Results}
+
+Table~\ref{tab:main_results} presents our main results comparing model scales. Table~\ref{tab:val_loss} provides detailed validation metrics for the XLarge model.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.9\textwidth]{training_history.png}
+    \caption{Training progress of the 116M parameter TrackFM model (log-log scale). The blue curve shows model loss (KL divergence) decreasing over 100K training steps, eventually falling well below both the dead reckoning baseline (red dashed) and last position baseline (green dashed). The model surpasses dead reckoning performance after approximately 500 training steps and continues improving, demonstrating that the learned representations capture vessel motion patterns beyond simple constant-velocity extrapolation.}
+    \label{fig:training_history}
+\end{figure}
+
+\begin{table}[t]
+    \centering
+    \caption{Validation loss (KL divergence) for the 116M parameter model compared to baselines, averaged across all prediction horizons (1--400 steps). Lower is better. Perplexity ($e^{\text{KL}}$) represents the effective number of grid cells of uncertainty---on a 64$\times$64 grid covering $\pm$33km ($\sim$1 km/cell), this translates to an effective uncertainty area. The model achieves 2.9$\times$ lower loss than dead reckoning and 4.2$\times$ lower than last position. \textbf{TODO:} Report metrics stratified by prediction horizon (e.g., 10min, 30min, 60min, 2hr) to show how uncertainty grows with time.}
+    \label{tab:val_loss}
+    \begin{tabular}{lccc}
+        \toprule
+        Method & KL Divergence & Perplexity & Effective Area \\
+        \midrule
+        \textbf{TrackFM (116M)} & \textbf{1.747} & \textbf{5.7 cells} & $\sim$6 km$^2$ \\
+        Dead Reckoning & 5.012 & 150 cells & $\sim$150 km$^2$ \\
+        Last Position & 7.367 & 1,590 cells & $\sim$1,600 km$^2$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[t]
+    \centering
+    \caption{Pre-training results across model scales. We report the ratio of baseline loss to model loss---higher means better. The XLarge model achieves 2.9$\times$ lower loss than dead reckoning and 4.2$\times$ lower than last position.}
+    \label{tab:main_results}
+    \begin{tabular}{lccc}
+        \toprule
+        Model & Parameters & vs Dead Reckoning & vs Last Position \\
+        \midrule
+        Small & 1M & 1.4$\times$ & 1.9$\times$ \\
+        Medium & 5M & 1.6$\times$ & 2.2$\times$ \\
+        Large & 18M & 2.1$\times$ & 3.1$\times$ \\
+        XLarge & 116M & \textbf{2.9}$\times$ & \textbf{4.2}$\times$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Scaling model capacity provides consistent improvements, suggesting the task benefits from the increased representational power of larger models. The XLarge model uses approximately 43GB GPU memory on an NVIDIA L40S (48GB).
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.85\textwidth]{prediction_example.png}
+    \caption{Example trajectory prediction at horizon 400 (50.3 minutes ahead) in the Øresund strait near Copenhagen. The heatmap shows TrackFM's predicted probability distribution over future positions, with the colorbar indicating probability density. The black dot marks the actual vessel position (ground truth), while the red X shows the dead reckoning baseline prediction. The blue line indicates the vessel's historical trajectory. In this example, TrackFM achieves 2,550m prediction error compared to 10,849m for dead reckoning---a 4.3$\times$ improvement. The model correctly captures that the vessel is traveling southward through the strait while dead reckoning overshoots to the east.}
+    \label{fig:prediction_example}
+\end{figure}
+
+\subsection{Ablation Studies}
+
+We conducted systematic ablations through synthetic experiments before real data training:
+
+\textbf{Loss function}: Soft targets with $\sigma = 0.5$ outperform hard targets (one-hot) and other sigma values, providing appropriate smoothness without excessive blur.
+
+\textbf{Velocity features}: The model achieves 34\% improvement over dead reckoning even without explicit velocity features, demonstrating it learns to infer motion from position sequences. With velocity features, improvement increases to 54\%.
+
+\textbf{Attention pattern}: Causal masking matches bidirectional attention performance while enabling efficient parallel training and online deployment.
+
+\subsection{Leak Test Verification}
+
+To confirm the model makes genuine predictions rather than exploiting data leakage, we compared predictions with and without future positions in the input sequence (masked by causal attention). Results were statistically indistinguishable, verifying no information leakage.
+
+\section{Downstream Tasks}
+
+TrackFM's pre-trained representations encode rich knowledge of vessel behavior, maritime traffic patterns, and spatiotemporal dynamics. This knowledge transfers to diverse downstream tasks through fine-tuning. We evaluate transfer learning on two tasks---anomaly detection and vessel classification---and present frameworks for four additional applications.
+
+\subsection{Anomaly Detection}
+
+Maritime anomaly detection identifies vessels exhibiting unusual behavior---deviations from expected routes, abnormal speeds or courses, unexpected stops, or erratic maneuvers \citep{riveiro2018anomaly}. Anomalies may indicate navigation errors, mechanical failures, deliberate AIS manipulation, or illegal activities such as smuggling or unauthorized fishing.
+
+\paragraph{Dataset and setup} We evaluate on the DTU Danish Waters AIS dataset \citep{dtu_anomaly_dataset}, which contains trajectories labeled as normal or abnormal behavior with approximately 10:1 class imbalance. We compare three conditions: (1) \textbf{pretrained}---load TrackFM encoder weights and fine-tune all layers with differential learning rates; (2) \textbf{random\_init}---randomly initialized encoder trained from scratch; (3) \textbf{frozen\_pretrained}---TrackFM encoder frozen, only classification head trained. A mean-pooled representation feeds into a 3-layer MLP classification head (768$\rightarrow$384$\rightarrow$128$\rightarrow$1). We use nested 5-fold cross-validation with 5 random seeds for statistical robustness.
+
+\paragraph{Results} Table~\ref{tab:anomaly_results} shows performance after Bayesian hyperparameter optimization (30 trials per condition). Pre-training provides substantial benefit: the pretrained model achieves 0.872 AUPRC compared to 0.753 for random initialization---a 15.8\% relative improvement. Both approaches dramatically outperform the random baseline of $\sim$0.05 AUPRC.
+
+\begin{table}[h]
+\centering
+\caption{Anomaly detection results with optimized hyperparameters (5-fold CV). AUPRC random baseline $\approx$ 0.05.}
+\label{tab:anomaly_results}
+\begin{tabular}{lccc}
+\toprule
+Condition & AUPRC & Learning Rate & Weight Decay \\
+\midrule
+\textbf{pretrained} & \textbf{0.872 $\pm$ 0.106} & 2.2e-4 & 0.0 \\
+random\_init & 0.753 $\pm$ 0.168 & 1.9e-4 & 0.086 \\
+frozen\_pretrained & 0.276 $\pm$ 0.138 & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Notably, optimal hyperparameters differ substantially between conditions: pretrained benefits from zero weight decay while random initialization requires regularization. Fine-tuning the encoder is critical---frozen\_pretrained achieves only 0.276 AUPRC, significantly worse than full fine-tuning ($p=0.036$), indicating that encoder adaptation to the anomaly detection task is essential.
+
+\paragraph{Anomaly taxonomy} Following \citet{riveiro2018anomaly}, we consider five anomaly types: (1) \textit{positional anomalies}---deviations from expected routes or locations; (2) \textit{kinematic anomalies}---unusual speed, course, acceleration, or turning patterns; (3) \textit{contextual anomalies}---unexpected vessel types in certain areas or times; (4) \textit{behavioral anomalies}---patterns inconsistent with declared vessel type or destination; and (5) \textit{data anomalies}---AIS gaps, spoofing, or manipulation.
+
+\subsection{Vessel Classification}
+
+Different vessel types exhibit distinct motion signatures: cargo ships follow established shipping lanes with steady speeds, fishing vessels display characteristic patterns during fishing operations, tankers move slowly when laden, and passenger ferries follow regular schedules \citep{pedroche2020fishing}. Classifying vessels from trajectory data alone (without relying on self-reported AIS vessel type fields) enables verification of declared vessel types and detection of misreported identities.
+
+\paragraph{Dataset and setup} We use trajectories from the same DMA Danish maritime data as pre-training, with vessel type labels from the AIS \texttt{Ship type} field withheld during classification. The dataset contains four classes: Fishing (766 vessels), Cargo (1,964 vessels), Tanker (837 vessels), and Passenger (380 vessels). We compare pretrained versus random initialization using the same encoder architecture and classification head as anomaly detection, with 4-way softmax output.
+
+\paragraph{Results} Table~\ref{tab:classification_results} shows results after Bayesian hyperparameter optimization (30 trials per condition). Pre-training improves accuracy from 70.8\% to 73.8\% and macro F1 from 0.618 to 0.641---a consistent 3\% absolute improvement across metrics.
+
+\begin{table}[h]
+\centering
+\caption{Vessel classification results with optimized hyperparameters.}
+\label{tab:classification_results}
+\begin{tabular}{lcccc}
+\toprule
+Condition & Accuracy & F1 Macro & Learning Rate & Weight Decay \\
+\midrule
+\textbf{pretrained} & \textbf{73.8\%} & \textbf{0.641} & 4.2e-4 & 0.10 \\
+random\_init & 70.8\% & 0.618 & 7.8e-5 & 0.018 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+As with anomaly detection, optimal hyperparameters differ substantially: pretrained benefits from higher learning rate (4.2e-4 vs 7.8e-5) and higher weight decay (0.10 vs 0.018), and prefers mean pooling while random initialization prefers last-token pooling. Default literature hyperparameters initially suggested no transfer benefit---proper tuning was essential to reveal the advantage of pre-training.
+
+\paragraph{Class difficulty} Per-class analysis reveals that Cargo and Tanker vessels are difficult to distinguish (both achieve low F1 $\sim$0.07 on Tanker) due to nearly identical movement patterns---both primarily follow straight-line shipping routes through the Danish maritime zone. Fishing and Passenger achieve higher F1 ($\sim$0.77 and $\sim$0.70 respectively) due to their distinctive motion signatures.
+
+\paragraph{Applications} Vessel classification supports fisheries monitoring (identifying fishing activity regardless of declared type), sanctions enforcement (detecting vessels misrepresenting their identity), and traffic analysis (understanding fleet composition from trajectory data alone).
+
+\subsection{Trajectory Imputation}
+
+\textbf{TODO:} Implement and evaluate fine-tuning for trajectory imputation.
+
+AIS data frequently contains gaps due to signal loss, antenna obstructions, communication channel congestion, or intentional transmission disabling. Trajectory imputation reconstructs missing portions of vessel tracks, essential for complete trajectory analysis, accurate distance calculations, and reliable downstream applications \citep{chen2020imputation}.
+
+\paragraph{Fine-tuning approach} We adapt TrackFM for imputation using a masked prediction objective. During fine-tuning, we randomly mask segments of trajectories and train the model to reconstruct the masked positions. The bidirectional context (positions before and after the gap) can be incorporated through a modified attention pattern or by running the causal model in both directions and combining predictions.
+
+\paragraph{Challenge considerations} Imputation difficulty varies with gap duration and vessel behavior complexity. Short gaps in steady-state motion are straightforward; long gaps during maneuvers require understanding of destination, traffic patterns, and navigation constraints.
+
+\subsection{Destination Prediction}
+
+\textbf{TODO:} Implement and evaluate fine-tuning for destination prediction.
+
+Predicting a vessel's destination from partial trajectory observations supports port planning, berth allocation, and maritime situational awareness \citep{besse2018destination}. Early destination prediction enables ports to prepare resources before vessel arrival.
+
+\paragraph{Fine-tuning approach} We formulate destination prediction as classification over a discretized set of ports/anchorages or as regression to destination coordinates. A prediction head takes the transformer's hidden state from the current position and outputs destination probabilities or coordinates. The pre-trained model's understanding of traffic patterns and common routes provides strong priors for destination inference.
+
+\paragraph{Multimodality} Destination prediction is inherently multimodal---a vessel's current trajectory may be consistent with multiple possible destinations. TrackFM's probabilistic outputs naturally represent this uncertainty.
+
+\subsection{Estimated Time of Arrival (ETA)}
+
+\textbf{TODO:} Implement and evaluate fine-tuning for ETA prediction.
+
+Accurate ETA prediction enables efficient port operations, berth scheduling, and supply chain coordination \citep{deepeta}. ETA depends on current vessel state, remaining distance, expected traffic conditions, and potential delays.
+
+\paragraph{Fine-tuning approach} Given a trajectory and declared destination, a regression head predicts remaining travel time. The pre-trained model's representations capture vessel speed patterns, traffic conditions, and route characteristics that influence travel time. Fine-tuning on historical arrival data adapts these representations to ETA prediction.
+
+\paragraph{Considerations} ETA prediction must account for uncertainty---weather changes, port congestion, and operational decisions can significantly affect arrival times. TrackFM's probabilistic framework can be extended to output ETA distributions rather than point estimates.
+
+\subsection{Collision Risk Assessment}
+
+\textbf{TODO:} Implement and evaluate fine-tuning for collision risk assessment.
+
+Collision risk assessment quantifies the likelihood and severity of potential vessel-to-vessel collisions, supporting navigation decisions and traffic management \citep{zhang2025collisionrisk}. Traditional approaches rely on Closest Point of Approach (CPA) metrics computed from current vessel states, but these deterministic methods ignore trajectory uncertainty.
+
+\paragraph{Fine-tuning approach} TrackFM's probabilistic trajectory predictions enable uncertainty-aware collision risk assessment. For two vessels, we predict trajectory distributions for both and compute the probability of their prediction regions overlapping at future times. A fine-tuned head can directly output collision risk scores given pairs of vessel trajectories, trained on historical near-miss and collision data.
+
+\paragraph{Advantages over CPA} Unlike traditional DCPA/TCPA metrics that assume constant velocity, TrackFM-based risk assessment incorporates trajectory uncertainty, vessel behavior patterns, and the likelihood of course changes. This provides more realistic risk estimates, particularly for complex multi-vessel scenarios.
+
+\section{Discussion}
+
+\subsection{Why Foundation Models for Maritime AI?}
+
+The foundation model approach offers several advantages for maritime applications. First, trajectory forecasting is a self-supervised objective that requires no manual labeling, enabling pre-training on the vast quantities of available AIS data. Second, the learned representations capture general maritime knowledge---vessel dynamics, traffic patterns, geographic influences---that transfers across tasks. Third, fine-tuning requires less task-specific data than training from scratch, important for applications like anomaly detection where labeled examples are scarce.
+
+\subsection{Limitations}
+
+TrackFM has several limitations that suggest directions for future work. The current model processes single vessel trajectories independently, without explicit modeling of vessel-vessel interactions important for collision risk and traffic prediction. External context---weather, sea state, port schedules, navigational constraints---is not incorporated but would improve predictions. The model is trained on Danish maritime data; transfer to other regions requires investigation. Finally, the 64$\times$64 spatial grid provides approximately 1km resolution; some applications may require finer granularity.
+
+\subsection{Broader Impact}
+
+Improved maritime AI capabilities have positive applications in safety, efficiency, and environmental protection. However, the same capabilities could potentially be misused for surveillance or to evade detection. We encourage responsible deployment with appropriate oversight.
+
+\section{Conclusion}
+
+We presented TrackFM, a foundation model for vessel trajectory understanding. Pre-trained via next-position prediction on 69 days of Danish maritime AIS data, TrackFM learns rich representations of vessel behavior that achieve 2.9$\times$ lower loss than dead reckoning baselines on trajectory forecasting---corresponding to an effective prediction uncertainty of only $\sim$6 km$^2$ compared to $\sim$150 km$^2$ for dead reckoning. The model architecture---a decoder-only transformer with 2D Fourier density heads---outputs probability distributions that explicitly capture prediction uncertainty.
+
+We demonstrated that the pre-trained representations transfer effectively to downstream tasks: on anomaly detection, fine-tuning the pre-trained model achieves 0.872 AUPRC compared to 0.753 for training from scratch (+15.8\% relative improvement); on vessel classification, pre-training improves accuracy from 70.8\% to 73.8\%. A key finding is that optimal hyperparameters differ substantially between pre-trained and randomly-initialized models---proper tuning is essential to realize transfer learning benefits. We presented frameworks for four additional downstream tasks: trajectory imputation, destination prediction, ETA estimation, and collision risk assessment. By releasing our code and pre-trained models, we aim to accelerate research in maritime AI and provide a strong foundation for diverse maritime applications.
+
+\section*{Acknowledgments}
+
+AIS data was provided by the Danish Maritime Authority. Computation was performed on AWS infrastructure using NVIDIA L40S GPUs.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
