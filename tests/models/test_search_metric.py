@@ -65,3 +65,32 @@ def test_sharper_gaussian_ranks_better_when_accurate():
     rw = search_ranks(wide, tgt, R).item()
     assert rt <= rw
     assert rt <= 4
+
+
+def test_capture_curve_properties():
+    from trackfm.eval.search import capture_curve
+
+    torch.manual_seed(1)
+    N = G * G
+    ld = torch.log_softmax(torch.randn(64, 1, G * G) * 3, dim=-1).reshape(64, 1, G, G)
+    tgt = (torch.rand(64, 1, 2) - 0.5) * 2 * R * 0.9
+    ranks = search_ranks(ld, tgt, R)
+    c = capture_curve(ranks, N)
+    cap = torch.tensor(c["capture"])
+    assert (cap.diff() >= 0).all()                      # monotone
+    assert abs(cap[-1].item() - c["ceiling"]) < 1e-6    # asymptotes at ceiling
+    assert 0 <= c["auc"] <= 1
+    if c["k@90"] is not None:
+        assert cap[c["k@90"] - 1] >= 0.9
+
+
+def test_capture_curve_perfect_model_beats_null():
+    from trackfm.eval.search import capture_curve
+
+    # density peaked exactly at truth for every sample -> rank 1 always
+    tgt = torch.zeros(8, 1, 2) + CELL * 0.4
+    ld = peaked_density(G // 2, G // 2).repeat(8, 1, 1, 1)
+    ranks = search_ranks(ld, tgt, R)
+    c = capture_curve(ranks, G * G)
+    assert c["k@90"] == 1
+    assert c["auc"] > c["null_auc"]

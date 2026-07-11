@@ -73,6 +73,37 @@ def summarize_ranks(ranks: torch.Tensor, ks: tuple = (1, 3, 10, 30, 100)) -> dic
     return out
 
 
+def capture_curve(ranks: torch.Tensor, n_cells: int) -> dict:
+    """Full containment curve: capture probability vs image budget k.
+
+    ROC-like: the skill-less null (uniform density) is the diagonal k/n_cells;
+    the model's curve bows above it. Returns the curve plus:
+      k@90  -- images needed for 90% containment (None if ceiling < 0.9)
+      auc   -- area under the capture curve, normalized to [0, 1]
+      ceiling -- max achievable capture (1 - censored fraction)
+    """
+    total = ranks.numel()
+    valid = ranks[ranks > 0]
+    ceiling = len(valid) / max(total, 1)
+
+    ks = torch.arange(1, n_cells + 1)
+    if len(valid) == 0:
+        capture = torch.zeros(n_cells)
+    else:
+        counts = torch.bincount(valid.reshape(-1).long(), minlength=n_cells + 1)[1:]
+        capture = counts.cumsum(0).float() / total
+
+    at90 = (capture >= 0.9).nonzero()
+    return {
+        "k": ks.tolist(),
+        "capture": capture.tolist(),
+        "ceiling": ceiling,
+        "k@90": int(at90[0]) + 1 if len(at90) else None,
+        "auc": float(capture.mean()),          # normalized: mean over k in [1, N]
+        "null_auc": float((ks.float() / n_cells).mean()),
+    }
+
+
 def gaussian_grid_log_density(pred: torch.Tensor, sigma: torch.Tensor,
                               grid_range: float, grid_size: int) -> torch.Tensor:
     """Rasterize a Gaussian point-forecast onto the grid for ranking.
