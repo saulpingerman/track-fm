@@ -59,7 +59,7 @@ def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
     only — early stopping stays on val_loss (a proper scoring rule); never
     select models on a pure ranking metric.
     """
-    from trackfm.eval.search import capture_curve, search_ranks
+    from trackfm.eval.search import search_ranks
 
     model.eval()
     m = cfg.model
@@ -89,13 +89,20 @@ def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
         return float("nan"), float("nan"), {}
 
     ranks = torch.cat(rank_chunks)
-    n_cells = m.grid_size * m.grid_size
     search = {}
-    for k, h in ((0, int(horizons[0])), (len(horizons) - 1, int(horizons[-1]))):
-        c = capture_curve(ranks[:, k], n_cells)
-        search[f"val_k90_h{h}"] = float(c["k@90"] or n_cells)
-        search[f"val_capture10_h{h}"] = float(c["capture"][9])
-        search[f"val_ceiling_h{h}"] = c["ceiling"]
+    # Monitor a mid horizon and the max horizon; h=1 is degenerate (the
+    # vessel has barely moved). k@90-of-total is undefined whenever the
+    # grid ceiling is below 90%, so report the 90th-percentile rank among
+    # CAPTURABLE targets instead — always defined, actually tracks skill.
+    mid = max(1, len(horizons) // 2)
+    for k, h in ((mid, int(horizons[mid])), (len(horizons) - 1, int(horizons[-1]))):
+        col = ranks[:, k]
+        valid = col[col > 0].float()
+        if len(valid):
+            search[f"val_p90rank_h{h}"] = float(valid.quantile(0.9))
+            search[f"val_medrank_h{h}"] = float(valid.median())
+        search[f"val_capture10_h{h}"] = float(((col > 0) & (col <= 10)).float().mean())
+        search[f"val_ceiling_h{h}"] = float((col > 0).float().mean())
     return total / n, dr_total / n, search
 
 
@@ -214,7 +221,7 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                                         "dr_ratio": ratio, **search}, step=step)
                     logger.info(f"step {step}: val {val_loss:.4f}, DR-ratio {ratio:.2f}x, "
                                 + ", ".join(f"{k}={v:.3g}" for k, v in search.items()
-                                            if "k90" in k))
+                                            if "rank" in k))
                     last_val_time = time.time()
 
                     torch.save({"model": model.state_dict(), "step": step,
