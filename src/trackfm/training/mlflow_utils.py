@@ -34,10 +34,18 @@ def data_manifest_sha256(data_dir: Path) -> str:
     return hashlib.sha256(manifest.read_bytes()).hexdigest()
 
 
+# Config fields that add noise, not information, in the params table:
+# mlflow's own settings, and filesystem paths (kept in the config artifact).
+_SKIP_PREFIXES = ("mlflow.",)
+_SKIP_SUFFIXES = ("_dir", "_path", "backbone", "checkpoint")
+
+
 def _flatten(cfg: dict, prefix: str = "") -> dict[str, str]:
     out: dict[str, str] = {}
     for k, v in cfg.items():
         key = f"{prefix}{k}"
+        if key.startswith(_SKIP_PREFIXES) or key.endswith(_SKIP_SUFFIXES):
+            continue
         if isinstance(v, dict):
             out.update(_flatten(v, f"{key}."))
         else:
@@ -45,15 +53,19 @@ def _flatten(cfg: dict, prefix: str = "") -> dict[str, str]:
     return out
 
 
-def start_run(mlf: MLflowConfig, config: BaseModel, data_dir: Path | None = None):
-    """Start an MLflow run with full provenance: flattened params, config
-    artifact, git SHA/dirty and data-manifest tags. Returns the active run."""
+def start_run(mlf: MLflowConfig, config: BaseModel, data_dir: Path | None = None,
+              extra_params: dict | None = None):
+    """Start an MLflow run with full provenance: curated flattened params
+    (paths/mlflow noise excluded — the full config is attached as an
+    artifact), git SHA/dirty and data-manifest tags. Returns the run."""
     mlflow.set_tracking_uri(mlf.tracking_uri)
     mlflow.set_experiment(mlf.experiment)
     run = mlflow.start_run(run_name=mlf.run_name)
 
     cfg_dict = config.model_dump(mode="json")
     params = _flatten(cfg_dict)
+    if extra_params:
+        params.update({k: str(v) for k, v in extra_params.items()})
     # MLflow caps params per batch; log in chunks
     items = list(params.items())
     for i in range(0, len(items), 90):

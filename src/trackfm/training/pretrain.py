@@ -138,11 +138,13 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
     sched = torch.optim.lr_scheduler.LambdaLR(
         opt, lambda s: _lr_lambda(s, t.warmup_steps, max_steps, t.lr_schedule))
 
-    run = start_run(cfg.mlflow, cfg, data_dir=cfg.data_dir)
+    run = start_run(cfg.mlflow, cfg, data_dir=cfg.data_dir,
+                    extra_params={"n_params": n_params,
+                                  "n_params_h": f"{n_params/1e6:.1f}M",
+                                  "gflops_per_sample": f"{flops_per_sample/1e9:.1f}"})
     ckpt_dir = cfg.checkpoint_dir / (cfg.mlflow.run_name or run.info.run_id)
     ckpt_dir.mkdir(parents=True, exist_ok=True)
 
-    mlflow.log_metric("n_params", n_params)
 
     best_val = float("inf")
     bad_vals = 0
