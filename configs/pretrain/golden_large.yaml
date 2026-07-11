@@ -1,0 +1,45 @@
+# XLarge (116M) pretraining — the paper backbone, scaled-up data.
+data_dir: ~/data/trackfm/materialized/golden69
+checkpoint_dir: ~/data/trackfm/checkpoints
+
+model:
+  d_model: 384
+  nhead: 16
+  num_layers: 8
+  dim_feedforward: 2048
+  dropout: 0.1
+  max_seq_len: 128
+  grid_size: 64
+  grid_range: 0.3
+  num_freqs: 12
+
+normalization:
+  lat_center: 56.25
+  lat_scale: 1.0
+  lon_center: 11.5
+  lon_scale: 2.0
+  sog_scale: 30.0
+  dt_scale: 300.0
+
+train:
+  learning_rate: 3.0e-4      # revisit after batch-size sweep on 96GB VRAM
+  weight_decay: 1.0e-5
+  batch_size: 1280
+  max_horizon: 800
+  num_horizon_samples: 4
+  warmup_steps: 1000
+  lr_schedule: cosine
+  max_epochs: 3
+  sigma: 0.003
+  dr_sigma: 0.05
+  precision: bf16
+  compile: false             # enable after correctness is proven
+  val_interval_minutes: 30
+  early_stop_patience: 10
+  num_workers: 8
+  seed: 17
+
+mlflow:
+  tracking_uri: http://127.0.0.1:5000
+  experiment: trackfm/golden
+  run_name: golden-large
