@@ -55,7 +55,7 @@ def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
     """Val loss (causal=False) + DR ratio + search metrics.
 
     Returns (val_loss, dr_loss, search) where search maps metric names to
-    values, e.g. val_k90_h1 / val_k90_h800. Search metrics are MONITORING
+    values, e.g. val_p90rank_h267 / val_capture10_h800. Search metrics are MONITORING
     only — early stopping stays on val_loss (a proper scoring rule); never
     select models on a pure ranking metric.
     """
