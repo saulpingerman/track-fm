@@ -13,4 +13,5 @@ exec "$UV_BIN" --directory "$(dirname "$0")/.." run mlflow server \
     --artifacts-destination "$MLFLOW_DIR/artifacts" \
     --host 127.0.0.1 \
     --allowed-hosts "snorlax.tail0517b6.ts.net,localhost,127.0.0.1,localhost:5000,127.0.0.1:5000" \
+    --cors-allowed-origins "https://snorlax.tail0517b6.ts.net" \
     --port 5000
