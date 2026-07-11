@@ -249,3 +249,39 @@ class CausalAISModel(nn.Module):
             future_mask = torch.ones(num_samples, dtype=torch.bool, device=device)
 
             return log_densities, targets, horizon_indices, future_mask
+
+    def forward_at_indices(self, features: torch.Tensor,
+                           step_idx: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        """Predict densities at PER-SAMPLE future steps (time-bucket eval).
+
+        step_idx: (B, H) 1-based future-step indices, potentially different
+        per sample (each vessel's "30 minutes" is a different step because
+        dt varies). Returns (log_densities (B,H,G,G), targets (B,H,2)).
+        """
+        seq_len = self.max_seq_len
+        embeddings = self.encode(features[:, :seq_len, :])
+        dt = features[:, :, 5] * self.norm.dt_scale
+        cumsum_dt = torch.cumsum(dt, dim=1)
+        positions = self._denorm_positions(features, 0, seq_len)
+        future_pos = self._denorm_positions(features, seq_len, features.shape[1])
+
+        last_emb = embeddings[:, -1, :]
+        last_cumsum = cumsum_dt[:, seq_len - 1]
+        src_pos = positions[:, -1, :]
+
+        gather_idx = (seq_len + step_idx - 1)                       # (B, H)
+        cum_time = torch.gather(cumsum_dt, 1, gather_idx) - last_cumsum[:, None]
+        tgt_abs = torch.gather(
+            future_pos, 1, (step_idx - 1)[..., None].expand(-1, -1, 2))
+        targets = tgt_abs - src_pos[:, None, :]
+
+        num_samples = step_idx.shape[1]
+        time_enc = self.time_proj(cum_time.unsqueeze(-1) / 300.0)
+        last_exp = last_emb.unsqueeze(1).expand(-1, num_samples, -1)
+        conditioned = self.horizon_proj(torch.cat([last_exp, time_enc], dim=-1))
+        cond_flat = conditioned.reshape(-1, self.d_model)
+        gs = self.model_cfg.grid_size
+        log_densities = self.fourier_head(cond_flat).view(
+            features.shape[0], num_samples, gs, gs)
+        return log_densities, targets
+

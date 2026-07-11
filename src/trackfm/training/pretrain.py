@@ -55,10 +55,11 @@ def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
     """Val loss (causal=False) + DR ratio + search metrics.
 
     Returns (val_loss, dr_loss, search) where search maps metric names to
-    values, e.g. val_p90rank_h267 / val_capture10_h800. Search metrics are MONITORING
+    values keyed by TIME bucket, e.g. val_p90rank_30m / val_capture10_2h. Search metrics are MONITORING
     only — early stopping stays on val_loss (a proper scoring rule); never
     select models on a pure ranking metric.
     """
+    from trackfm.eval.horizons import TIME_BUCKETS, time_bucket_indices
     from trackfm.eval.search import search_ranks
 
     model.eval()
@@ -67,20 +68,28 @@ def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
     total, dr_total, n = 0.0, 0.0, 0
     horizons = torch.linspace(1, t.max_horizon, t.num_horizon_samples,
                               dtype=torch.long, device=device)
-    rank_chunks = []
+    rank_chunks, valid_chunks = [], []
     for i, batch in enumerate(val_loader):
         if i >= max_batches:
             break
         batch = batch.to(device, non_blocking=True)
         with torch.autocast(device_type=device.type, dtype=autocast_dtype,
                             enabled=autocast_dtype is not None):
+            # loss on the training-consistent step horizons (early stopping)
             ld, tgt, h, _ = model.forward_train(batch, horizon_indices=horizons, causal=False)
+            # containment monitoring at OPERATIONAL time buckets (15m..2h):
+            # step-indexed horizons conflate physically different questions
+            # because dt varies per vessel
+            step_idx, bucket_valid = time_bucket_indices(batch, cfg.normalization,
+                                                         m.max_seq_len)
+            ld_t, tgt_t = model.forward_at_indices(batch, step_idx)
         loss = compute_soft_target_loss(ld.float(), tgt.float(), m.grid_range,
                                         m.grid_size, t.sigma)
         dr_pred = dead_reckoning_displacement(batch, horizons, m.max_seq_len, cfg.normalization)
         dr_loss = gaussian_log_density_loss(dr_pred, tgt.float(), m.grid_range,
                                             m.grid_size, t.sigma, t.dr_sigma)
-        rank_chunks.append(search_ranks(ld.float(), tgt.float(), m.grid_range).cpu())
+        rank_chunks.append(search_ranks(ld_t.float(), tgt_t.float(), m.grid_range).cpu())
+        valid_chunks.append(bucket_valid.cpu())
         total += loss.item()
         dr_total += dr_loss.item()
         n += 1
@@ -89,20 +98,21 @@ def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
         return float("nan"), float("nan"), {}
 
     ranks = torch.cat(rank_chunks)
+    bucket_ok = torch.cat(valid_chunks)
     search = {}
-    # Monitor a mid horizon and the max horizon; h=1 is degenerate (the
-    # vessel has barely moved). k@90-of-total is undefined whenever the
-    # grid ceiling is below 90%, so report the 90th-percentile rank among
-    # CAPTURABLE targets instead — always defined, actually tracks skill.
-    mid = max(1, len(horizons) // 2)
-    for k, h in ((mid, int(horizons[mid])), (len(horizons) - 1, int(horizons[-1]))):
-        col = ranks[:, k]
+    for k, name in enumerate(TIME_BUCKETS):
+        # censor ranks where the bucket time isn't reachable in the window
+        col = torch.where(bucket_ok[:, k], ranks[:, k], torch.full_like(ranks[:, k], -1))
+        n_avail = bucket_ok[:, k].sum().clamp(min=1).float()
         valid = col[col > 0].float()
         if len(valid):
-            search[f"val_p90rank_h{h}"] = float(valid.quantile(0.9))
-            search[f"val_medrank_h{h}"] = float(valid.median())
-        search[f"val_capture10_h{h}"] = float(((col > 0) & (col <= 10)).float().mean())
-        search[f"val_ceiling_h{h}"] = float((col > 0).float().mean())
+            # p90 rank among CAPTURABLE targets — k@90-of-total is undefined
+            # whenever the grid ceiling is below 90%
+            search[f"val_p90rank_{name}"] = float(valid.quantile(0.9))
+            search[f"val_medrank_{name}"] = float(valid.median())
+        search[f"val_capture10_{name}"] = float(((col > 0) & (col <= 10)).sum() / n_avail)
+        search[f"val_ceiling_{name}"] = float((col > 0).sum() / n_avail)
+        search[f"val_avail_{name}"] = float(bucket_ok[:, k].float().mean())
     return total / n, dr_total / n, search
 
 
@@ -221,7 +231,7 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                                         "dr_ratio": ratio, **search}, step=step)
                     logger.info(f"step {step}: val {val_loss:.4f}, DR-ratio {ratio:.2f}x, "
                                 + ", ".join(f"{k}={v:.3g}" for k, v in search.items()
-                                            if "rank" in k))
+                                            if "p90rank" in k))
                     last_val_time = time.time()
 
                     torch.save({"model": model.state_dict(), "step": step,
