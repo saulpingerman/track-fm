@@ -82,6 +82,7 @@ def evaluate_forecasting(
     del vf, val_batches
 
     n = 0
+    rank_accum: dict[str, list] = {"model": [], "dr_tuned": [], "kalman": []}
     for i, batch in enumerate(loader):
         if i >= max_batches:
             break
@@ -96,6 +97,15 @@ def evaluate_forecasting(
         lp = torch.zeros_like(dr)
         kf_pred, kf_sig = kalman_cv_forecast(batch, h_idx, m.max_seq_len,
                                              cfg.normalization, kf_q, kf_r)
+        from trackfm.eval.search import gaussian_grid_log_density, search_ranks
+        rank_accum["model"].append(search_ranks(ld, tgt, m.grid_range).cpu())
+        rank_accum["dr_tuned"].append(search_ranks(
+            gaussian_grid_log_density(dr, dr_sigmas.to(device).view(1, -1, 1).expand_as(dr),
+                                      m.grid_range, m.grid_size),
+            tgt, m.grid_range).cpu())
+        rank_accum["kalman"].append(search_ranks(
+            gaussian_grid_log_density(kf_pred, kf_sig, m.grid_range, m.grid_size),
+            tgt, m.grid_range).cpu())
         for k, h in enumerate(horizons):
             s, sl = sums[h], slice(k, k + 1)
             s["model"] += compute_soft_target_loss(
@@ -136,6 +146,24 @@ def evaluate_forecasting(
             agg[k] += r[k]
     for b in BASELINES:
         out[f"mean_{b}_ratio"] = agg[b] / agg["model"]
+
+    # search-effort / capture curves per horizon, model vs strong baselines
+    from trackfm.eval.search import capture_curve, summarize_ranks
+    n_cells = m.grid_size * m.grid_size
+    out["search"] = {}
+    for name, chunks in rank_accum.items():
+        ranks = torch.cat(chunks)                       # (N, H)
+        per_h = {}
+        for k, h in enumerate(horizons):
+            s = summarize_ranks(ranks[:, k])
+            s["curve"] = capture_curve(ranks[:, k], n_cells)
+            per_h[h] = s
+        out["search"][name] = per_h
+    for k, h in enumerate(horizons):
+        row = {name: out["search"][name][h] for name in rank_accum}
+        logger.info(f"search h={h}: " + " | ".join(
+            f"{nm} k@90={v['curve']['k@90']} med={v.get('median_rank', float('nan')):.0f}"
+            for nm, v in row.items()))
 
     hdr = f"{'h':>5} {'model':>7} " + " ".join(f"{b:>9}" for b in BASELINES)
     logger.info(hdr)
