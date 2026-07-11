@@ -54,7 +54,33 @@ def evaluate_forecasting(
                         pin_memory=device.type == "cuda")
 
     h_idx = torch.tensor(horizons, device=device)
-    sums = {h: {"model": 0.0, "dr": 0.0, "lp": 0.0} for h in horizons}
+    BASELINES = ["dr", "lp", "dr_tuned", "lp_tuned", "kalman"]
+    sums = {h: {k: 0.0 for k in ["model", *BASELINES]} for h in horizons}
+    # ---- tune strong baselines on VAL (never on the scored split) ----
+    from trackfm.eval.baselines import (fit_sigma_per_horizon,
+                                        gaussian_density_loss_per_sample,
+                                        kalman_cv_forecast, tune_kalman)
+    val_ds = ShardedWindowDataset(cfg.data_dir / "val", batch_size=t.batch_size,
+                                  shuffle_shards=False)
+    val_batches = []
+    for i, b in enumerate(DataLoader(val_ds, batch_size=None, num_workers=2)):
+        val_batches.append(b.to(device))
+        if i >= 7:
+            break
+    vf = torch.cat(val_batches)
+    with torch.autocast(device_type=device.type, dtype=torch.bfloat16,
+                        enabled=device.type == "cuda"):
+        _, vtgt, _, _ = model.forward_train(vf, horizon_indices=h_idx, causal=False)
+    vtgt = vtgt.float()
+    vdr = dead_reckoning_displacement(vf, h_idx, m.max_seq_len, cfg.normalization)
+    dr_sigmas = fit_sigma_per_horizon(vdr, vtgt, m.grid_range, m.grid_size, t.sigma)
+    lp_sigmas = fit_sigma_per_horizon(torch.zeros_like(vdr), vtgt, m.grid_range,
+                                      m.grid_size, t.sigma)
+    kf_q, kf_r = tune_kalman(vf, vtgt, h_idx, m.max_seq_len, cfg.normalization,
+                             m.grid_range, m.grid_size, t.sigma)
+    logger.info(f"tuned per-horizon DR sigmas: {[round(float(s), 3) for s in dr_sigmas]}")
+    del vf, val_batches
+
     n = 0
     for i, batch in enumerate(loader):
         if i >= max_batches:
@@ -67,34 +93,55 @@ def evaluate_forecasting(
         ld, tgt = ld.float(), tgt.float()
         dr = dead_reckoning_displacement(batch, h_idx, m.max_seq_len,
                                          cfg.normalization)
+        lp = torch.zeros_like(dr)
+        kf_pred, kf_sig = kalman_cv_forecast(batch, h_idx, m.max_seq_len,
+                                             cfg.normalization, kf_q, kf_r)
         for k, h in enumerate(horizons):
-            sums[h]["model"] += compute_soft_target_loss(
-                ld[:, k:k+1], tgt[:, k:k+1], m.grid_range, m.grid_size, t.sigma).item()
-            sums[h]["dr"] += gaussian_log_density_loss(
-                dr[:, k:k+1], tgt[:, k:k+1], m.grid_range, m.grid_size,
+            s, sl = sums[h], slice(k, k + 1)
+            s["model"] += compute_soft_target_loss(
+                ld[:, sl], tgt[:, sl], m.grid_range, m.grid_size, t.sigma).item()
+            # paper-comparable fixed-sigma baselines
+            s["dr"] += gaussian_log_density_loss(
+                dr[:, sl], tgt[:, sl], m.grid_range, m.grid_size,
                 t.sigma, t.dr_sigma).item()
-            sums[h]["lp"] += gaussian_log_density_loss(
-                torch.zeros_like(dr[:, k:k+1]), tgt[:, k:k+1], m.grid_range,
-                m.grid_size, t.sigma, t.dr_sigma).item()
+            s["lp"] += gaussian_log_density_loss(
+                lp[:, sl], tgt[:, sl], m.grid_range, m.grid_size,
+                t.sigma, t.dr_sigma).item()
+            # strong baselines: per-horizon tuned sigma; Kalman covariance
+            s["dr_tuned"] += gaussian_density_loss_per_sample(
+                dr[:, sl], torch.full_like(dr[:, sl], float(dr_sigmas[k])),
+                tgt[:, sl], m.grid_range, m.grid_size, t.sigma).item()
+            s["lp_tuned"] += gaussian_density_loss_per_sample(
+                lp[:, sl], torch.full_like(lp[:, sl], float(lp_sigmas[k])),
+                tgt[:, sl], m.grid_range, m.grid_size, t.sigma).item()
+            s["kalman"] += gaussian_density_loss_per_sample(
+                kf_pred[:, sl], kf_sig[:, sl], tgt[:, sl],
+                m.grid_range, m.grid_size, t.sigma).item()
         n += 1
 
     out: dict = {"horizons": {}, "checkpoint": str(checkpoint), "split": split,
-                 "batches": n}
-    agg = {"model": 0.0, "dr": 0.0, "lp": 0.0}
+                 "batches": n,
+                 "baseline_params": {
+                     "dr_sigmas": [float(s) for s in dr_sigmas],
+                     "lp_sigmas": [float(s) for s in lp_sigmas],
+                     "kalman_q": kf_q, "kalman_r": kf_r,
+                 }}
+    agg = {k: 0.0 for k in ["model", *BASELINES]}
     for h in horizons:
         r = {k: v / n for k, v in sums[h].items()}
-        r["dr_ratio"] = r["dr"] / r["model"]
-        r["lp_ratio"] = r["lp"] / r["model"]
+        for b in BASELINES:
+            r[f"{b}_ratio"] = r[b] / r["model"]
         out["horizons"][h] = r
         for k in agg:
             agg[k] += r[k]
-    out["mean_dr_ratio"] = (agg["dr"] / len(horizons)) / (agg["model"] / len(horizons))
-    out["mean_lp_ratio"] = (agg["lp"] / len(horizons)) / (agg["model"] / len(horizons))
+    for b in BASELINES:
+        out[f"mean_{b}_ratio"] = agg[b] / agg["model"]
 
-    logger.info(f"{'h':>5} {'model':>8} {'DR':>8} {'LP':>8} {'DRx':>6} {'LPx':>6}")
+    hdr = f"{'h':>5} {'model':>7} " + " ".join(f"{b:>9}" for b in BASELINES)
+    logger.info(hdr)
     for h, r in out["horizons"].items():
-        logger.info(f"{h:>5} {r['model']:8.3f} {r['dr']:8.3f} {r['lp']:8.3f} "
-                    f"{r['dr_ratio']:6.2f} {r['lp_ratio']:6.2f}")
-    logger.info(f"MEAN ratios: {out['mean_dr_ratio']:.2f}x vs DR, "
-                f"{out['mean_lp_ratio']:.2f}x vs LP")
+        logger.info(f"{h:>5} {r['model']:7.3f} " + " ".join(
+            f"{r[b]:5.2f}/{r[f'{b}_ratio']:.1f}x" for b in BASELINES))
+    logger.info("MEAN ratios: " + ", ".join(
+        f"{out[f'mean_{b}_ratio']:.2f}x vs {b}" for b in BASELINES))
     return out
