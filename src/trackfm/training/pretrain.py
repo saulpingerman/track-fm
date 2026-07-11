@@ -39,32 +39,51 @@ def _lr_lambda(step: int, warmup: int, max_steps: int | None, schedule: str):
 @torch.no_grad()
 def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
              max_batches: int = 100):
-    """Val loss from the last position (causal=False) + DR baseline ratio."""
+    """Val loss (causal=False) + DR ratio + search metrics.
+
+    Returns (val_loss, dr_loss, search) where search maps metric names to
+    values, e.g. val_k90_h1 / val_k90_h800. Search metrics are MONITORING
+    only — early stopping stays on val_loss (a proper scoring rule); never
+    select models on a pure ranking metric.
+    """
+    from trackfm.eval.search import capture_curve, search_ranks
+
     model.eval()
     m = cfg.model
     t = cfg.train
     total, dr_total, n = 0.0, 0.0, 0
+    horizons = torch.linspace(1, t.max_horizon, t.num_horizon_samples,
+                              dtype=torch.long, device=device)
+    rank_chunks = []
     for i, batch in enumerate(val_loader):
         if i >= max_batches:
             break
         batch = batch.to(device, non_blocking=True)
-        horizons = torch.linspace(1, t.max_horizon, t.num_horizon_samples,
-                                  dtype=torch.long, device=device)
         with torch.autocast(device_type=device.type, dtype=autocast_dtype,
                             enabled=autocast_dtype is not None):
             ld, tgt, h, _ = model.forward_train(batch, horizon_indices=horizons, causal=False)
-            loss = compute_soft_target_loss(ld.float(), tgt.float(), m.grid_range,
-                                            m.grid_size, t.sigma)
+        loss = compute_soft_target_loss(ld.float(), tgt.float(), m.grid_range,
+                                        m.grid_size, t.sigma)
         dr_pred = dead_reckoning_displacement(batch, horizons, m.max_seq_len, cfg.normalization)
         dr_loss = gaussian_log_density_loss(dr_pred, tgt.float(), m.grid_range,
                                             m.grid_size, t.sigma, t.dr_sigma)
+        rank_chunks.append(search_ranks(ld.float(), tgt.float(), m.grid_range).cpu())
         total += loss.item()
         dr_total += dr_loss.item()
         n += 1
     model.train()
     if n == 0:
-        return float("nan"), float("nan")
-    return total / n, dr_total / n
+        return float("nan"), float("nan"), {}
+
+    ranks = torch.cat(rank_chunks)
+    n_cells = m.grid_size * m.grid_size
+    search = {}
+    for k, h in ((0, int(horizons[0])), (len(horizons) - 1, int(horizons[-1]))):
+        c = capture_curve(ranks[:, k], n_cells)
+        search[f"val_k90_h{h}"] = float(c["k@90"] or n_cells)
+        search[f"val_capture10_h{h}"] = float(c["capture"][9])
+        search[f"val_ceiling_h{h}"] = c["ceiling"]
+    return total / n, dr_total / n, search
 
 
 def run_pretraining(cfg: PretrainConfig) -> Path:
@@ -173,12 +192,14 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
 
                 if time.time() - last_val_time > t.val_interval_minutes * 60 \
                         or step >= max_steps:
-                    val_loss, dr_loss = validate(model, val_loader, cfg, device,
-                                                 autocast_dtype)
+                    val_loss, dr_loss, search = validate(model, val_loader, cfg,
+                                                         device, autocast_dtype)
                     ratio = dr_loss / val_loss if val_loss and not math.isnan(val_loss) else float("nan")
                     mlflow.log_metrics({"val_loss": val_loss, "dr_loss": dr_loss,
-                                        "dr_ratio": ratio}, step=step)
-                    logger.info(f"step {step}: val {val_loss:.4f}, DR-ratio {ratio:.2f}x")
+                                        "dr_ratio": ratio, **search}, step=step)
+                    logger.info(f"step {step}: val {val_loss:.4f}, DR-ratio {ratio:.2f}x, "
+                                + ", ".join(f"{k}={v:.3g}" for k, v in search.items()
+                                            if "k90" in k))
                     last_val_time = time.time()
 
                     torch.save({"model": model.state_dict(), "step": step,
