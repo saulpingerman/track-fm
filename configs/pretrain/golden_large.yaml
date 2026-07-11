@@ -34,7 +34,7 @@ train:
   dr_sigma: 0.05
   precision: bf16
   compile: false             # enable after correctness is proven
-  val_interval_minutes: 30
+  val_interval_minutes: 8
   early_stop_patience: 10
   num_workers: 8
   seed: 17
