@@ -89,6 +89,9 @@ class TrainConfig(BaseModel):
     early_stop_patience: int = 10
     num_workers: int = 8
     seed: int = 17
+    # Practical bf16 peak of this GPU (scripts/gpu_peak_bench.py) — the
+    # denominator for MFU. RTX Pro 6000 Blackwell Max-Q measured: 304.
+    peak_tflops: float = 304.0
 
 
 class MLflowConfig(BaseModel):

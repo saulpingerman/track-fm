@@ -78,7 +78,10 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
     if t.compile:
         model = torch.compile(model)
     n_params = count_parameters(model)
-    logger.info(f"Model: {n_params/1e6:.1f}M params on {device}")
+    from trackfm.training.flops import train_flops_per_sample
+    flops_per_sample = train_flops_per_sample(cfg.model, t.num_horizon_samples)
+    logger.info(f"Model: {n_params/1e6:.1f}M params, "
+                f"{flops_per_sample/1e9:.1f} GFLOPs/sample on {device}")
 
     train_ds = ShardedWindowDataset(cfg.data_dir / "train", batch_size=t.batch_size,
                                     seed=t.seed)
@@ -139,10 +142,14 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
 
                 if step % 50 == 0:
                     elapsed = time.time() - t_start
+                    sps = samples_seen / elapsed
+                    achieved_tflops = flops_per_sample * sps / 1e12
                     mlflow.log_metrics({
                         "train_loss": loss.item() * t.grad_accum_steps,
                         "lr": sched.get_last_lr()[0],
-                        "samples_per_s": samples_seen / elapsed,
+                        "samples_per_s": sps,
+                        "achieved_tflops": achieved_tflops,
+                        "mfu": achieved_tflops / t.peak_tflops,
                     }, step=step)
 
                 if time.time() - last_val_time > t.val_interval_minutes * 60 \
