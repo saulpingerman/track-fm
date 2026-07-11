@@ -24,7 +24,7 @@ normalization:
 train:
   learning_rate: 3.0e-4      # revisit after batch-size sweep on 96GB VRAM
   weight_decay: 1.0e-5
-  batch_size: 1024
+  batch_size: 1280
   max_horizon: 800
   num_horizon_samples: 4
   warmup_steps: 1000

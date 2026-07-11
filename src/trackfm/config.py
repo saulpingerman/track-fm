@@ -37,6 +37,8 @@ class MaterializeConfig(BaseModel):
     split: Literal["temporal"] = "temporal"
     train_frac: float = 0.8
     val_frac: float = 0.1
+    start_date: Optional[str] = None   # "YYYY-MM-DD" — golden-slice selection
+    end_date: Optional[str] = None
     seed: int = 17
     num_workers: int = 40
 

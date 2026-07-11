@@ -63,6 +63,19 @@ def materialize(
 
 
 @app.command()
+def audit(
+    clean_dir: Path = typer.Option(Path("~/data/ais/clean")),
+    raw_dir: Path = typer.Option(Path("~/data/ais/raw")),
+    write_manifest: bool = typer.Option(True),
+):
+    """Audit the cleaned dataset: continuity, invariants, stats, MANIFEST."""
+    from trackfm.data.audit import run_audit
+
+    ok = run_audit(clean_dir.expanduser(), raw_dir.expanduser(), write_manifest)
+    raise typer.Exit(0 if ok else 1)
+
+
+@app.command()
 def port_data(
     clean_dir: Path = typer.Option(Path("~/data/ais/clean")),
     out_dir: Path = typer.Option(Path("~/data/trackfm/ports/v1")),

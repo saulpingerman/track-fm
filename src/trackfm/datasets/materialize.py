@@ -265,6 +265,10 @@ def materialize_dataset(cfg: MaterializeConfig, subset_days: int | None = None) 
     days = list_day_partitions(clean_dir)
     if not days:
         raise FileNotFoundError(f"No day partitions under {clean_dir}")
+    if cfg.start_date:
+        days = [d for d in days if partition_date(d) >= cfg.start_date]
+    if cfg.end_date:
+        days = [d for d in days if partition_date(d) <= cfg.end_date]
     if subset_days:
         days = days[:subset_days]
 
