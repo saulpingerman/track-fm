@@ -92,11 +92,17 @@ def pretrain(
 
 @app.command()
 def finetune(
-    config: Path = typer.Option(..., help="Downstream task config YAML"),
+    config: Path = typer.Option(..., help="FinetuneConfig YAML"),
 ):
-    """Fine-tune a pretrained backbone on a downstream task."""
-    typer.echo("Downstream fine-tuning: see experiments/anomaly and experiments/vessel_class")
-    raise typer.Exit(1)
+    """Fine-tune a (pretrained or random-init) encoder on a downstream task."""
+    import logging
+
+    from trackfm.config import load_config
+    from trackfm.training.finetune import FinetuneConfig, finetune_port_task
+
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
+    cfg = load_config(config, FinetuneConfig)
+    finetune_port_task(cfg)
 
 
 @app.command()

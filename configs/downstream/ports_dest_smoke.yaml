@@ -1,0 +1,24 @@
+# Smoke: destination classification, tiny random-init encoder, capped data.
+task: classification
+label_column: destination
+data_dir: ~/data/trackfm/ports/v1
+backbone: null
+model:
+  d_model: 128
+  nhead: 8
+  num_layers: 4
+  dim_feedforward: 512
+  max_seq_len: 128
+  grid_size: 64
+  grid_range: 0.3
+  num_freqs: 12
+train:
+  batch_size: 256
+  max_epochs: 3
+  early_stopping_patience: 3
+  max_train_windows: 60000
+  pooling: last
+mlflow:
+  tracking_uri: http://127.0.0.1:5000
+  experiment: trackfm/ports
+  run_name: dest-smoke-randominit
