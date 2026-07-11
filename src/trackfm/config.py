@@ -27,10 +27,11 @@ class MaterializeConfig(BaseModel):
     out_dir: Path = Path("~/data/trackfm/materialized/v1")
     window_size: int = 928           # 128 input + 800 horizon
     input_len: int = 128
-    stride: int = 64
-    min_track_length: int = 600
-    min_sog_knots: float = 3.0
-    gap_threshold_seconds: float = 1800.0
+    stride: int = 32                 # legacy materialize_samples.py value
+    # Legacy materialization applied no extra filters beyond window length;
+    # Exp-11-style filtering (600 / 3.0 kn) is available via these knobs.
+    min_track_length: int = 928
+    min_sog_knots: float = 0.0
     num_output_shards: int = 256
     shard_target_mb: int = 512
     split: Literal["temporal"] = "temporal"
