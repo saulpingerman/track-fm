@@ -1,0 +1,91 @@
+# Experiment design decisions & their interpretation
+
+Running log of design forks: what was chosen, why, and — for experiments —
+what each possible outcome would mean. Newest first.
+
+## 2026-07-11 — Fourier head vs direct-grid head (ablation)
+
+**Setup.** `head_type: direct` replaces `FourierHead2D` (predict spectral
+coefficients, combine with fixed cos/sin bases, softmax over the sampled
+grid) with `Linear(d_model -> G^2)` per-cell logits. Same encoder, same
+data (golden69), same loss; only the density parametrization differs.
+Config: `configs/pretrain/ablation_direct_head.yaml` vs `golden_medium.yaml`.
+
+**The concrete stakes at XLarge dimensions (192-cell grid):**
+- Parameters: Fourier 117.3M vs direct 143.5M — the direct head spends
+  +26M params just to emit the grid, and that cost scales with G^2, while
+  the Fourier coefficient count is grid-independent (~2.1M at F=18).
+- Compute: direct is actually CHEAPER per step at F=18 (768 x G^2 vs
+  2,738 x G^2 in the logits matmul).
+- Capabilities: only the Fourier head defines a CONTINUOUS density —
+  arbitrary-resolution sampling, exact evaluation at H3 hexagon centers,
+  physically-honest containment metrics at any footprint. The direct head
+  exists only at its own cells.
+
+**Outcome interpretation:**
+- **Fourier matches or beats direct** -> the spectral smoothness prior
+  earns its place: same or better forecast quality with 26M fewer
+  parameters AND the continuous-density property. The paper's architecture
+  section has its empirical justification; proceed to the 9-day XLarge run
+  with the Fourier head, and cite this ablation when reviewers ask
+  "why not just softmax over cells?"
+- **Direct wins meaningfully (beyond noise)** -> the smoothness prior is
+  costing accuracy — the density's band limit is throwing away real
+  structure. Decisions cascade: (a) consider raising num_freqs (buys back
+  sharpness at compute cost) before abandoning the head; (b) if direct
+  still wins, the continuous-density property has a measurable accuracy
+  price that must be weighed explicitly against the H3/containment
+  workflow it enables; (c) the XLarge run's head choice must be revisited
+  BEFORE committing the 9 days.
+- **Direct wins only at short horizons / loses at long** (or vice versa)
+  -> mixed regime: the prior helps where data is sparse per cell (long
+  horizons spread mass over many cells) and hurts where the truth is
+  near-delta (short horizons). Would motivate horizon-dependent num_freqs
+  — worth a paper paragraph either way.
+
+Judge on: val soft-target CE (proper score), time-bucketed containment
+(15m/30m/1h/2h p90rank + capture@10), and NLL-at-truth. If the heads
+disagree across metrics (e.g. direct wins CE, Fourier wins containment),
+report both — that itself is a finding about what the smoothness prior
+trades.
+
+## 2026-07-11 — Density grid geometry for the scale-up run
+
+**Chosen: ±0.9° / 192 cells / num_freqs=18** (from ±0.6/128/F12).
+
+**The governing insight:** grid cells do NOT set the model's resolution —
+the Fourier band limit does (finest lobe ~ L/(2F)). Adding cells past the
+basis Nyquist rate samples the same smooth function finer. Any range
+increase must scale num_freqs proportionally to hold sharpness, and THAT
+(not cell count) is where compute lives. Measured cost/quality table:
+
+| config | coverage@2h | eff. resolution | step cost |
+|---|---|---|---|
+| ±0.3/64/F12 (paper) | 74.5% | 1.4 km | 0.9x |
+| ±0.6/128/F12 | 91.5% | 2.8 km | 1.0x |
+| **±0.9/192/F18 (chosen)** | **98.8%** | **2.8 km** | **1.8x** |
+| ±1.2/256/F24 | 99.7% | 2.8 km | 3.7x (rejected: last 0.9% doubles cost) |
+| ±1.2/256/F12 | 99.7% | 5.5 km | 1.6x (rejected: hidden 2x blur) |
+
+Also measured: p99 displacement is LINEAR in horizon (0.0012°/step) — the
+reachable region is a cone. A horizon-scaled grid range (range ∝ elapsed
+time) would give ~99% coverage at ALL horizons at 1.0x cost with constant
+relative resolution; set aside in favor of the fixed grid for formulation
+continuity with the paper, but it remains the principled alternative if
+long-horizon censoring or compute ever bites again. DR-centered residual
+grids were measured too (95.2% at ±0.6): helps but doesn't solve — the
+escape tail is maneuvering vessels, not just fast ones.
+
+## 2026-07-11 — Metrics doctrine (accumulated through review)
+
+1. Containment/search metrics are indexed by WALL-CLOCK horizon
+   (15m/30m/1h/2h, ±15% tolerance, per-bucket availability reported) —
+   never by step count (step 800 spans 1.3-4.5h across vessels).
+2. Early stopping selects on val soft-target CE (proper scoring rule).
+   Ranking metrics (p90rank, capture@k) MONITOR, never select.
+3. Report per-horizon k@90 only against the capturable ceiling; the
+   off-grid fraction is its own number, never silently folded in.
+4. Baseline ladder: LP -> DR(fixed sigma, paper-comparable) -> DR(tuned
+   per-horizon) -> Kalman(tuned) -> TrAISformer -> TrackFM. Fixed-sigma
+   ratios flatter the model (smoke: 1.71x vs 1.08x tuned); strong
+   baselines are the honest headline.
