@@ -17,10 +17,20 @@ from trackfm.models.encoder import CausalAISModel
 Pooling = Literal["mean", "last"]
 
 
-def _pool(emb: torch.Tensor, pooling: Pooling) -> torch.Tensor:
+def _pool(emb: torch.Tensor, pooling: Pooling,
+          lengths: torch.Tensor | None = None) -> torch.Tensor:
+    """Pool (B, L, d) -> (B, d). `lengths` masks zero-padded positions."""
+    if lengths is None:
+        if pooling == "mean":
+            return emb.mean(dim=1)
+        return emb[:, -1, :]
+    mask = (torch.arange(emb.shape[1], device=emb.device)[None, :]
+            < lengths[:, None])                       # (B, L)
     if pooling == "mean":
-        return emb.mean(dim=1)
-    return emb[:, -1, :]
+        summed = (emb * mask[..., None]).sum(dim=1)
+        return summed / lengths[:, None].clamp(min=1)
+    idx = (lengths - 1).clamp(min=0)                  # last REAL position
+    return emb[torch.arange(emb.shape[0], device=emb.device), idx]
 
 
 class MLPHead(nn.Module):
@@ -50,9 +60,10 @@ class PortClassifier(nn.Module):
             for p in self.encoder.parameters():
                 p.requires_grad = False
 
-    def forward(self, windows: torch.Tensor) -> torch.Tensor:
-        emb = self.encoder.encode(windows)          # (B, L, d)
-        return self.head(_pool(emb, self.pooling))  # (B, num_classes)
+    def forward(self, windows: torch.Tensor,
+                lengths: torch.Tensor | None = None) -> torch.Tensor:
+        emb = self.encoder.encode(windows)                    # (B, L, d)
+        return self.head(_pool(emb, self.pooling, lengths))   # (B, num_classes)
 
 
 class EtaRegressor(nn.Module):
