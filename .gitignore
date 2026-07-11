@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Data & artifacts — NEVER commit; they live under ~/data/trackfm and MLflow
+*.pt
+*.ckpt
+*.parquet
+*.npy
+*.npz
+*.pkl
+data/
+outputs/
+mlruns/
+checkpoints/
+
+# Paper build
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.pdf
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
+
+# Misc
+.DS_Store
+*.log
+!tests/**/*.log

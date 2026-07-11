@@ -1,0 +1,119 @@
+"""Unified pydantic configuration for all TrackFM stages.
+
+Every CLI entry point loads one YAML file into one of these models.
+Paths default to the snorlax data layout under ~/data.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Literal, Optional
+
+import yaml
+from pydantic import BaseModel, Field, field_validator
+
+
+def _expand(p: str | Path) -> Path:
+    return Path(p).expanduser()
+
+
+# NOTE: the cleaning-pipeline config schema lives in trackfm.data.config
+# (moved verbatim from ais-analysis); this module covers the ML stages.
+
+
+# ------------------------------------------------------------- materialize
+class MaterializeConfig(BaseModel):
+    """Config for `trackfm materialize` (windowing + 2-pass shuffle)."""
+    clean_dir: Path = Path("~/data/ais/clean")
+    out_dir: Path = Path("~/data/trackfm/materialized/v1")
+    window_size: int = 928           # 128 input + 800 horizon
+    input_len: int = 128
+    stride: int = 64
+    min_track_length: int = 600
+    min_sog_knots: float = 3.0
+    gap_threshold_seconds: float = 1800.0
+    num_output_shards: int = 256
+    shard_target_mb: int = 512
+    split: Literal["temporal"] = "temporal"
+    train_frac: float = 0.8
+    val_frac: float = 0.1
+    seed: int = 17
+    num_workers: int = 40
+
+    @field_validator("clean_dir", "out_dir")
+    @classmethod
+    def _expanduser(cls, v: Path) -> Path:
+        return _expand(v)
+
+
+# ------------------------------------------------------------------- model
+class ModelConfig(BaseModel):
+    d_model: int = 768
+    nhead: int = 16
+    num_layers: int = 16
+    dim_feedforward: int = 3072
+    dropout: float = 0.1
+    input_features: int = 6          # lat, lon, sog, cog_sin, cog_cos, dt
+    max_seq_len: int = 128
+    grid_size: int = 64
+    grid_range: float = 0.3          # degrees
+    num_freqs: int = 12
+
+
+class NormalizationConfig(BaseModel):
+    lat_center: float = 56.25
+    lat_scale: float = 1.0
+    lon_center: float = 11.5
+    lon_scale: float = 2.0
+    sog_scale: float = 30.0
+    dt_scale: float = 300.0
+
+
+# ---------------------------------------------------------------- training
+class TrainConfig(BaseModel):
+    learning_rate: float = 3e-4
+    weight_decay: float = 1e-5
+    batch_size: int = 300
+    max_horizon: int = 800
+    num_horizon_samples: int = 4
+    warmup_steps: int = 1000
+    lr_schedule: Literal["cosine", "constant"] = "cosine"
+    max_steps: Optional[int] = None
+    max_epochs: Optional[int] = None
+    sigma: float = 0.003             # soft-target Gaussian width (grid coords)
+    dr_sigma: float = 0.05           # dead-reckoning baseline sigma
+    precision: Literal["bf16", "fp32"] = "bf16"
+    compile: bool = False
+    grad_accum_steps: int = 1
+    val_interval_minutes: float = 30.0
+    early_stop_patience: int = 10
+    num_workers: int = 8
+    seed: int = 17
+
+
+class MLflowConfig(BaseModel):
+    tracking_uri: str = "http://127.0.0.1:5000"
+    experiment: str = "trackfm/pretrain"
+    run_name: Optional[str] = None
+
+
+class PretrainConfig(BaseModel):
+    """Config for `trackfm pretrain`."""
+    data_dir: Path = Path("~/data/trackfm/materialized/v1")
+    checkpoint_dir: Path = Path("~/data/trackfm/checkpoints")
+    model: ModelConfig = ModelConfig()
+    normalization: NormalizationConfig = NormalizationConfig()
+    train: TrainConfig = TrainConfig()
+    mlflow: MLflowConfig = MLflowConfig()
+
+    @field_validator("data_dir", "checkpoint_dir")
+    @classmethod
+    def _expanduser(cls, v: Path) -> Path:
+        return _expand(v)
+
+
+# ------------------------------------------------------------------ loader
+def load_config(path: str | Path, model_cls: type[BaseModel]) -> BaseModel:
+    """Load a YAML file into the given pydantic config model."""
+    with open(_expand(path)) as f:
+        raw = yaml.safe_load(f) or {}
+    return model_cls.model_validate(raw)
