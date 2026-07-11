@@ -27,6 +27,19 @@ from trackfm.training.mlflow_utils import start_run
 logger = logging.getLogger(__name__)
 
 
+def _mlflow_log(metrics: dict, step: int) -> None:
+    """Log metrics, surviving tracking-server outages.
+
+    A multi-day run must never die because MLflow hiccuped (learned the
+    hard way: a server restart mid-run killed the first golden chain).
+    Checkpoints and training continue; lost metric points are acceptable.
+    """
+    try:
+        mlflow.log_metrics(metrics, step=step)
+    except Exception as e:
+        logger.warning(f"mlflow logging failed at step {step} (continuing): {e}")
+
+
 def _lr_lambda(step: int, warmup: int, max_steps: int | None, schedule: str):
     if step < warmup:
         return (step + 1) / max(warmup, 1)
@@ -184,7 +197,7 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                     sps = (samples_seen - window_samples) / max(now - window_t, 1e-9)
                     window_samples, window_t = samples_seen, now
                     achieved_tflops = flops_per_sample * sps / 1e12
-                    mlflow.log_metrics({
+                    _mlflow_log({
                         "train_loss": loss.item() * t.grad_accum_steps,
                         "lr": sched.get_last_lr()[0],
                         "samples_per_s": sps,
@@ -197,7 +210,7 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                     val_loss, dr_loss, search = validate(model, val_loader, cfg,
                                                          device, autocast_dtype)
                     ratio = dr_loss / val_loss if val_loss and not math.isnan(val_loss) else float("nan")
-                    mlflow.log_metrics({"val_loss": val_loss, "dr_loss": dr_loss,
+                    _mlflow_log({"val_loss": val_loss, "dr_loss": dr_loss,
                                         "dr_ratio": ratio, **search}, step=step)
                     logger.info(f"step {step}: val {val_loss:.4f}, DR-ratio {ratio:.2f}x, "
                                 + ", ".join(f"{k}={v:.3g}" for k, v in search.items()
@@ -224,10 +237,14 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
     except StopIteration:
         pass
     finally:
-        mlflow.log_metric("best_val_loss", best_val)
-        if (ckpt_dir / "best.pt").exists():
-            mlflow.log_artifact(str(ckpt_dir / "best.pt"))
-        mlflow.end_run()
+        try:
+            mlflow.log_metric("best_val_loss", best_val)
+            if (ckpt_dir / "best.pt").exists():
+                mlflow.log_artifact(str(ckpt_dir / "best.pt"))
+            mlflow.end_run()
+        except Exception as e:
+            logger.warning(f"mlflow finalization failed (checkpoints are safe "
+                           f"on disk in {ckpt_dir}): {e}")
 
     logger.info(f"Done: best val {best_val:.4f}; checkpoints in {ckpt_dir}")
     return ckpt_dir / "best.pt"
