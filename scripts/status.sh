@@ -24,7 +24,7 @@ nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total,power.draw --for
 echo "─── disk"
 df -h / | tail -1 | awk '{print "  used "$3" of "$2"  ("$5")  free: "$4}'
 
-echo "─── recent MLflow runs (http://localhost:5000 — 5001 on your Mac)"
+echo "─── recent MLflow runs (https://snorlax.tail0517b6.ts.net from anywhere on the tailnet)"
 python3 -c "
 import sqlite3, datetime, os
 db = os.path.expanduser('~/data/trackfm/mlflow/mlflow.db')
