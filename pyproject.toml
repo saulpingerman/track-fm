@@ -22,6 +22,7 @@ dependencies = [
     "geopy>=2.4",
     "tqdm>=4.66",
     "requests>=2.32",
+    "zstandard>=0.25.0",
 ]
 
 [project.optional-dependencies]

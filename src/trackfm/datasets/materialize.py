@@ -72,6 +72,60 @@ def _save_checkpoint(path: Path, ckpt: dict) -> None:
 
 
 # ------------------------------------------------------------------- pass 1
+class _CompressedPile:
+    """Append-only zstd-compressed sample store.
+
+    Samples are buffered in memory and flushed as independent zstd frames
+    (concatenated frames are a valid zstd stream). Keeps pass-1 temp disk
+    at ~1/3 of raw — without compression the full 26-month materialization
+    would need ~3.7TB of temp space and outgrow the disk.
+    """
+
+    FLUSH_BYTES = 32 * 1024 * 1024
+
+    def __init__(self, path: Path):
+        import zstandard
+
+        self._cctx = zstandard.ZstdCompressor(level=3)
+        self._file = open(path, "ab")
+        self._buf: list[bytes] = []
+        self._buf_bytes = 0
+
+    def write(self, arr: np.ndarray) -> None:
+        b = np.ascontiguousarray(arr).tobytes()
+        self._buf.append(b)
+        self._buf_bytes += len(b)
+        if self._buf_bytes >= self.FLUSH_BYTES:
+            self.flush()
+
+    def flush(self) -> None:
+        if self._buf:
+            self._file.write(self._cctx.compress(b"".join(self._buf)))
+            self._buf, self._buf_bytes = [], 0
+
+    def close(self) -> None:
+        self.flush()
+        self._file.close()
+
+
+def _read_compressed_pile(path: Path, sample_floats: int) -> np.ndarray:
+    """Decompress a pile file back to (n_samples, sample_floats) float32."""
+    import zstandard
+
+    dctx = zstandard.ZstdDecompressor()
+    chunks = []
+    with open(path, "rb") as f:
+        reader = dctx.stream_reader(f, read_across_frames=True)
+        while True:
+            chunk = reader.read(64 * 1024 * 1024)
+            if not chunk:
+                break
+            chunks.append(chunk)
+    raw = b"".join(chunks)
+    arr = np.frombuffer(raw, dtype=np.float32)
+    return arr.reshape(-1, sample_floats)
+
+
 def pass1_extract(cfg: MaterializeConfig, split_days: list[Path], out_dir: Path,
                   rng: np.random.Generator, num_piles: int, ckpt_path: Path,
                   split_name: str) -> None:
@@ -90,7 +144,7 @@ def pass1_extract(cfg: MaterializeConfig, split_days: list[Path], out_dir: Path,
 
     temp_dir = out_dir / f"_piles_{split_name}"
     temp_dir.mkdir(parents=True, exist_ok=True)
-    pile_files = [open(temp_dir / f"pile_{i:03d}.bin", "ab") for i in range(num_piles)]
+    pile_files = [_CompressedPile(temp_dir / f"pile_{i:03d}.bin") for i in range(num_piles)]
 
     buffers: dict[str, list[np.ndarray]] = defaultdict(list)
     last_seen: dict[str, str] = {}
@@ -106,8 +160,7 @@ def pass1_extract(cfg: MaterializeConfig, split_days: list[Path], out_dir: Path,
             return 0
         assignment = rng.integers(0, num_piles, size=len(windows))
         for pile_id in np.unique(assignment):
-            sel = windows[assignment == pile_id]
-            pile_files[pile_id].write(np.ascontiguousarray(sel).tobytes())
+            pile_files[pile_id].write(windows[assignment == pile_id])
         return len(windows)
 
     total_windows = 0
@@ -167,7 +220,6 @@ def pass2_shuffle(cfg: MaterializeConfig, out_dir: Path, rng: np.random.Generato
     dest_dir.mkdir(parents=True, exist_ok=True)
 
     sample_floats = cfg.window_size * len(FEATURE_COLUMNS)
-    bytes_per_sample = sample_floats * 4
 
     for pile_id in tqdm(range(num_piles), desc=f"pass2[{split_name}]"):
         if pile_id in done:
@@ -178,9 +230,8 @@ def pass2_shuffle(cfg: MaterializeConfig, out_dir: Path, rng: np.random.Generato
             done.add(pile_id)
             continue
 
-        num_samples = pile_path.stat().st_size // bytes_per_sample
-        data = np.memmap(pile_path, dtype=np.float32, mode="r",
-                         shape=(num_samples, sample_floats))
+        data = _read_compressed_pile(pile_path, sample_floats)
+        num_samples = len(data)
         order = rng.permutation(num_samples)
         shuffled = np.ascontiguousarray(data[order])
 
