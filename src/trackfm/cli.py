@@ -63,6 +63,43 @@ def materialize(
 
 
 @app.command()
+def port_data(
+    clean_dir: Path = typer.Option(Path("~/data/ais/clean")),
+    out_dir: Path = typer.Option(Path("~/data/trackfm/ports/v1")),
+    subset_days: Optional[int] = typer.Option(None, help="Only use first N cleaned days"),
+    stride: int = typer.Option(64),
+):
+    """Discover ports, label tracks, and materialize the port-task dataset."""
+    import logging
+
+    import polars as pl
+
+    from trackfm.datasets.port_task import build_port_task_dataset
+    from trackfm.datasets.ports import (PortLabelConfig, discover_ports,
+                                        extract_track_endpoints, label_tracks)
+
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
+    clean_dir = clean_dir.expanduser()
+    out_dir = out_dir.expanduser()
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    from trackfm.datasets.materialize import list_day_partitions
+    days = list_day_partitions(clean_dir)
+    if subset_days:
+        days = days[:subset_days]
+
+    cfg = PortLabelConfig()
+    tracks = extract_track_endpoints(clean_dir, day_files=days,
+                                     min_positions=cfg.min_track_positions)
+    ports = discover_ports(tracks, cfg)
+    ports.write_parquet(out_dir / "ports.parquet")
+    labeled = label_tracks(tracks, ports, cfg)
+    labeled.write_parquet(out_dir / "labeled_tracks.parquet")
+    build_port_task_dataset(clean_dir, labeled, out_dir,
+                            stride=stride, subset_days=subset_days)
+
+
+@app.command()
 def pretrain(
     config: Path = typer.Option(Path("configs/pretrain/xlarge.yaml")),
 ):
