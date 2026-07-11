@@ -17,7 +17,7 @@ import torch
 import torch.nn as nn
 
 from trackfm.config import ModelConfig, NormalizationConfig
-from trackfm.models.fourier_head import FourierHead2D
+from trackfm.models.fourier_head import DirectGridHead, FourierHead2D
 
 
 class SinusoidalEncoding(nn.Module):
@@ -85,8 +85,11 @@ class CausalAISModel(nn.Module):
         # Horizon conditioning
         self.horizon_proj = nn.Linear(model.d_model * 2, model.d_model)
 
-        # Fourier head
-        self.fourier_head = FourierHead2D(
+        # Density head. Attribute keeps its historical name for state-dict
+        # compatibility; head_type='direct' swaps in the ablation head
+        # (per-cell logits, no continuous density).
+        head_cls = FourierHead2D if model.head_type == "fourier" else DirectGridHead
+        self.fourier_head = head_cls(
             model.d_model, model.grid_size, model.num_freqs, model.grid_range
         )
 

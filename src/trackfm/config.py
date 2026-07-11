@@ -60,6 +60,7 @@ class ModelConfig(BaseModel):
     grid_size: int = 64
     grid_range: float = 0.3          # degrees
     num_freqs: int = 12
+    head_type: Literal["fourier", "direct"] = "fourier"  # 'direct' = ablation
 
 
 class NormalizationConfig(BaseModel):

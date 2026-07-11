@@ -9,9 +9,9 @@ model:
   dim_feedforward: 1024
   dropout: 0.1
   max_seq_len: 128
-  grid_size: 128
-  grid_range: 0.6
-  num_freqs: 12
+  grid_size: 192
+  grid_range: 0.9
+  num_freqs: 18
 
 normalization:
   lat_center: 56.25

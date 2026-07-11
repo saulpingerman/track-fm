@@ -16,6 +16,31 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+class DirectGridHead(nn.Module):
+    """Ablation head: straight linear map to per-cell logits.
+
+    No spectral basis — d_model -> G^2 logits -> log_softmax. Compared to
+    FourierHead2D it is parameter-HEAVY (d*G^2 grows with the grid: 28.3M
+    params at d=768/G=192 vs the Fourier head's grid-independent ~2.1M at
+    F=18) but compute-competitive, and it has NO continuous density — it
+    can only be evaluated at its own cells. Exists to answer: is the
+    Fourier smoothness prior earning its place, or just compressing params?
+    """
+
+    def __init__(self, d_model: int, grid_size: int = 64,
+                 num_freqs: int = 0, grid_range: float = 0.1):
+        super().__init__()
+        self.grid_size = grid_size
+        self.grid_range = grid_range
+        self.logits = nn.Linear(d_model, grid_size * grid_size)
+        nn.init.normal_(self.logits.weight, std=0.01)
+        nn.init.zeros_(self.logits.bias)
+
+    def forward(self, z: torch.Tensor) -> torch.Tensor:
+        log_density = F.log_softmax(self.logits(z), dim=-1)
+        return log_density.view(z.shape[0], self.grid_size, self.grid_size)
+
+
 class FourierHead2D(nn.Module):
     """2D Fourier density head."""
 
