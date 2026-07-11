@@ -122,10 +122,22 @@ def finetune(
 def evaluate(
     checkpoint: Path = typer.Option(..., help="Model checkpoint"),
     config: Path = typer.Option(Path("configs/pretrain/xlarge.yaml")),
+    split: str = typer.Option("test"),
+    out: Optional[Path] = typer.Option(None, help="Write results JSON here"),
 ):
-    """Evaluate a checkpoint against dead-reckoning / last-position baselines."""
-    typer.echo("Evaluation entry point: implemented with the trainer in Phase 2.")
-    raise typer.Exit(1)
+    """Per-horizon evaluation vs dead-reckoning / last-position baselines."""
+    import json
+    import logging
+
+    from trackfm.config import PretrainConfig, load_config
+    from trackfm.eval.forecast import evaluate_forecasting
+
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    cfg = load_config(config, PretrainConfig)
+    results = evaluate_forecasting(checkpoint, cfg, split=split)
+    if out:
+        out.write_text(json.dumps(results, indent=2))
+        typer.echo(f"written {out}")
 
 
 if __name__ == "__main__":
