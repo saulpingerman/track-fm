@@ -129,6 +129,64 @@ GAPS (searches rate-limited, re-run later): vessel-intrinsic
 traffic-interaction ML literature; economic layers (fuel/freight)
 unverified.
 
+## EXECUTION PLAN (2026-07-13) — measured steps, gated
+
+Architecture choices follow the verified fusion review
+(2026-07-context-fusion-architectures.md): gated fusion not concat, null
+embeddings + channel dropout from day one, decoder conditioning, and a
+reanalysis->forecast adaptation stage.
+
+### Track A — data acquisition (CPU/network only; overlaps GPU campaign)
+1. **Own-AIS extras** (no external dependency, highest value/cost):
+   `heading` + absolute timestamps + ship_type ALREADY SURVIVE in
+   ~/data/ais/clean (checked 2026-07-13) — heading-vs-COG is a free
+   per-point drift measurement. Extraction pass over raw zips recovers
+   what cleaning dropped: draught / destination / ETA / dims / nav-status
+   as a compact change-log table per (mmsi, day). Per-point ROT deferred.
+2. ERA5 10m winds, hourly, bbox subset (CDS API — needs free account).
+3. CMEMS regional pair (Baltic ~2km + NWShelf ~1.5km currents/waves) +
+   Baltic sea-ice 1km (Copernicus Marine — needs free account).
+4. ECMWF open-data archived operational forecasts (VERIFIED live
+   2026-07-13, no auth, s3://ecmwf-forecasts, daily runs from
+   2023-01-18, 0.4deg beta early 2023 then 0.25): 10m wind/msl for bbox,
+   HRES + **ensemble (enfo)** — feeds the forecast-adaptation stage and
+   the ensemble-conditioning gap the review critic flagged.
+5. EMODnet bathymetry DTM via WCS (VERIFIED live, no auth), static.
+Storage: bbox subsets are GB-scale vs 1.4TB free — not a constraint.
+
+### Track B — plumbing (code now; heavy rebuild AFTER gated chain)
+- Materialization v3: per-window t0 (epoch s) + heading channel +
+  (mmsi, track_id) refs for aux joins. Rebuild only after the gated
+  scaling chain stops needing v1 (disk + IO contention).
+- Field store: hourly bbox grids -> zarr/memmap; dataloader join keyed
+  by t0; leakage tests (operational eval may only see fields from
+  forecast runs issued <= window start).
+
+### Track C — zero-GPU decision gates (BEFORE any conditioned training)
+- C1 **Headroom gate**: regress DR residuals (our difficulty score) on
+  local field values over sampled windows. If fields explain ~none of
+  the hard tail, conditioning headroom is small — stop and rethink
+  before spending GPU. (Review expectation: gains are diluted, ~92%
+  open-water; judge on strata, not averages.)
+- C2 **Drift audit**: heading-vs-COG differences vs CMEMS current + ERA5
+  wind vectors — validates both the drift channel and join correctness.
+- C3 Add weather-severity deciles to the stratified eval.
+
+### Track D — GPU experiments (post-flagship-gate; each logged in DECISIONS.md)
+- D1 vessel-intrinsic channel at Medium: gated projection + learned null
+  embeddings + channel dropout (type/dims/draught/destination/drift) vs
+  plain Medium. Cheapest, fully own data — runs first.
+- D2 Stage-1' local weather (gated fusion, interpolated to exact
+  ping/time) A/B at Medium, judged on weather+difficulty strata.
+- D3 Stage-2 forward-rotated egocentric field crop conditioning the
+  DENSITY DECODER (ImplicitO-style continuous query readout as stretch).
+- D4 Forecast adaptation: evaluate reanalysis-trained conditioning under
+  archived real forecasts (paired ECMWF vs ERA5); adapt conditioning
+  pathway on paired data before any operational claim.
+
+Paul's actions: CDS + Copernicus Marine registrations (free, minutes);
+AISFormer full text via PSU library (requested 2026-07-13).
+
 ## Implied layer stack for the context grid
 Static (join once): bathymetry, TSS/lanes, infrastructure masks, ports.
 Slow (daily): sea ice, traffic-density climatology.
