@@ -3,6 +3,16 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-12 — Saturation stop: opportunity-cost projection (GPT-3-safe)
+
+A rate-floor stop (>=X% per window) kills healthy power-law runs whose
+relative gains decay below the floor mid-training. Criterion instead: fit
+val loss vs log(step) over the last 24 validations, project the gain over
+the ENTIRE remaining budget, stop when it's < 0.1% of current loss.
+Simulation-verified: power-law curves survive past 90% of budget (tail
+trimmed only where the analytic remainder buys < 0.1%); flat curves stop
+in one 12h window. Loss selects, projection thrifts, ranking monitors.
+
 ## 2026-07-12 — Campaign plan: hybrid geometries (Paul's pick)
 
 Measured at ±0.9/192/F18: head+loss dominates at EVERY scale (~300-400
