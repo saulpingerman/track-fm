@@ -3,6 +3,28 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-12 — Flagship GATED on scaling evidence (Paul's call)
+
+Paul predicts small@26mo ~= medium@26mo — i.e. capacity is NOT the binding
+constraint at 50M samples, and a week of XLarge compute would buy nothing.
+The campaign's auto-launch of the flagship was therefore REMOVED
+(campaign.sh killed after medium started; replaced by campaign_gated.sh).
+Gate evidence, gathered before any flagship decision:
+1. **7-point scaling curve** at identical protocol (50M samples, 26mo,
+   paper geometry): nano 25k / micro 70k / mini 244k / tiny 485k /
+   small 1.0M / medium 5.3M / large 18.3M. (True 10k impossible — the
+   Fourier head + input machinery floor is ~25k params.)
+2. **The 2x2** {small,medium} x {69d,26mo} — small-69d moved AHEAD of the
+   flagship (it is decision evidence, not a side experiment).
+
+Decision rule: launch XLarge manually ONLY if val CE is still falling
+at the 18M point of the curve (power-law fit, not eyeball). If the curve
+bends at/below ~1M: capacity demand must be re-created by adding
+INFORMATION (per-point AIS features, context grids) before any big run —
+scale-up compute shifts to feature/context experiments at Medium.
+Related doctrine (flagship exclusivity) unchanged: whenever a flagship
+DOES run, it runs solo.
+
 ## 2026-07-12 — Data-vs-capacity at the small end (Paul's challenge)
 
 Claim "data volume is doing enormous work" from small@26mo ~= golden-
