@@ -57,5 +57,35 @@ their evaluation machinery.
 - Operational eval: archived-forecast conditioning vs reanalysis
   conditioning (the honesty gap).
 
-(Verified data-source specifics, prior-art map, and architecture
-evidence to be merged when the deep-research pass completes.)
+
+## VERIFIED data sources (2026-07-12 review; 107 agents, primary sources)
+
+**Reanalysis (training):**
+- **ERA5** (CDS API, free): hourly, 1940-present. 10m wind u/v at 0.25
+  deg (18x36 cells over our bbox); WAVES on a coarser 0.5 deg grid
+  (9x18 cells, near-coast cells land-contaminated in Kattegat/Belts) —
+  use ERA5 winds but CMEMS regional waves. **ERA5 has NO ocean
+  currents.**
+- **CMEMS currents/waves — a regional PAIR is required** (neither covers
+  the bbox alone): BALTICSEA_ANALYSISFORECAST (~2 km, hourly, east of
+  9.04 E: Kattegat/Belts/Skagerrak) + NWSHELF (~1.5 km, 7-13 E North Sea
+  strip, masks Kattegat south of 57.25 N). Global multi-obs product
+  (0.25 deg) too coarse for the Danish straits (Oresund ~4 km wide).
+
+**Archived operational forecasts (honest inference-time eval):**
+- ECMWF open-data AWS bucket: CC-BY-4.0, daily runs SINCE 2023-01-18 —
+  covers our whole study period. IFS + AIFS.
+- NCAR GDEX d084001: GFS 0.25 deg, 2015-present, 3-hourly leads to 240h,
+  CC-BY-4.0.
+- NEGATIVE result: WeatherBench 2's HRES Zarr ends 2023-01-10 — NOT
+  usable for our period.
+- CMEMS Baltic issues 10-day ocean forecasts twice daily — operational
+  ocean conditioning through our 2h horizon is trivially covered.
+
+**Honest gap:** no claims survived verification on prior
+weather-conditioned VESSEL-trajectory work, conditioning architectures,
+reanalysis-vs-forecast domain-gap quantification, or hydrodynamic
+speed-loss literature — those sections remain design-reasoning-only for
+now (the movement-context review may partially fill prior work; treat
+architecture choice as our contribution to validate empirically).
+
