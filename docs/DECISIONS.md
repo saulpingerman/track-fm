@@ -3,15 +3,18 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
-## 2026-07-12 — Saturation stop: opportunity-cost projection (GPT-3-safe)
+## 2026-07-12 — Saturation stop v2: median-block halves (noise-robust)
 
-A rate-floor stop (>=X% per window) kills healthy power-law runs whose
-relative gains decay below the floor mid-training. Criterion instead: fit
-val loss vs log(step) over the last 24 validations, project the gain over
-the ENTIRE remaining budget, stop when it's < 0.1% of current loss.
-Simulation-verified: power-law curves survive past 90% of budget (tail
-trimmed only where the analytic remainder buys < 0.1%); flat curves stop
-in one 12h window. Loss selects, projection thrifts, ranking monitors.
+Iterated twice under Paul's challenges: (1) a rate-floor stop kills
+healthy power-law runs (relative gains decay below any floor); (2) a
+window-local slope projection has SNR < 1 under realistic +-1% val noise
+(measured 26 consecutive false positives). Final criterion: compare
+MEDIANS of the two halves of the full validation history — half-over-half
+gain < 0.4% for 4 consecutive validations, minimum 24h history. Median
+blocks grow with the run so noise (1/sqrt n) cannot fake saturation;
+healthy power laws show ~1.5% half-over-half. Seeded sims: 10/10 noisy
+power laws survive full budget, 10/10 flat runs stop within ~24h of
+eligibility. Doctrine: loss selects, medians thrift, ranking monitors.
 
 ## 2026-07-12 — Campaign plan: hybrid geometries (Paul's pick)
 
