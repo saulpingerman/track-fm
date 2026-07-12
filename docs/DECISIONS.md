@@ -3,6 +3,31 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-12 — Head ablation OUTCOME: near-tie, mixed regime -> keep Fourier
+
+Ran overnight at golden geometry (0.3°/64/F12), medium encoder, test split:
+
+| metric | Fourier | Direct |
+|---|---|---|
+| mean vs tuned-DR | 2.46x | 2.53x |
+| CE @ h800 | 2.436 | **2.256** (-7%) |
+| CE @ h1 | **0.193** | 0.210 |
+| median rank @ h400/800 | **1 / 1** | 2 / 2 |
+| k@90 (all horizons) | ~equal | ~equal |
+
+Exactly the predicted mixed case: direct wins CE at long horizons (the F12
+band limit IS discarding structure where densities spread), Fourier wins
+ranking there and CE at short. Differences are 2-7% — small.
+
+**Decision: Fourier for the scale-up run**, because (1) the scale-up
+already raises num_freqs to 18, loosening the exact band limit that
+explains direct's long-horizon CE edge; (2) Fourier saves 26M params at
+scale-up geometry (117.3M vs 143.5M); (3) only Fourier gives the
+continuous density that the H3/containment evaluation machinery is built
+on. Direct head stays as one paper line ("a per-cell softmax head matches
+within 2-7% at matched compute but forfeits the continuous density") and
+horizon-dependent num_freqs is logged as future work.
+
 ## 2026-07-11 — Fourier head vs direct-grid head (ablation)
 
 **Setup.** `head_type: direct` replaces `FourierHead2D` (predict spectral
