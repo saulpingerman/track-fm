@@ -90,6 +90,10 @@ class TrainConfig(BaseModel):
     grad_accum_steps: int = 1
     val_interval_minutes: float = 30.0
     early_stop_patience: int = 10
+    # patience resets only on a MEANINGFUL improvement (relative). Strict-<
+    # resets let 1e-5 blips keep a saturated run alive forever; best.pt still
+    # updates on any improvement.
+    early_stop_min_delta_frac: float = 0.001
     num_workers: int = 8
     seed: int = 17
     # Practical bf16 peak of this GPU (scripts/gpu_peak_bench.py) — the

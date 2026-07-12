@@ -177,6 +177,7 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
 
 
     best_val = float("inf")
+    best_meaningful = float("inf")
     bad_vals = 0
     step = 0
     samples_seen = 0
@@ -239,15 +240,21 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                                ckpt_dir / "last.pt")
                     if val_loss < best_val:
                         best_val = val_loss
-                        bad_vals = 0
                         torch.save({"model": model.state_dict(), "step": step,
                                     "val_loss": val_loss,
                                     "config": cfg.model_dump(mode="json")},
                                    ckpt_dir / "best.pt")
+                    # patience: only MEANINGFUL improvement resets the clock
+                    if val_loss < best_meaningful * (1 - t.early_stop_min_delta_frac):
+                        best_meaningful = val_loss
+                        bad_vals = 0
                     else:
                         bad_vals += 1
+                        logger.info(f"no meaningful val improvement "
+                                    f"({bad_vals}/{t.early_stop_patience}): "
+                                    f"{val_loss:.5f} vs {best_meaningful:.5f}")
                         if bad_vals >= t.early_stop_patience:
-                            logger.info(f"Early stop after {bad_vals} bad validations")
+                            logger.info("Early stop: validation saturated")
                             raise StopIteration
                 if step >= max_steps:
                     raise StopIteration
