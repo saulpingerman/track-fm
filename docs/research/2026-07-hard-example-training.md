@@ -83,6 +83,18 @@ Judge on: difficulty-stratified eval (deciles), esp. hard-decile
 model-vs-tuned-DR ratio and hard-decile capture@10, with easy-decile
 regression as the guardrail.
 
+
+## Measured artifact contamination (2026-07-12, golden69 val)
+
+One-step DR residuals (physics bound at ~10s median dt): median 1m,
+p99 92m, **>1km (impossible) = 0.012%** of windows. Cleaning already
+removed 202k single-point teleports; the survivors are multi-point
+excursions and sub-threshold offsets. Implications: negligible for
+training gradients (1/8000 with soft targets); MATERIAL for the extreme
+difficulty tail (they concentrate there) — confirming the need for the
+learnability criterion + extreme-tail trimming in any hard-example
+scheme, and a physics-bound censor flag on the top stratified decile.
+
 ## Open questions logged by the review
 - Does an excess-loss transform of the DR residual actually separate
   maneuvers from glitches on real AIS? (First thing experiment C tests.)
