@@ -89,3 +89,50 @@ speed-loss literature — those sections remain design-reasoning-only for
 now (the movement-context review may partially fill prior work; treat
 architecture choice as our contribution to validate empirically).
 
+## VERIFIED context-layer catalog beyond weather (2026-07-12; 99 agents)
+
+Ranked by (measured effect) x (availability) x (grid-alignability):
+
+1. **SEA ICE** — strongest measured non-weather effect anywhere in the
+   lit: explains 62-67% of Baltic ship-speed variance (Loptien & Axell
+   2014); ice-product choice moves icebreaker-need prediction F1 from
+   <90% to 95% (Ocean Eng 2026). FREE daily 1km grids (Copernicus
+   SEAICE_BAL_..._011_004) + FMI quarter-nm charts. Caveats: seasonal
+   (Oct-May), covers east of ~9E only; effect sizes are for SPEED/mode,
+   not yet density-grid routing — transfer is our experiment.
+2. **BATHYMETRY** — EMODnet DTM 2024, ~115m over our exact bbox, open.
+   Depth-vs-draught is a hard physical constraint; transformer
+   conditioning precedent exists (Zhang 2023, 6-DoF), routing effect
+   unquantified for density models (opportunity). Static field,
+   perfectly grid-alignable; join is trivial (one raster, no time axis).
+3. **EMODnet HUMAN ACTIVITIES bundle** — one CC-BY portal, ~18 layers:
+   offshore wind farms (poly/points, region fully covered, annual
+   updates — critical for 2023-25 North Sea/Baltic build-out), oil/gas,
+   cables, pipelines, ports, protected areas, dredging.
+4. **TRAFFIC DENSITY as an aggregate field** — EMODnet ready-made 1x1km
+   vessel-density rasters, or self-derived from our own AIS (climatology
+   or trailing-window). Bridges toward multi-vessel work with zero
+   architecture change.
+5. **TSS / shipping-lane geometry** — OSM/OpenSeaMap seamark vectors,
+   open; rasterize to lane-membership/distance-to-lane fields.
+6. **Evidence the program works**: inland-waterway transformer gained
+   ~19-22% ADE/FDE from fusing river discharge + fairway geometry —
+   direct proof exogenous navigation context helps trajectory
+   transformers.
+
+REFUTED: a claim that tides helped while weather HURT AIS prediction
+(Minssen et al.) did not survive — treat tide-vs-weather rankings
+skeptically; tides remain plausible for the shallow straits, unproven.
+
+GAPS (searches rate-limited, re-run later): vessel-intrinsic
+(draught/destination/ETA — we hold these in raw AIS regardless) and
+traffic-interaction ML literature; economic layers (fuel/freight)
+unverified.
+
+## Implied layer stack for the context grid
+Static (join once): bathymetry, TSS/lanes, infrastructure masks, ports.
+Slow (daily): sea ice, traffic-density climatology.
+Fast (hourly, forecastable): weather/currents/waves [verified above].
+Per-vessel tokens: type, dims, draught, declared destination/ETA, nav
+status (from our own raw AIS; extraction pass needed — fields currently
+dropped at cleaning).
