@@ -1,0 +1,14 @@
+# Golden-comparison slice: Jan 1 - Feb 26 2025 (57 days), matching the
+# paper's exp-11 window as closely as the data allows. Used to sanity-check
+# the refactored trainer against paper Table 1 before the full campaign.
+clean_dir: ~/data/ais/clean
+out_dir: ~/data/trackfm/materialized/golden69
+window_size: 928
+input_len: 128
+stride: 32
+num_output_shards: 32
+train_frac: 0.8
+val_frac: 0.1
+seed: 17
+start_date: "2025-01-01"
+end_date: "2025-02-26"

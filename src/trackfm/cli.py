@@ -3,6 +3,7 @@
 Subcommands mirror the project stages:
   download     Fetch raw DMA AIS zips
   clean        Run the cleaning pipeline (raw zips -> partitioned parquet)
+  extract-aux  Extract vessel-intrinsic aux-field change-logs from raw zips
   materialize  Window + shuffle cleaned tracks into training shards
   pretrain     Pretrain the foundation model
   finetune     Fine-tune on a downstream task
@@ -46,6 +47,34 @@ def clean(
     cfg = load_config(str(config))
     pipeline = AISPipeline(cfg)
     stats = pipeline.run(resume=resume and not reset, max_files=max_files)
+    typer.echo(stats)
+
+
+@app.command("extract-aux")
+def extract_aux(
+    raw_dir: Path = typer.Option(Path("~/data/ais/raw"), help="Raw DMA zip directory"),
+    aux_dir: Path = typer.Option(Path("~/data/ais/aux"), help="Output directory"),
+    state_dir: Path = typer.Option(Path("~/data/ais/state/aux"), help="Checkpoint directory"),
+    resume: bool = typer.Option(True, help="Skip days/zips already processed"),
+    max_files: Optional[int] = typer.Option(None, help="Limit number of zips (smoke test)"),
+    day: Optional[list[str]] = typer.Option(
+        None, help="Restrict to YYYY-MM-DD day(s); repeatable (smoke test)"
+    ),
+):
+    """Extract vessel-intrinsic aux-field change-logs from raw zips."""
+    import logging
+
+    from trackfm.data.aux_fields import extract_aux_fields
+
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
+    stats = extract_aux_fields(
+        raw_dir.expanduser(),
+        aux_dir.expanduser(),
+        state_dir.expanduser(),
+        resume=resume,
+        max_files=max_files,
+        days=day,
+    )
     typer.echo(stats)
 
 

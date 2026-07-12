@@ -1,0 +1,3957 @@
+[
+ {
+  "name": "APM Container Terminal Aarhus",
+  "lat": 56.15315,
+  "lon": 10.23814
+ },
+ {
+  "name": "ASVzR - Akademische Segler-Verein zu Rostock",
+  "lat": 54.09506,
+  "lon": 12.12273
+ },
+ {
+  "name": "Aalbæk Havn",
+  "lat": 57.59242,
+  "lon": 10.42911
+ },
+ {
+  "name": "Aalbæk Havn",
+  "lat": 57.59225,
+  "lon": 10.42794
+ },
+ {
+  "name": "Aarhus Lystbådehavn",
+  "lat": 56.16573,
+  "lon": 10.22144
+ },
+ {
+  "name": "Aarø Havn",
+  "lat": 55.26072,
+  "lon": 9.73085
+ },
+ {
+  "name": "Agersbæk Havn",
+  "lat": 56.15397,
+  "lon": 8.24767
+ },
+ {
+  "name": "Aggersund Havn",
+  "lat": 56.99741,
+  "lon": 9.29342
+ },
+ {
+  "name": "Agnefest",
+  "lat": 58.12072,
+  "lon": 7.0473
+ },
+ {
+  "name": "Almösunds Marina",
+  "lat": 58.06587,
+  "lon": 11.75648
+ },
+ {
+  "name": "Alter Hafen",
+  "lat": 54.37321,
+  "lon": 9.08617
+ },
+ {
+  "name": "Alter Marinehafen",
+  "lat": 54.30483,
+  "lon": 13.12401
+ },
+ {
+  "name": "Amundö Marina",
+  "lat": 57.5991,
+  "lon": 11.92032
+ },
+ {
+  "name": "Ancora Marina",
+  "lat": 54.09274,
+  "lon": 10.807
+ },
+ {
+  "name": "Ancora Marina",
+  "lat": 54.09326,
+  "lon": 10.80135
+ },
+ {
+  "name": "Angelverein",
+  "lat": 54.29567,
+  "lon": 13.19023
+ },
+ {
+  "name": "Anglerverein Flotthafen Stralsund e. V.",
+  "lat": 54.31106,
+  "lon": 13.10039
+ },
+ {
+  "name": "Anholt Havn",
+  "lat": 56.71578,
+  "lon": 11.51081
+ },
+ {
+  "name": "Anleger Glewitzer Fähre",
+  "lat": 54.24109,
+  "lon": 13.3167
+ },
+ {
+  "name": "Arendal Seilforening gjestehavn",
+  "lat": 58.4341,
+  "lon": 8.7932
+ },
+ {
+  "name": "Arendal gjestehavn",
+  "lat": 58.45633,
+  "lon": 8.76318
+ },
+ {
+  "name": "Arilds hamn",
+  "lat": 56.27543,
+  "lon": 12.57399
+ },
+ {
+  "name": "Arnisser Segel-Club",
+  "lat": 54.65654,
+  "lon": 9.93622
+ },
+ {
+  "name": "Asaa Havn",
+  "lat": 57.14442,
+  "lon": 10.42644
+ },
+ {
+  "name": "Askerö Brygga",
+  "lat": 58.09933,
+  "lon": 11.78685
+ },
+ {
+  "name": "Assens Marina",
+  "lat": 55.26801,
+  "lon": 9.88564
+ },
+ {
+  "name": "Attrup Havn Bådelaug",
+  "lat": 57.03784,
+  "lon": 9.45536
+ },
+ {
+  "name": "Avernakø Bådehavn",
+  "lat": 55.03985,
+  "lon": 10.25392
+ },
+ {
+  "name": "Baagø Havn",
+  "lat": 55.29695,
+  "lon": 9.80411
+ },
+ {
+  "name": "Bagenkop Havn",
+  "lat": 54.75203,
+  "lon": 10.67335
+ },
+ {
+  "name": "Balka Havn",
+  "lat": 55.03965,
+  "lon": 15.11113
+ },
+ {
+  "name": "BalleStrand NordHavn",
+  "lat": 55.03395,
+  "lon": 12.14288
+ },
+ {
+  "name": "Ballen Færgehavn",
+  "lat": 55.80781,
+  "lon": 10.64676
+ },
+ {
+  "name": "Ballen Havn",
+  "lat": 55.81623,
+  "lon": 10.6399
+ },
+ {
+  "name": "Bandholm Havn",
+  "lat": 54.83737,
+  "lon": 11.48931
+ },
+ {
+  "name": "Barakkebroen",
+  "lat": 55.66703,
+  "lon": 12.74169
+ },
+ {
+  "name": "Barsebäckshamn",
+  "lat": 55.75699,
+  "lon": 12.90276
+ },
+ {
+  "name": "Barth",
+  "lat": 54.37181,
+  "lon": 12.72887
+ },
+ {
+  "name": "Barther Seglerverein",
+  "lat": 54.37182,
+  "lon": 12.72596
+ },
+ {
+  "name": "Barther Yachtservice",
+  "lat": 54.37176,
+  "lon": 12.72204
+ },
+ {
+  "name": "Basen Solny Im. 100-Lecia Ligi Morskiej i Rzecznej",
+  "lat": 54.17856,
+  "lon": 15.56009
+ },
+ {
+  "name": "Bassholmens gästhamn",
+  "lat": 58.2419,
+  "lon": 11.50647
+ },
+ {
+  "name": "Berga Hamnförening",
+  "lat": 58.0028,
+  "lon": 11.74644
+ },
+ {
+  "name": "Binnenhafen",
+  "lat": 54.17838,
+  "lon": 7.88933
+ },
+ {
+  "name": "Binnenhafen",
+  "lat": 54.69239,
+  "lon": 8.57263
+ },
+ {
+  "name": "Binnenhafen",
+  "lat": 54.69167,
+  "lon": 8.57181
+ },
+ {
+  "name": "Bjerregård Havn",
+  "lat": 55.88042,
+  "lon": 8.1817
+ },
+ {
+  "name": "Bjöla Marina",
+  "lat": 57.62252,
+  "lon": 11.91065
+ },
+ {
+  "name": "Björholmens Marina",
+  "lat": 58.05334,
+  "lon": 11.52394
+ },
+ {
+  "name": "Björkfors Båtklubb",
+  "lat": 58.01444,
+  "lon": 15.90486
+ },
+ {
+  "name": "Björkö Hamn",
+  "lat": 57.73278,
+  "lon": 11.67197
+ },
+ {
+  "name": "Björkö hamn",
+  "lat": 57.73324,
+  "lon": 11.66974
+ },
+ {
+  "name": "Blans Havn",
+  "lat": 54.86879,
+  "lon": 11.43185
+ },
+ {
+  "name": "Bokenäset",
+  "lat": 58.25983,
+  "lon": 11.59912
+ },
+ {
+  "name": "Bootshafen Schausende - Club Nautic Glücksburg",
+  "lat": 54.85776,
+  "lon": 9.57106
+ },
+ {
+  "name": "Bootshalle NSV Rantum",
+  "lat": 54.85669,
+  "lon": 8.29977
+ },
+ {
+  "name": "Bootswerft Freest",
+  "lat": 54.13626,
+  "lon": 13.73003
+ },
+ {
+  "name": "Bork Hytteby Havn",
+  "lat": 55.83223,
+  "lon": 8.26409
+ },
+ {
+  "name": "Borstahusens hamn",
+  "lat": 55.89496,
+  "lon": 12.80033
+ },
+ {
+  "name": "Bosau",
+  "lat": 54.10162,
+  "lon": 10.42371
+ },
+ {
+  "name": "Bovallstrands Gästhamn",
+  "lat": 58.47664,
+  "lon": 11.31846
+ },
+ {
+  "name": "Bovallstrands Marina",
+  "lat": 58.4706,
+  "lon": 11.31274
+ },
+ {
+  "name": "Brandsbøl Havn",
+  "lat": 55.01125,
+  "lon": 9.77958
+ },
+ {
+  "name": "Bregnør Havn",
+  "lat": 55.48605,
+  "lon": 10.59762
+ },
+ {
+  "name": "Bråtavikens Båtsällskap",
+  "lat": 57.34121,
+  "lon": 12.09659
+ },
+ {
+  "name": "Brøndby Havn",
+  "lat": 55.60898,
+  "lon": 12.44212
+ },
+ {
+  "name": "Bua Hamn",
+  "lat": 57.24151,
+  "lon": 12.11134
+ },
+ {
+  "name": "Bua Hamn",
+  "lat": 57.24036,
+  "lon": 12.11227
+ },
+ {
+  "name": "Bäckvikens Hamn",
+  "lat": 55.90315,
+  "lon": 12.72164
+ },
+ {
+  "name": "Bäckvikens Hamn",
+  "lat": 55.90322,
+  "lon": 12.72272
+ },
+ {
+  "name": "Bådelauget Bøgeskov",
+  "lat": 55.62714,
+  "lon": 9.74806
+ },
+ {
+  "name": "Båly gjestehavn",
+  "lat": 58.03871,
+  "lon": 7.14844
+ },
+ {
+  "name": "Båstad hamn",
+  "lat": 56.43589,
+  "lon": 12.84447
+ },
+ {
+  "name": "Bøjden Bro",
+  "lat": 55.10654,
+  "lon": 10.09624
+ },
+ {
+  "name": "Bønnerup Havn",
+  "lat": 56.53411,
+  "lon": 10.7134
+ },
+ {
+  "name": "Bønnerup Lystbådehavn",
+  "lat": 56.5329,
+  "lon": 10.71086
+ },
+ {
+  "name": "Büsumer Seglerverein e.V.",
+  "lat": 54.12308,
+  "lon": 8.86469
+ },
+ {
+  "name": "Christianshavn",
+  "lat": 55.67638,
+  "lon": 12.59693
+ },
+ {
+  "name": "Citadellshamnen",
+  "lat": 55.60569,
+  "lon": 12.98361
+ },
+ {
+  "name": "Citymarina Stralsund",
+  "lat": 54.31819,
+  "lon": 13.09834
+ },
+ {
+  "name": "Dagebüll Hafen",
+  "lat": 54.73093,
+  "lon": 8.68911
+ },
+ {
+  "name": "Dagebüll Hafen Nordmole",
+  "lat": 54.73201,
+  "lon": 8.68952
+ },
+ {
+  "name": "Dalben 28",
+  "lat": 54.11708,
+  "lon": 12.09768
+ },
+ {
+  "name": "Dockan Marina",
+  "lat": 55.61779,
+  "lon": 12.98839
+ },
+ {
+  "name": "Domstens hamn",
+  "lat": 56.11663,
+  "lon": 12.60413
+ },
+ {
+  "name": "Donsö fiskhamn",
+  "lat": 57.59893,
+  "lon": 11.79303
+ },
+ {
+  "name": "Donsö gästhamn",
+  "lat": 57.59834,
+  "lon": 11.79191
+ },
+ {
+  "name": "Doverodde Havn",
+  "lat": 56.71752,
+  "lon": 8.47399
+ },
+ {
+  "name": "Dragsmarks Varv",
+  "lat": 58.23743,
+  "lon": 11.55209
+ },
+ {
+  "name": "Dragsmarks klosters hamn",
+  "lat": 58.25515,
+  "lon": 11.55512
+ },
+ {
+  "name": "Dranske",
+  "lat": 54.62944,
+  "lon": 13.23603
+ },
+ {
+  "name": "Drejø Gamle Havn",
+  "lat": 54.97462,
+  "lon": 10.42029
+ },
+ {
+  "name": "Drejø Havn",
+  "lat": 54.96578,
+  "lon": 10.43651
+ },
+ {
+  "name": "Dronningborg Lystbådehavn",
+  "lat": 56.46697,
+  "lon": 10.08151
+ },
+ {
+  "name": "Dyreborg Havn",
+  "lat": 55.07179,
+  "lon": 10.21726
+ },
+ {
+  "name": "Dänholm",
+  "lat": 54.30501,
+  "lon": 13.12187
+ },
+ {
+  "name": "Dünenhafen",
+  "lat": 54.18393,
+  "lon": 7.90341
+ },
+ {
+  "name": "Ebeltoft Færgehavn",
+  "lat": 56.15378,
+  "lon": 10.66573
+ },
+ {
+  "name": "Edshultshalls gästhamn",
+  "lat": 58.10785,
+  "lon": 11.46554
+ },
+ {
+  "name": "Egense Lystbådehavn",
+  "lat": 56.98383,
+  "lon": 10.30571
+ },
+ {
+  "name": "Egå Marina",
+  "lat": 56.20981,
+  "lon": 10.28881
+ },
+ {
+  "name": "Ehemaliger Fischereihafen",
+  "lat": 54.69368,
+  "lon": 8.57457
+ },
+ {
+  "name": "Ejby Havn",
+  "lat": 55.69547,
+  "lon": 11.83734
+ },
+ {
+  "name": "Ekenabben Gästhamn",
+  "lat": 56.10171,
+  "lon": 15.63645
+ },
+ {
+  "name": "Ellös gästhamn",
+  "lat": 58.18458,
+  "lon": 11.46628
+ },
+ {
+  "name": "Endelave Færgehavn",
+  "lat": 55.76229,
+  "lon": 10.27276
+ },
+ {
+  "name": "Engewikens Båtförening",
+  "lat": 58.03447,
+  "lon": 11.50587
+ },
+ {
+  "name": "Ensted Havn",
+  "lat": 55.02579,
+  "lon": 9.43925
+ },
+ {
+  "name": "Eriksberg",
+  "lat": 57.69702,
+  "lon": 11.90909
+ },
+ {
+  "name": "Ernst hamn",
+  "lat": 57.69821,
+  "lon": 11.68562
+ },
+ {
+  "name": "Esbjerg Havn",
+  "lat": 55.46814,
+  "lon": 8.43027
+ },
+ {
+  "name": "Esbjerg Lystbådehavn",
+  "lat": 55.48194,
+  "lon": 8.41077
+ },
+ {
+  "name": "Espergærde Havn",
+  "lat": 55.99242,
+  "lon": 12.56244
+ },
+ {
+  "name": "FSC - Flensburger Segel-Club",
+  "lat": 54.83834,
+  "lon": 9.52389
+ },
+ {
+  "name": "FYC - Flensborg Yacht Club",
+  "lat": 54.82242,
+  "lon": 9.47243
+ },
+ {
+  "name": "Falkenbergs Båtsällskap Gästhamn",
+  "lat": 56.89366,
+  "lon": 12.49197
+ },
+ {
+  "name": "Falsterbokanalens småbåtshamn",
+  "lat": 55.41308,
+  "lon": 12.93072
+ },
+ {
+  "name": "Farehamnen",
+  "lat": 57.11591,
+  "lon": 12.237
+ },
+ {
+  "name": "Faurby Marina",
+  "lat": 55.5125,
+  "lon": 9.63043
+ },
+ {
+  "name": "Faxe Ladeplads Lystbådehavn A.m.b.a.",
+  "lat": 55.21343,
+  "lon": 12.15997
+ },
+ {
+  "name": "Fedhavnen",
+  "lat": 55.17042,
+  "lon": 12.09117
+ },
+ {
+  "name": "Felsted Kog Havn",
+  "lat": 56.32012,
+  "lon": 8.23638
+ },
+ {
+  "name": "Fevik smbåthavn",
+  "lat": 58.37467,
+  "lon": 8.67728
+ },
+ {
+  "name": "Fischerei- und Sportboothafen Pruchten",
+  "lat": 54.38081,
+  "lon": 12.68251
+ },
+ {
+  "name": "Fischereihafen Freest",
+  "lat": 54.13738,
+  "lon": 13.72951
+ },
+ {
+  "name": "Fischereihafen Thiessow",
+  "lat": 54.28061,
+  "lon": 13.70855
+ },
+ {
+  "name": "Fischerhafen Vitt",
+  "lat": 54.66571,
+  "lon": 13.43261
+ },
+ {
+  "name": "Fiskebäcks småbåtshamn",
+  "lat": 57.64634,
+  "lon": 11.85277
+ },
+ {
+  "name": "Fiskebäcks småbåtshamn AB",
+  "lat": 57.64781,
+  "lon": 11.85405
+ },
+ {
+  "name": "Fiskebäckskils småbåtshamn",
+  "lat": 58.24241,
+  "lon": 11.46113
+ },
+ {
+  "name": "Fiskerihavn",
+  "lat": 55.96358,
+  "lon": 11.84651
+ },
+ {
+  "name": "Fiskerihavn",
+  "lat": 56.19374,
+  "lon": 10.66848
+ },
+ {
+  "name": "Fiskerihavnen",
+  "lat": 55.4495,
+  "lon": 10.6633
+ },
+ {
+  "name": "Fiskhamn",
+  "lat": 58.38102,
+  "lon": 11.26064
+ },
+ {
+  "name": "Fiskhamn",
+  "lat": 57.88682,
+  "lon": 11.59514
+ },
+ {
+  "name": "Fiskhamnens gästhamn",
+  "lat": 58.27471,
+  "lon": 11.44157
+ },
+ {
+  "name": "Fjellebroen Havn",
+  "lat": 55.05947,
+  "lon": 10.38043
+ },
+ {
+  "name": "Flakfortet Havn",
+  "lat": 55.70288,
+  "lon": 12.73051
+ },
+ {
+  "name": "Flensburg Industriehafen",
+  "lat": 54.80287,
+  "lon": 9.44157
+ },
+ {
+  "name": "Flådestation Frederikshavn",
+  "lat": 57.43192,
+  "lon": 10.53932
+ },
+ {
+  "name": "Forellensteg Seedorf",
+  "lat": 54.35234,
+  "lon": 13.65282
+ },
+ {
+  "name": "Forsbäcks småbåtshamn",
+  "lat": 57.45328,
+  "lon": 12.0549
+ },
+ {
+  "name": "Fotö gästhamn",
+  "lat": 57.6669,
+  "lon": 11.65446
+ },
+ {
+  "name": "Frederikshavn Havn",
+  "lat": 57.43888,
+  "lon": 10.55092
+ },
+ {
+  "name": "Frederiksholmsløbet",
+  "lat": 55.65378,
+  "lon": 12.55388
+ },
+ {
+  "name": "Frederikssund Havn",
+  "lat": 55.83614,
+  "lon": 12.05389
+ },
+ {
+  "name": "Frederikssund Lystbådehavn",
+  "lat": 55.82613,
+  "lon": 12.05851
+ },
+ {
+  "name": "Frederiksværk Marina",
+  "lat": 55.96325,
+  "lon": 11.99722
+ },
+ {
+  "name": "Fritidsbåtshamn",
+  "lat": 58.44454,
+  "lon": 11.58785
+ },
+ {
+  "name": "Fritidshamn",
+  "lat": 58.42524,
+  "lon": 11.64719
+ },
+ {
+  "name": "Fröjdendals småbåtshamn",
+  "lat": 58.19681,
+  "lon": 11.49136
+ },
+ {
+  "name": "Fur Havn",
+  "lat": 56.80337,
+  "lon": 9.02071
+ },
+ {
+  "name": "Furuholmen",
+  "lat": 58.04696,
+  "lon": 7.25868
+ },
+ {
+  "name": "Fährhafen",
+  "lat": 54.69296,
+  "lon": 8.5768
+ },
+ {
+  "name": "Fährhafen Dagebüll",
+  "lat": 54.73083,
+  "lon": 8.69047
+ },
+ {
+  "name": "Fåborg Lystbådehavn",
+  "lat": 55.09447,
+  "lon": 10.23864
+ },
+ {
+  "name": "Fåborg Lystbådehavn",
+  "lat": 55.09756,
+  "lon": 10.23261
+ },
+ {
+  "name": "Færgehavn",
+  "lat": 55.093,
+  "lon": 10.2411
+ },
+ {
+  "name": "Færgehavn",
+  "lat": 55.96583,
+  "lon": 11.84423
+ },
+ {
+  "name": "Færgehavn",
+  "lat": 55.94511,
+  "lon": 11.7673
+ },
+ {
+  "name": "Förde-Yacht-Club Bockholmwik",
+  "lat": 54.83089,
+  "lon": 9.61519
+ },
+ {
+  "name": "GFA:s Båthamn",
+  "lat": 57.62533,
+  "lon": 11.91202
+ },
+ {
+  "name": "Galtabäcks Hamn",
+  "lat": 57.02716,
+  "lon": 12.30903
+ },
+ {
+  "name": "Gambøt Lystbådehavn",
+  "lat": 55.04182,
+  "lon": 10.66842
+ },
+ {
+  "name": "Gamle Havn",
+  "lat": 56.08762,
+  "lon": 8.24036
+ },
+ {
+  "name": "Gamle Svajebassin",
+  "lat": 55.49199,
+  "lon": 9.49136
+ },
+ {
+  "name": "Gammelhavn",
+  "lat": 55.04214,
+  "lon": 9.42547
+ },
+ {
+  "name": "Garderhøjens Havn",
+  "lat": 55.40002,
+  "lon": 12.31793
+ },
+ {
+  "name": "Gastlieger Steg Yachthafen Wyk",
+  "lat": 54.69456,
+  "lon": 8.57746
+ },
+ {
+  "name": "Gedser",
+  "lat": 54.57126,
+  "lon": 11.92666
+ },
+ {
+  "name": "Gedser Lystbådehavn",
+  "lat": 54.58102,
+  "lon": 11.92244
+ },
+ {
+  "name": "Gelting Mole",
+  "lat": 54.75358,
+  "lon": 9.86159
+ },
+ {
+  "name": "Gershøj Havn",
+  "lat": 55.7165,
+  "lon": 11.98063
+ },
+ {
+  "name": "Getskärs Marina",
+  "lat": 58.01504,
+  "lon": 11.79811
+ },
+ {
+  "name": "Getteröns Småbåtshamn",
+  "lat": 57.11319,
+  "lon": 12.23039
+ },
+ {
+  "name": "Gilleleje Havn",
+  "lat": 56.12746,
+  "lon": 12.311
+ },
+ {
+  "name": "Gisseløre Lystbådehavn",
+  "lat": 55.67749,
+  "lon": 11.07307
+ },
+ {
+  "name": "Glommens fiskehamn",
+  "lat": 56.92936,
+  "lon": 12.35247
+ },
+ {
+  "name": "Glommens hamn",
+  "lat": 56.92996,
+  "lon": 12.35141
+ },
+ {
+  "name": "Glowe Hafen",
+  "lat": 54.57443,
+  "lon": 13.46783
+ },
+ {
+  "name": "Glyngøre Havn",
+  "lat": 56.76422,
+  "lon": 8.86398
+ },
+ {
+  "name": "Godshavn Vige",
+  "lat": 58.16247,
+  "lon": 8.04094
+ },
+ {
+  "name": "Gottskärs Hamn",
+  "lat": 57.38694,
+  "lon": 12.01952
+ },
+ {
+  "name": "Greifswald",
+  "lat": 54.0993,
+  "lon": 13.3837
+ },
+ {
+  "name": "Grenaa Havn",
+  "lat": 56.40975,
+  "lon": 10.92732
+ },
+ {
+  "name": "Grenaa Havn",
+  "lat": 56.41339,
+  "lon": 10.92428
+ },
+ {
+  "name": "Greve Marina",
+  "lat": 55.59482,
+  "lon": 12.35492
+ },
+ {
+  "name": "Grimstad gjestehavn",
+  "lat": 58.34106,
+  "lon": 8.5961
+ },
+ {
+  "name": "Grubnow",
+  "lat": 54.55122,
+  "lon": 13.35324
+ },
+ {
+  "name": "Grundsunds Marina",
+  "lat": 58.20887,
+  "lon": 11.42192
+ },
+ {
+  "name": "Grundsunds hamn",
+  "lat": 58.216,
+  "lon": 11.41577
+ },
+ {
+  "name": "Gråsten Havn",
+  "lat": 54.9187,
+  "lon": 9.59931
+ },
+ {
+  "name": "Grötviks småbåtshamn",
+  "lat": 56.64097,
+  "lon": 12.77942
+ },
+ {
+  "name": "Grötö hamn",
+  "lat": 57.69525,
+  "lon": 11.687
+ },
+ {
+  "name": "Guldborg Havn",
+  "lat": 54.8709,
+  "lon": 11.74665
+ },
+ {
+  "name": "Gullholmens gästhamn",
+  "lat": 58.17695,
+  "lon": 11.40476
+ },
+ {
+  "name": "Gullmarsstrands småbåtshamn",
+  "lat": 58.24988,
+  "lon": 11.45782
+ },
+ {
+  "name": "Gundestrup Marina",
+  "lat": 55.77936,
+  "lon": 11.61606
+ },
+ {
+  "name": "Gustavsberg gästhamn",
+  "lat": 58.33061,
+  "lon": 11.90202
+ },
+ {
+  "name": "Gyldendal Lystbådehavn",
+  "lat": 56.57986,
+  "lon": 8.7098
+ },
+ {
+  "name": "Gästhamn",
+  "lat": 58.3522,
+  "lon": 11.22758
+ },
+ {
+  "name": "Gästhamn",
+  "lat": 58.23867,
+  "lon": 11.54835
+ },
+ {
+  "name": "Gästhamn - Ekenabben",
+  "lat": 56.1198,
+  "lon": 15.65059
+ },
+ {
+  "name": "Gästhamn - Säljö Brygga",
+  "lat": 56.16173,
+  "lon": 15.66967
+ },
+ {
+  "name": "Gästhamn Dragsö Utkik",
+  "lat": 56.17289,
+  "lon": 15.5642
+ },
+ {
+  "name": "Gästhamn Hallahamnen, Hasslö",
+  "lat": 56.11724,
+  "lon": 15.45058
+ },
+ {
+  "name": "Gästhamn Kalvsund",
+  "lat": 57.7114,
+  "lon": 11.68262
+ },
+ {
+  "name": "Gästhamn Lökanabben Aspö",
+  "lat": 56.11309,
+  "lon": 15.56328
+ },
+ {
+  "name": "Gästhamn Lövstavikens Båtförening",
+  "lat": 56.89137,
+  "lon": 12.4679
+ },
+ {
+  "name": "Gästhamn Stenshamn",
+  "lat": 56.03102,
+  "lon": 15.77815
+ },
+ {
+  "name": "Gästhamn Torhamn",
+  "lat": 56.09337,
+  "lon": 15.823
+ },
+ {
+  "name": "Gästhamn Ungskär",
+  "lat": 56.04127,
+  "lon": 15.80238
+ },
+ {
+  "name": "Gästhamn Utklippan",
+  "lat": 55.95507,
+  "lon": 15.70374
+ },
+ {
+  "name": "Gårda Brygga",
+  "lat": 57.36433,
+  "lon": 12.08201
+ },
+ {
+  "name": "Gåsö småbåtshamn",
+  "lat": 58.23394,
+  "lon": 11.4121
+ },
+ {
+  "name": "Göteborg City Marina",
+  "lat": 57.72078,
+  "lon": 11.97585
+ },
+ {
+  "name": "Göteborgs Fiskehamn",
+  "lat": 57.69889,
+  "lon": 11.92381
+ },
+ {
+  "name": "HYS - Hanseatische Yachtschule Glücksburg",
+  "lat": 54.83884,
+  "lon": 9.52514
+ },
+ {
+  "name": "Haarum Havn",
+  "lat": 56.62918,
+  "lon": 8.21754
+ },
+ {
+  "name": "Hafen Barhöft",
+  "lat": 54.43372,
+  "lon": 13.03167
+ },
+ {
+  "name": "Hafen Breege",
+  "lat": 54.61237,
+  "lon": 13.35597
+ },
+ {
+  "name": "Hafen Damgarten",
+  "lat": 54.25072,
+  "lon": 12.47116
+ },
+ {
+  "name": "Hafen Kloster (Hiddensee)",
+  "lat": 54.58382,
+  "lon": 13.11201
+ },
+ {
+  "name": "Hafen Lauterbach",
+  "lat": 54.34143,
+  "lon": 13.5016
+ },
+ {
+  "name": "Hafen Neuendorf",
+  "lat": 54.33493,
+  "lon": 12.52865
+ },
+ {
+  "name": "Hafen Neuendorf (Hiddensee)",
+  "lat": 54.52396,
+  "lon": 13.09307
+ },
+ {
+  "name": "Hafen Olpenitz",
+  "lat": 54.66123,
+  "lon": 10.02499
+ },
+ {
+  "name": "Hafen Olpenitz",
+  "lat": 54.66063,
+  "lon": 10.01584
+ },
+ {
+  "name": "Hafen Orth/Fehmarn",
+  "lat": 54.44642,
+  "lon": 11.05025
+ },
+ {
+  "name": "Hafen Prerow",
+  "lat": 54.44526,
+  "lon": 12.58622
+ },
+ {
+  "name": "Hafen Puddemin",
+  "lat": 54.27859,
+  "lon": 13.33378
+ },
+ {
+  "name": "Hafen Schlüttsiel",
+  "lat": 54.68188,
+  "lon": 8.75366
+ },
+ {
+  "name": "Hafen Schnatermann",
+  "lat": 54.17362,
+  "lon": 12.1429
+ },
+ {
+  "name": "Hafen Seedorf",
+  "lat": 54.35402,
+  "lon": 13.65274
+ },
+ {
+  "name": "Hafen Vierow",
+  "lat": 54.13294,
+  "lon": 13.57414
+ },
+ {
+  "name": "Hafen Wieck",
+  "lat": 54.4085,
+  "lon": 12.59756
+ },
+ {
+  "name": "Hafen Wieck (bei Greifswald)",
+  "lat": 54.0958,
+  "lon": 13.45363
+ },
+ {
+  "name": "Hafenbecken 1 / Museumshafen",
+  "lat": 54.1272,
+  "lon": 8.85854
+ },
+ {
+  "name": "Hafenbecken 2",
+  "lat": 54.12785,
+  "lon": 8.86237
+ },
+ {
+  "name": "Hafenbecken 3",
+  "lat": 54.12598,
+  "lon": 8.86344
+ },
+ {
+  "name": "Hafenbecken 4",
+  "lat": 54.12432,
+  "lon": 8.86488
+ },
+ {
+  "name": "Hafendorf Wiek",
+  "lat": 54.62262,
+  "lon": 13.28455
+ },
+ {
+  "name": "Hafenmeister",
+  "lat": 54.09863,
+  "lon": 10.81541
+ },
+ {
+  "name": "Hallig Segel Club auf Hooge",
+  "lat": 54.57542,
+  "lon": 8.54117
+ },
+ {
+  "name": "Hals Havn",
+  "lat": 56.9906,
+  "lon": 10.30803
+ },
+ {
+  "name": "Hals Jollehavn",
+  "lat": 56.99062,
+  "lon": 10.31094
+ },
+ {
+  "name": "Hammars småbåtshamn",
+  "lat": 57.62645,
+  "lon": 11.87738
+ },
+ {
+  "name": "Handbjerg Marina",
+  "lat": 56.48117,
+  "lon": 8.71972
+ },
+ {
+  "name": "Hanstholm Havn",
+  "lat": 57.12527,
+  "lon": 8.59313
+ },
+ {
+  "name": "Haralds Havn",
+  "lat": 55.16602,
+  "lon": 15.05134
+ },
+ {
+  "name": "Hasle Havn",
+  "lat": 55.18791,
+  "lon": 14.70233
+ },
+ {
+  "name": "Hasle Kutterservice",
+  "lat": 55.18505,
+  "lon": 14.70207
+ },
+ {
+  "name": "Hasselösunds gästhamn",
+  "lat": 58.36591,
+  "lon": 11.24105
+ },
+ {
+  "name": "Hasslö Båtförening",
+  "lat": 56.11725,
+  "lon": 15.45173
+ },
+ {
+  "name": "Haurvig Havn",
+  "lat": 55.93942,
+  "lon": 8.16829
+ },
+ {
+  "name": "Haverslev Havn",
+  "lat": 57.02837,
+  "lon": 9.40211
+ },
+ {
+  "name": "Havnsø Havn",
+  "lat": 55.75448,
+  "lon": 11.32649
+ },
+ {
+  "name": "Havnsø Havn",
+  "lat": 55.75395,
+  "lon": 11.32428
+ },
+ {
+  "name": "Havsbadets gästhamn",
+  "lat": 58.26988,
+  "lon": 11.43736
+ },
+ {
+  "name": "Hedens hamn",
+  "lat": 57.69522,
+  "lon": 11.66564
+ },
+ {
+  "name": "Hejlsminde Havn",
+  "lat": 55.36087,
+  "lon": 9.60071
+ },
+ {
+  "name": "Helsingør Nordhavn",
+  "lat": 56.04299,
+  "lon": 12.61536
+ },
+ {
+  "name": "Henningsen & Steckmest",
+  "lat": 54.66974,
+  "lon": 9.93853
+ },
+ {
+  "name": "Henåns gästhamn",
+  "lat": 58.24078,
+  "lon": 11.6772
+ },
+ {
+  "name": "Herslev Havn",
+  "lat": 55.67765,
+  "lon": 11.98934
+ },
+ {
+  "name": "Hirtshals Havn",
+  "lat": 57.59506,
+  "lon": 9.9593
+ },
+ {
+  "name": "Hirtshals Marina",
+  "lat": 57.59222,
+  "lon": 9.9562
+ },
+ {
+  "name": "Hjarbæk Havn",
+  "lat": 56.53121,
+  "lon": 9.31862
+ },
+ {
+  "name": "Hjelms Bryggor",
+  "lat": 57.85314,
+  "lon": 11.69784
+ },
+ {
+  "name": "Hjo hamn",
+  "lat": 58.30224,
+  "lon": 14.29556
+ },
+ {
+  "name": "Hjuviks Båtklubb",
+  "lat": 57.71023,
+  "lon": 11.70521
+ },
+ {
+  "name": "Hjuviks brygga",
+  "lat": 57.70403,
+  "lon": 11.71122
+ },
+ {
+  "name": "Hobro Både- og Fiskerihavn",
+  "lat": 56.63852,
+  "lon": 9.80629
+ },
+ {
+  "name": "Hobro Lystbådehavn",
+  "lat": 56.64351,
+  "lon": 9.81197
+ },
+ {
+  "name": "Holbæk Marina",
+  "lat": 55.72379,
+  "lon": 11.76078
+ },
+ {
+  "name": "Holstebro-Struer Havn",
+  "lat": 56.49387,
+  "lon": 8.59729
+ },
+ {
+  "name": "Holstebro-Struer Havn",
+  "lat": 56.49513,
+  "lon": 8.59072
+ },
+ {
+  "name": "Horsens Lystbådehavn",
+  "lat": 55.85762,
+  "lon": 9.87437
+ },
+ {
+  "name": "Hou Færgehavn",
+  "lat": 55.91222,
+  "lon": 10.25977
+ },
+ {
+  "name": "Hou Lystbådehavn",
+  "lat": 55.90979,
+  "lon": 10.25518
+ },
+ {
+  "name": "Hou Lystbådehavn",
+  "lat": 57.05611,
+  "lon": 10.37948
+ },
+ {
+  "name": "Hovås hamn",
+  "lat": 57.62057,
+  "lon": 11.92307
+ },
+ {
+  "name": "Humlebæk Havn",
+  "lat": 55.97098,
+  "lon": 12.54619
+ },
+ {
+  "name": "Humlum Fiskerleje & Camping Havn",
+  "lat": 56.54864,
+  "lon": 8.57422
+ },
+ {
+  "name": "Hundested Lystbådehavn",
+  "lat": 55.96514,
+  "lon": 11.84393
+ },
+ {
+  "name": "Hundested Lystbådehavn",
+  "lat": 55.96346,
+  "lon": 11.84368
+ },
+ {
+  "name": "Hunnebostrand gästhamn",
+  "lat": 58.44053,
+  "lon": 11.29321
+ },
+ {
+  "name": "Husumer Segler-Verein",
+  "lat": 54.47303,
+  "lon": 9.04678
+ },
+ {
+  "name": "Hvalpsund Fiskerihavn",
+  "lat": 56.70101,
+  "lon": 9.19322
+ },
+ {
+  "name": "Hvalpsund Færgeleje",
+  "lat": 56.70074,
+  "lon": 9.19191
+ },
+ {
+  "name": "Hvalpsund Lystbådehavn",
+  "lat": 56.70527,
+  "lon": 9.20166
+ },
+ {
+  "name": "Hvide Sande Havn",
+  "lat": 56.00244,
+  "lon": 8.12506
+ },
+ {
+  "name": "Hyppeln gästhamn",
+  "lat": 57.75757,
+  "lon": 11.61649
+ },
+ {
+  "name": "Hällevik Yacht Club",
+  "lat": 58.11701,
+  "lon": 11.45811
+ },
+ {
+  "name": "Hälleviksstrands Hamn",
+  "lat": 58.1224,
+  "lon": 11.44234
+ },
+ {
+  "name": "Hälleviksstrands Varvs Marina",
+  "lat": 58.1187,
+  "lon": 11.44647
+ },
+ {
+  "name": "Hällsviks småbåtshamn",
+  "lat": 57.69979,
+  "lon": 11.7364
+ },
+ {
+  "name": "Hälsö hamn",
+  "lat": 57.73085,
+  "lon": 11.65801
+ },
+ {
+  "name": "Hälsö hamn",
+  "lat": 57.73025,
+  "lon": 11.65747
+ },
+ {
+  "name": "Hållö hamn",
+  "lat": 58.33319,
+  "lon": 11.21837
+ },
+ {
+  "name": "Höganäs småbåtshamn",
+  "lat": 56.19831,
+  "lon": 12.54784
+ },
+ {
+  "name": "Hönö Klåva hamn",
+  "lat": 57.68111,
+  "lon": 11.64802
+ },
+ {
+  "name": "Hörn",
+  "lat": 54.31431,
+  "lon": 10.1354
+ },
+ {
+  "name": "Hörnum",
+  "lat": 54.75874,
+  "lon": 8.29538
+ },
+ {
+  "name": "Hörte Hamn",
+  "lat": 55.38629,
+  "lon": 13.54763
+ },
+ {
+  "name": "Höviksnäs Båtförening",
+  "lat": 58.03657,
+  "lon": 11.76287
+ },
+ {
+  "name": "Høllen gjestehavn",
+  "lat": 58.07602,
+  "lon": 7.80828
+ },
+ {
+  "name": "Høllet",
+  "lat": 56.66588,
+  "lon": 9.95301
+ },
+ {
+  "name": "Hørby Lystbådehavn",
+  "lat": 55.73472,
+  "lon": 11.70649
+ },
+ {
+  "name": "Høruphav Havn",
+  "lat": 54.90648,
+  "lon": 9.8884
+ },
+ {
+  "name": "Inderhavnen",
+  "lat": 55.49054,
+  "lon": 9.48605
+ },
+ {
+  "name": "Industriehafen Lubmin",
+  "lat": 54.14921,
+  "lon": 13.65441
+ },
+ {
+  "name": "Innenhafen Eckernförde",
+  "lat": 54.47367,
+  "lon": 9.83356
+ },
+ {
+  "name": "Inre Saltholmen",
+  "lat": 57.66177,
+  "lon": 11.84406
+ },
+ {
+  "name": "Inselhafen Prerow",
+  "lat": 54.4596,
+  "lon": 12.57157
+ },
+ {
+  "name": "Ishøj Havn",
+  "lat": 55.60956,
+  "lon": 12.38744
+ },
+ {
+  "name": "Juelsminde Havn og Marina",
+  "lat": 55.71586,
+  "lon": 10.01613
+ },
+ {
+  "name": "Jungshoved Kirkehavn",
+  "lat": 55.08133,
+  "lon": 12.12151
+ },
+ {
+  "name": "KMS Nordön - Norra hamnen",
+  "lat": 57.89628,
+  "lon": 11.69326
+ },
+ {
+  "name": "KMS Nordön - Södra hamnen",
+  "lat": 57.89179,
+  "lon": 11.68326
+ },
+ {
+  "name": "Kalkbrænderihavnen",
+  "lat": 55.71144,
+  "lon": 12.59051
+ },
+ {
+  "name": "Kalvehave Havn",
+  "lat": 54.99457,
+  "lon": 12.16719
+ },
+ {
+  "name": "Kappelsbjerg Lystbådebro",
+  "lat": 55.50697,
+  "lon": 9.74626
+ },
+ {
+  "name": "Kastrup Strandpark",
+  "lat": 55.64253,
+  "lon": 12.65182
+ },
+ {
+  "name": "Kignæs Havn",
+  "lat": 55.85736,
+  "lon": 12.00927
+ },
+ {
+  "name": "Killingsholmens Marina",
+  "lat": 57.57745,
+  "lon": 11.92499
+ },
+ {
+  "name": "Killingsholmens båthamn",
+  "lat": 57.57292,
+  "lon": 11.92752
+ },
+ {
+  "name": "Kindvig Lystbådehavn",
+  "lat": 55.05082,
+  "lon": 12.12767
+ },
+ {
+  "name": "Kindvig havn",
+  "lat": 55.04787,
+  "lon": 12.12921
+ },
+ {
+  "name": "Kinnbackenhagen - Kinnbackenhagener Anglerverein",
+  "lat": 54.41058,
+  "lon": 12.9203
+ },
+ {
+  "name": "Klagshamns hamn",
+  "lat": 55.52186,
+  "lon": 12.89117
+ },
+ {
+  "name": "Kleiner Hafen vom Campingplatz Bodstedt mit Gastanleger",
+  "lat": 54.37169,
+  "lon": 12.61763
+ },
+ {
+  "name": "Klint Havn",
+  "lat": 55.95932,
+  "lon": 11.5954
+ },
+ {
+  "name": "Klintebjerg Havn",
+  "lat": 55.47818,
+  "lon": 10.45227
+ },
+ {
+  "name": "Kloss Hafen",
+  "lat": 54.42987,
+  "lon": 12.6875
+ },
+ {
+  "name": "Klubbhamn Halmstads Segelsällskap",
+  "lat": 56.65854,
+  "lon": 12.85046
+ },
+ {
+  "name": "Klädesholmens Västra hamn",
+  "lat": 57.94595,
+  "lon": 11.53647
+ },
+ {
+  "name": "Knallekilens småbåtshamn",
+  "lat": 57.36769,
+  "lon": 11.97405
+ },
+ {
+  "name": "Knippla gästhamn",
+  "lat": 57.74926,
+  "lon": 11.65524
+ },
+ {
+  "name": "Kolhättan Gästhamn",
+  "lat": 58.13546,
+  "lon": 11.84324
+ },
+ {
+  "name": "Kollund Mole",
+  "lat": 54.8372,
+  "lon": 9.44558
+ },
+ {
+  "name": "Kommunalhafen Vitte",
+  "lat": 54.56863,
+  "lon": 13.10872
+ },
+ {
+  "name": "Korshavn Bro",
+  "lat": 55.01268,
+  "lon": 10.31583
+ },
+ {
+  "name": "Korshavn Lystbådebro",
+  "lat": 55.60432,
+  "lon": 10.60898
+ },
+ {
+  "name": "Korsør Flådehavn",
+  "lat": 55.33165,
+  "lon": 11.12808
+ },
+ {
+  "name": "Korsør Flådestation",
+  "lat": 55.33503,
+  "lon": 11.12548
+ },
+ {
+  "name": "Korsør Havn",
+  "lat": 55.33364,
+  "lon": 11.13572
+ },
+ {
+  "name": "Kovikshamns Norra Småbåtshamn",
+  "lat": 57.84241,
+  "lon": 11.68475
+ },
+ {
+  "name": "Kristiansand Containerhavn",
+  "lat": 58.1408,
+  "lon": 7.99229
+ },
+ {
+  "name": "Kristiansand feriesenter gjestehavn",
+  "lat": 58.12148,
+  "lon": 8.06276
+ },
+ {
+  "name": "Krossholmens Båtklubb",
+  "lat": 57.69282,
+  "lon": 11.76814
+ },
+ {
+  "name": "Kullaviks Hamn",
+  "lat": 57.55057,
+  "lon": 11.92371
+ },
+ {
+  "name": "Kungshamns fiskehamn",
+  "lat": 58.35598,
+  "lon": 11.27023
+ },
+ {
+  "name": "Kungshamns gästhamn",
+  "lat": 58.36051,
+  "lon": 11.24672
+ },
+ {
+  "name": "Kungshamns småbåtshamn",
+  "lat": 58.35718,
+  "lon": 11.26992
+ },
+ {
+  "name": "Kungsvikens marina",
+  "lat": 58.22608,
+  "lon": 11.58277
+ },
+ {
+  "name": "Kyrkbackens Hamn",
+  "lat": 55.90981,
+  "lon": 12.67354
+ },
+ {
+  "name": "Kyrkesunds Östra Hamn",
+  "lat": 58.02102,
+  "lon": 11.5177
+ },
+ {
+  "name": "Källvikens och Munkeby marina",
+  "lat": 58.25397,
+  "lon": 11.50167
+ },
+ {
+  "name": "Käringöns gästhamn",
+  "lat": 58.11327,
+  "lon": 11.36333
+ },
+ {
+  "name": "Kåseberga hamn",
+  "lat": 55.38317,
+  "lon": 14.06369
+ },
+ {
+  "name": "Køge Marina",
+  "lat": 55.46942,
+  "lon": 12.19777
+ },
+ {
+  "name": "Laholm hamn",
+  "lat": 56.51135,
+  "lon": 13.0368
+ },
+ {
+  "name": "Langelinie Lystbådehavn",
+  "lat": 55.69419,
+  "lon": 12.59928
+ },
+ {
+  "name": "Lemvig Havn",
+  "lat": 56.55107,
+  "lon": 8.30507
+ },
+ {
+  "name": "Lemvig Marina",
+  "lat": 56.56592,
+  "lon": 8.29807
+ },
+ {
+  "name": "Lerhamns hamn",
+  "lat": 56.25693,
+  "lon": 12.5194
+ },
+ {
+  "name": "Lerkils marina",
+  "lat": 57.45527,
+  "lon": 11.91311
+ },
+ {
+  "name": "Lerums Segelsällskap",
+  "lat": 57.76102,
+  "lon": 12.25215
+ },
+ {
+  "name": "Lilla Bommen Göteborgs gästhamn",
+  "lat": 57.71162,
+  "lon": 11.96525
+ },
+ {
+  "name": "Lilla Brattöns gästhamn",
+  "lat": 58.04948,
+  "lon": 11.77574
+ },
+ {
+  "name": "Lillesand gjestehavn",
+  "lat": 58.24759,
+  "lon": 8.37955
+ },
+ {
+  "name": "Lindgrens Hamn",
+  "lat": 57.39321,
+  "lon": 12.02379
+ },
+ {
+  "name": "Lindholm Brygge Bådelaug",
+  "lat": 57.06348,
+  "lon": 9.90052
+ },
+ {
+  "name": "Livø Lystbådehavn",
+  "lat": 56.88645,
+  "lon": 9.09865
+ },
+ {
+  "name": "Ljungskile Båtklubb",
+  "lat": 58.22268,
+  "lon": 11.91491
+ },
+ {
+  "name": "Lohals Havn",
+  "lat": 55.13322,
+  "lon": 10.90121
+ },
+ {
+  "name": "Lomma hamn",
+  "lat": 55.67585,
+  "lon": 13.0568
+ },
+ {
+  "name": "Lotsenhafen",
+  "lat": 54.37019,
+  "lon": 10.15507
+ },
+ {
+  "name": "Lundeborg Havn",
+  "lat": 55.13873,
+  "lon": 10.78641
+ },
+ {
+  "name": "Lundåkrahamnen",
+  "lat": 55.85984,
+  "lon": 12.84952
+ },
+ {
+  "name": "Lustbåtshamnen",
+  "lat": 55.86805,
+  "lon": 12.8195
+ },
+ {
+  "name": "Lyckans slip Marina",
+  "lat": 58.24355,
+  "lon": 11.46113
+ },
+ {
+  "name": "Lyckornas Brygga",
+  "lat": 58.21661,
+  "lon": 11.9038
+ },
+ {
+  "name": "Lynettehavnen",
+  "lat": 55.6963,
+  "lon": 12.61075
+ },
+ {
+  "name": "Lynæs Havn",
+  "lat": 55.94232,
+  "lon": 11.86933
+ },
+ {
+  "name": "Lysekils Marina",
+  "lat": 58.31541,
+  "lon": 11.3992
+ },
+ {
+  "name": "Lystbådehavn",
+  "lat": 56.00842,
+  "lon": 8.13615
+ },
+ {
+  "name": "Lystbådehavn",
+  "lat": 56.08642,
+  "lon": 8.23934
+ },
+ {
+  "name": "Lystbådehavn Troense",
+  "lat": 55.03454,
+  "lon": 10.64534
+ },
+ {
+  "name": "Lystbådehavnen Stige Ø",
+  "lat": 55.43957,
+  "lon": 10.42312
+ },
+ {
+  "name": "Långeviks småbåtshamn",
+  "lat": 58.28668,
+  "lon": 11.43151
+ },
+ {
+  "name": "Løgstør Lystbådehavn",
+  "lat": 56.9683,
+  "lon": 9.24731
+ },
+ {
+  "name": "Løviga",
+  "lat": 58.11192,
+  "lon": 7.98501
+ },
+ {
+  "name": "MYCR - Mecklenburgischer Yachtclub Rostock",
+  "lat": 54.09504,
+  "lon": 12.126
+ },
+ {
+  "name": "Maleviks hamn",
+  "lat": 57.52731,
+  "lon": 11.92558
+ },
+ {
+  "name": "Malmöns gästhamn",
+  "lat": 58.34846,
+  "lon": 11.34396
+ },
+ {
+  "name": "Mandal gjestehavn",
+  "lat": 58.02536,
+  "lon": 7.45283
+ },
+ {
+  "name": "Marbæk Lystbådehavn",
+  "lat": 55.82786,
+  "lon": 12.06037
+ },
+ {
+  "name": "Marens gästhamn",
+  "lat": 56.17054,
+  "lon": 15.05007
+ },
+ {
+  "name": "Mariager Jollehavn",
+  "lat": 56.65319,
+  "lon": 9.98229
+ },
+ {
+  "name": "Mariager Lystbådehavn",
+  "lat": 56.65407,
+  "lon": 9.98309
+ },
+ {
+  "name": "Marina Bramow",
+  "lat": 54.10852,
+  "lon": 12.09319
+ },
+ {
+  "name": "Marina Fehmarnsund - Bootswerft Schaich",
+  "lat": 54.40336,
+  "lon": 11.11887
+ },
+ {
+  "name": "Marina Gager",
+  "lat": 54.31109,
+  "lon": 13.68291
+ },
+ {
+  "name": "Marina Haedgehafen - Rostocker Segelverein Citybootshafen",
+  "lat": 54.09262,
+  "lon": 12.12355
+ },
+ {
+  "name": "Marina Horn",
+  "lat": 54.05802,
+  "lon": 13.78345
+ },
+ {
+  "name": "Marina Hülsen",
+  "lat": 54.54802,
+  "lon": 9.7527
+ },
+ {
+  "name": "Marina Langballigau",
+  "lat": 54.82107,
+  "lon": 9.65334
+ },
+ {
+  "name": "Marina Lauterbach",
+  "lat": 54.34109,
+  "lon": 13.50633
+ },
+ {
+  "name": "Marina Neuhof",
+  "lat": 54.26466,
+  "lon": 13.17996
+ },
+ {
+  "name": "Marina Ralswiek",
+  "lat": 54.47241,
+  "lon": 13.45189
+ },
+ {
+  "name": "Marina Wassersleben - Segel-Sport Flensburg-Harrislee",
+  "lat": 54.82337,
+  "lon": 9.42418
+ },
+ {
+  "name": "Marina Wiek",
+  "lat": 54.62119,
+  "lon": 13.28426
+ },
+ {
+  "name": "Marina Wustrow",
+  "lat": 54.34314,
+  "lon": 12.39915
+ },
+ {
+  "name": "Marina Yachtservice Schreiber",
+  "lat": 54.32912,
+  "lon": 9.71671
+ },
+ {
+  "name": "Marina am Ryck - Yachtzentrum Greifswald",
+  "lat": 54.10042,
+  "lon": 13.39235
+ },
+ {
+  "name": "Marina, Bootswerft-Modersitzki",
+  "lat": 54.686,
+  "lon": 9.98762
+ },
+ {
+  "name": "Maritim Center Marks Barth",
+  "lat": 54.36993,
+  "lon": 12.73732
+ },
+ {
+  "name": "Marstrands hamn",
+  "lat": 57.88878,
+  "lon": 11.58594
+ },
+ {
+  "name": "Martinshafen Sagard",
+  "lat": 54.52525,
+  "lon": 13.51124
+ },
+ {
+  "name": "Mejeri Havnen",
+  "lat": 55.05175,
+  "lon": 10.67805
+ },
+ {
+  "name": "Meldorfer Seglerverein",
+  "lat": 54.09147,
+  "lon": 8.95587
+ },
+ {
+  "name": "Mellembassinet",
+  "lat": 55.70245,
+  "lon": 12.59623
+ },
+ {
+  "name": "Mellemfortet",
+  "lat": 55.63777,
+  "lon": 12.5426
+ },
+ {
+  "name": "Mellerup Lystbådehavn",
+  "lat": 56.52411,
+  "lon": 10.22359
+ },
+ {
+  "name": "Middelfart Marina",
+  "lat": 55.49232,
+  "lon": 9.72685
+ },
+ {
+  "name": "Middelfart city harbour",
+  "lat": 55.50625,
+  "lon": 9.73673
+ },
+ {
+  "name": "Missunder Yachtclub",
+  "lat": 54.52491,
+  "lon": 9.71595
+ },
+ {
+  "name": "Mittelmann's Werft",
+  "lat": 54.6518,
+  "lon": 9.93358
+ },
+ {
+  "name": "Mollösunds gästhamn",
+  "lat": 58.07348,
+  "lon": 11.47021
+ },
+ {
+  "name": "Morlanda brygga",
+  "lat": 58.2022,
+  "lon": 11.53754
+ },
+ {
+  "name": "Mosede Havn",
+  "lat": 55.56626,
+  "lon": 12.28732
+ },
+ {
+  "name": "Mossholmens Marina",
+  "lat": 57.95161,
+  "lon": 11.55994
+ },
+ {
+  "name": "Mullerup Havn",
+  "lat": 55.49364,
+  "lon": 11.17365
+ },
+ {
+  "name": "Museumshafen Hansestadt Rostock",
+  "lat": 54.09265,
+  "lon": 12.12558
+ },
+ {
+  "name": "Museumshavn",
+  "lat": 56.19816,
+  "lon": 10.67215
+ },
+ {
+  "name": "Muslingehavn",
+  "lat": 56.97104,
+  "lon": 9.26138
+ },
+ {
+  "name": "Mölle Hamn",
+  "lat": 56.28318,
+  "lon": 12.49263
+ },
+ {
+  "name": "Mörtströmmen",
+  "lat": 56.17981,
+  "lon": 15.10834
+ },
+ {
+  "name": "Mündung der Krusau",
+  "lat": 54.83223,
+  "lon": 9.42012
+ },
+ {
+  "name": "Nakskov",
+  "lat": 54.82911,
+  "lon": 11.13491
+ },
+ {
+  "name": "Nakskov Havn",
+  "lat": 54.83372,
+  "lon": 11.12057
+ },
+ {
+  "name": "Naturhafen Krummin",
+  "lat": 54.04581,
+  "lon": 13.84752
+ },
+ {
+  "name": "Nekselø Havn",
+  "lat": 55.78165,
+  "lon": 11.29707
+ },
+ {
+  "name": "Neptun Marina Rostock",
+  "lat": 54.10696,
+  "lon": 12.1056
+ },
+ {
+  "name": "Netzbootthafen",
+  "lat": 54.37173,
+  "lon": 12.41999
+ },
+ {
+  "name": "Nexø",
+  "lat": 55.0628,
+  "lon": 15.13484
+ },
+ {
+  "name": "Nibe Havn",
+  "lat": 56.98785,
+  "lon": 9.6318
+ },
+ {
+  "name": "Nimbushamnen",
+  "lat": 57.71007,
+  "lon": 11.66239
+ },
+ {
+  "name": "Nivå Havn",
+  "lat": 55.93979,
+  "lon": 12.52815
+ },
+ {
+  "name": "Nord-Ost-Hafen",
+  "lat": 54.18382,
+  "lon": 7.88991
+ },
+ {
+  "name": "Nordhavn",
+  "lat": 56.00412,
+  "lon": 8.12206
+ },
+ {
+  "name": "Nordre Havn",
+  "lat": 55.06083,
+  "lon": 10.61582
+ },
+ {
+  "name": "Nordre Havn",
+  "lat": 54.98401,
+  "lon": 12.2809
+ },
+ {
+  "name": "Nordre Refshalebassin",
+  "lat": 55.69481,
+  "lon": 12.60879
+ },
+ {
+  "name": "Norra Hamnen",
+  "lat": 58.34905,
+  "lon": 11.92914
+ },
+ {
+  "name": "Norra Hamnen Helsingborg",
+  "lat": 56.04919,
+  "lon": 12.68562
+ },
+ {
+  "name": "Norra Hamnens gästhamn",
+  "lat": 58.27617,
+  "lon": 11.4229
+ },
+ {
+  "name": "Norreborgs Hamn",
+  "lat": 55.92006,
+  "lon": 12.69754
+ },
+ {
+  "name": "Nothafen Greifswalder Oie",
+  "lat": 54.24271,
+  "lon": 13.90804
+ },
+ {
+  "name": "Ny Havn",
+  "lat": 56.08815,
+  "lon": 8.23912
+ },
+ {
+  "name": "Nya Varvet",
+  "lat": 57.68571,
+  "lon": 11.89088
+ },
+ {
+  "name": "Nya Varvet",
+  "lat": 57.68551,
+  "lon": 11.88742
+ },
+ {
+  "name": "Nyborg Lystbådehavn",
+  "lat": 55.30487,
+  "lon": 10.78853
+ },
+ {
+  "name": "Nyborg Marina",
+  "lat": 55.30651,
+  "lon": 10.79153
+ },
+ {
+  "name": "Nyhamn",
+  "lat": 55.86801,
+  "lon": 12.82439
+ },
+ {
+  "name": "Nyhamns hamn",
+  "lat": 56.24429,
+  "lon": 12.53185
+ },
+ {
+  "name": "Nyhavn",
+  "lat": 55.0446,
+  "lon": 9.42794
+ },
+ {
+  "name": "Nykøbing Sjælland Lystbådehavn",
+  "lat": 55.91345,
+  "lon": 11.67675
+ },
+ {
+  "name": "Nymindegab Havn",
+  "lat": 55.81895,
+  "lon": 8.18447
+ },
+ {
+  "name": "Nösunds båthamn",
+  "lat": 58.10192,
+  "lon": 11.50981
+ },
+ {
+  "name": "Odden Fiskeri Havn",
+  "lat": 55.97257,
+  "lon": 11.36793
+ },
+ {
+  "name": "Odden Færgehavn",
+  "lat": 55.97318,
+  "lon": 11.29833
+ },
+ {
+  "name": "Odden Lystbaadehavn",
+  "lat": 55.97219,
+  "lon": 11.36978
+ },
+ {
+  "name": "Oddesund Lystbådehavn",
+  "lat": 56.58278,
+  "lon": 8.54915
+ },
+ {
+  "name": "Oland",
+  "lat": 54.67254,
+  "lon": 8.68726
+ },
+ {
+  "name": "Onsevig Havn",
+  "lat": 54.94716,
+  "lon": 11.1073
+ },
+ {
+  "name": "Orust Marina",
+  "lat": 58.26755,
+  "lon": 11.68286
+ },
+ {
+  "name": "Ostseekai",
+  "lat": 54.32584,
+  "lon": 10.14658
+ },
+ {
+  "name": "Pilot harbour",
+  "lat": 58.33605,
+  "lon": 11.40405
+ },
+ {
+  "name": "Plön",
+  "lat": 54.14636,
+  "lon": 10.39407
+ },
+ {
+  "name": "Przystań Rybacka w Chłopach",
+  "lat": 54.2527,
+  "lon": 15.98432
+ },
+ {
+  "name": "Przystań rybacka",
+  "lat": 54.21557,
+  "lon": 15.74811
+ },
+ {
+  "name": "Præstø Havn",
+  "lat": 55.12554,
+  "lon": 12.04387
+ },
+ {
+  "name": "Prøvestenshavnen",
+  "lat": 55.67864,
+  "lon": 12.63823
+ },
+ {
+  "name": "Pump-out",
+  "lat": 54.37119,
+  "lon": 12.72135
+ },
+ {
+  "name": "ROYC - Rostocker Yachtclub",
+  "lat": 54.09478,
+  "lon": 12.12425
+ },
+ {
+  "name": "Rambin",
+  "lat": 54.36771,
+  "lon": 13.21804
+ },
+ {
+  "name": "Rantzausminde Lystbådehavn",
+  "lat": 55.03432,
+  "lon": 10.54141
+ },
+ {
+  "name": "Reersø Havn",
+  "lat": 55.51705,
+  "lon": 11.1194
+ },
+ {
+  "name": "Render Havn",
+  "lat": 55.98482,
+  "lon": 8.13966
+ },
+ {
+  "name": "Renz Yachting",
+  "lat": 54.50904,
+  "lon": 9.54768
+ },
+ {
+  "name": "Ribnitz-Damgarten",
+  "lat": 54.2456,
+  "lon": 12.43534
+ },
+ {
+  "name": "Ringens varv",
+  "lat": 57.88833,
+  "lon": 11.58717
+ },
+ {
+  "name": "Ringkøbing Havn",
+  "lat": 56.08707,
+  "lon": 8.2398
+ },
+ {
+  "name": "Risanäs",
+  "lat": 56.17581,
+  "lon": 15.25651
+ },
+ {
+  "name": "Risø harbour",
+  "lat": 55.69164,
+  "lon": 12.0824
+ },
+ {
+  "name": "Rixö Båtklubb",
+  "lat": 58.36919,
+  "lon": 11.44883
+ },
+ {
+  "name": "Rixö Småbåtshamn",
+  "lat": 58.3705,
+  "lon": 11.44781
+ },
+ {
+  "name": "Rostock",
+  "lat": 54.15742,
+  "lon": 12.10483
+ },
+ {
+  "name": "Ruden Hafen",
+  "lat": 54.20439,
+  "lon": 13.77271
+ },
+ {
+  "name": "Rudkøbing Lystbådehavn",
+  "lat": 54.94138,
+  "lon": 10.71073
+ },
+ {
+  "name": "Rugenhof",
+  "lat": 54.3857,
+  "lon": 13.25026
+ },
+ {
+  "name": "Rybacki Dziwnów",
+  "lat": 54.02009,
+  "lon": 14.73592
+ },
+ {
+  "name": "Rågø Anløbsbro",
+  "lat": 54.9638,
+  "lon": 11.30262
+ },
+ {
+  "name": "Råoljehamn",
+  "lat": 58.34681,
+  "lon": 11.40653
+ },
+ {
+  "name": "Råå Hamn",
+  "lat": 55.99027,
+  "lon": 12.7403
+ },
+ {
+  "name": "Röds hamn",
+  "lat": 57.69995,
+  "lon": 11.64046
+ },
+ {
+  "name": "Rödön/Lindesnäs",
+  "lat": 58.33158,
+  "lon": 11.89088
+ },
+ {
+  "name": "Rönnängs småbåtshamn",
+  "lat": 57.94056,
+  "lon": 11.57857
+ },
+ {
+  "name": "Rörö gästhamn",
+  "lat": 57.77212,
+  "lon": 11.618
+ },
+ {
+  "name": "Rødbyhavn Trafikhavn",
+  "lat": 54.65263,
+  "lon": 11.34653
+ },
+ {
+  "name": "Rødvig Lystbådehavn",
+  "lat": 55.25349,
+  "lon": 12.37371
+ },
+ {
+  "name": "Rømø Havn",
+  "lat": 55.08728,
+  "lon": 8.56875
+ },
+ {
+  "name": "Rønbjerg Lystbådehavn",
+  "lat": 56.8918,
+  "lon": 9.1664
+ },
+ {
+  "name": "Rønnerhavnen",
+  "lat": 57.464,
+  "lon": 10.53808
+ },
+ {
+  "name": "Rørvig Havn",
+  "lat": 55.94307,
+  "lon": 11.76858
+ },
+ {
+  "name": "Røsnæs Havn",
+  "lat": 55.75173,
+  "lon": 10.94456
+ },
+ {
+  "name": "SS Frams gästhamn",
+  "lat": 57.71065,
+  "lon": 11.68784
+ },
+ {
+  "name": "SS Frams gästhamn",
+  "lat": 57.71068,
+  "lon": 11.68581
+ },
+ {
+  "name": "SSC Munkmarsch - Marina Munkmarsch",
+  "lat": 54.92142,
+  "lon": 8.36316
+ },
+ {
+  "name": "SSV - See- und Segelsportverein der Hansestadt Rostock",
+  "lat": 54.09466,
+  "lon": 12.12787
+ },
+ {
+  "name": "SVF - Segler-Vereinigung Flensburg",
+  "lat": 54.82267,
+  "lon": 9.46957
+ },
+ {
+  "name": "Sakskøbing Bådelaug og Lystbådehavn",
+  "lat": 54.81133,
+  "lon": 11.61988
+ },
+ {
+  "name": "Saltskärs Båtklubb",
+  "lat": 57.66354,
+  "lon": 11.85529
+ },
+ {
+  "name": "Saltö Fiskhamn Gästhamn",
+  "lat": 56.16307,
+  "lon": 15.56973
+ },
+ {
+  "name": "Sandviks småbåtshamn",
+  "lat": 57.6976,
+  "lon": 11.76937
+ },
+ {
+  "name": "Sandö Hamn",
+  "lat": 57.49035,
+  "lon": 11.93107
+ },
+ {
+  "name": "Sannegårdshamnen",
+  "lat": 57.70481,
+  "lon": 11.92604
+ },
+ {
+  "name": "Sassnitz",
+  "lat": 54.48192,
+  "lon": 13.58981
+ },
+ {
+  "name": "Schleimünde",
+  "lat": 54.67328,
+  "lon": 10.0326
+ },
+ {
+  "name": "Schleswig Schlei-Segel-Club",
+  "lat": 54.51175,
+  "lon": 9.5559
+ },
+ {
+  "name": "Schwimmsteg Gehlsdorf",
+  "lat": 54.11115,
+  "lon": 12.10091
+ },
+ {
+  "name": "Schwimmsteg Stadthafen",
+  "lat": 54.09421,
+  "lon": 12.11915
+ },
+ {
+  "name": "Sebber Bådehavn",
+  "lat": 56.96095,
+  "lon": 9.57171
+ },
+ {
+  "name": "Seezeichenhafen",
+  "lat": 54.63159,
+  "lon": 8.38252
+ },
+ {
+  "name": "Segel-Club Neumünster e.V.",
+  "lat": 54.13444,
+  "lon": 9.99926
+ },
+ {
+  "name": "Segelclub Ahoi e.V.",
+  "lat": 54.51138,
+  "lon": 9.55585
+ },
+ {
+  "name": "Segelschule Dänholm",
+  "lat": 54.30492,
+  "lon": 13.12315
+ },
+ {
+  "name": "Segelverein",
+  "lat": 54.14148,
+  "lon": 10.62025
+ },
+ {
+  "name": "Seglerverein Alt Gaarz Rerik",
+  "lat": 54.10347,
+  "lon": 11.60873
+ },
+ {
+  "name": "Seglerverein Lemkenhafen Fehmarn",
+  "lat": 54.44536,
+  "lon": 11.08797
+ },
+ {
+  "name": "Sejerø Lystbådehavn",
+  "lat": 55.8806,
+  "lon": 11.13462
+ },
+ {
+  "name": "Sejlklubben Aarhus Nordhavn",
+  "lat": 56.16449,
+  "lon": 10.21897
+ },
+ {
+  "name": "Sildekajen",
+  "lat": 57.05578,
+  "lon": 9.92225
+ },
+ {
+  "name": "Sillerslev Havn",
+  "lat": 56.68086,
+  "lon": 8.73016
+ },
+ {
+  "name": "Sjöbo",
+  "lat": 57.84767,
+  "lon": 14.15322
+ },
+ {
+  "name": "Skagen Havn",
+  "lat": 57.71721,
+  "lon": 10.5923
+ },
+ {
+  "name": "Skagen Lystbådehavn",
+  "lat": 57.71861,
+  "lon": 10.58863
+ },
+ {
+  "name": "Skallkrokens hamn",
+  "lat": 56.72754,
+  "lon": 12.64143
+ },
+ {
+  "name": "Skalø Havn",
+  "lat": 54.95659,
+  "lon": 11.35654
+ },
+ {
+  "name": "Skanderborg lystbådehavn",
+  "lat": 56.04346,
+  "lon": 9.93542
+ },
+ {
+  "name": "Skansehavnen",
+  "lat": 57.45105,
+  "lon": 10.54606
+ },
+ {
+  "name": "Skarø Havn",
+  "lat": 55.01068,
+  "lon": 10.47242
+ },
+ {
+  "name": "Skeatångens hamn",
+  "lat": 57.20074,
+  "lon": 12.17494
+ },
+ {
+  "name": "Skeppsviken",
+  "lat": 58.34269,
+  "lon": 11.908
+ },
+ {
+  "name": "Skillinge",
+  "lat": 55.47431,
+  "lon": 14.28451
+ },
+ {
+  "name": "Skintebo hamn",
+  "lat": 57.58631,
+  "lon": 11.92171
+ },
+ {
+  "name": "Skive Havn",
+  "lat": 56.57071,
+  "lon": 9.05308
+ },
+ {
+  "name": "Skive Jollehavn",
+  "lat": 56.56683,
+  "lon": 9.05436
+ },
+ {
+  "name": "Skive Sydhavn",
+  "lat": 56.56983,
+  "lon": 9.05309
+ },
+ {
+  "name": "Skive Søsportshavn",
+  "lat": 56.5756,
+  "lon": 9.05408
+ },
+ {
+  "name": "Skuldelev Havn",
+  "lat": 55.7957,
+  "lon": 12.05728
+ },
+ {
+  "name": "Skärhamns gästhamn",
+  "lat": 57.98782,
+  "lon": 11.54603
+ },
+ {
+  "name": "Skärhamns småbåtshamn",
+  "lat": 57.98941,
+  "lon": 11.54312
+ },
+ {
+  "name": "Skåre hamn",
+  "lat": 55.37533,
+  "lon": 13.05385
+ },
+ {
+  "name": "Skælskør Lystbådehavn",
+  "lat": 55.25222,
+  "lon": 11.28766
+ },
+ {
+  "name": "Skærbæk Fiskerihavn",
+  "lat": 55.51287,
+  "lon": 9.62926
+ },
+ {
+  "name": "Skærbæk Lystbådehavn",
+  "lat": 55.51286,
+  "lon": 9.62661
+ },
+ {
+  "name": "Skærbækværkets Havn",
+  "lat": 55.51077,
+  "lon": 9.61889
+ },
+ {
+  "name": "Sletten Havn",
+  "lat": 55.95359,
+  "lon": 12.53688
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 57.69316,
+  "lon": 11.75645
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 57.88438,
+  "lon": 11.58714
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 58.43234,
+  "lon": 11.27724
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 58.30524,
+  "lon": 11.41902
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 57.83767,
+  "lon": 11.6957
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 57.71193,
+  "lon": 11.71274
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 57.7137,
+  "lon": 11.71269
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 57.70936,
+  "lon": 11.68448
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 57.33831,
+  "lon": 12.0891
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 57.64728,
+  "lon": 11.78522
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 57.69399,
+  "lon": 11.81541
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 57.29939,
+  "lon": 12.16308
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 57.3161,
+  "lon": 12.14566
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 58.43646,
+  "lon": 11.28799
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 58.43868,
+  "lon": 11.2878
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 58.36193,
+  "lon": 11.24735
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 58.10535,
+  "lon": 11.50599
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 56.91286,
+  "lon": 12.39673
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 58.00732,
+  "lon": 11.69864
+ },
+ {
+  "name": "Småbåtshamn",
+  "lat": 57.99168,
+  "lon": 11.69645
+ },
+ {
+  "name": "Småbåtshamn Kolholmarna/Grötö",
+  "lat": 58.27407,
+  "lon": 11.45129
+ },
+ {
+  "name": "Småbåtshamnen",
+  "lat": 55.58687,
+  "lon": 12.92581
+ },
+ {
+  "name": "Småbåtshamnen Ivön",
+  "lat": 56.11163,
+  "lon": 14.38266
+ },
+ {
+  "name": "Snekkersten Havn",
+  "lat": 56.0079,
+  "lon": 12.58886
+ },
+ {
+  "name": "Snogebæk Havn",
+  "lat": 55.02522,
+  "lon": 15.12242
+ },
+ {
+  "name": "Sommens Ångbåtsbrygga",
+  "lat": 58.14029,
+  "lon": 14.97764
+ },
+ {
+  "name": "Spodsbjerg Turistbådehavn",
+  "lat": 54.93293,
+  "lon": 10.83306
+ },
+ {
+  "name": "Sportboot- und Anglervereinigung Andershof e. V.",
+  "lat": 54.28372,
+  "lon": 13.10387
+ },
+ {
+  "name": "Sportbootclub Baabe",
+  "lat": 54.34996,
+  "lon": 13.68415
+ },
+ {
+  "name": "Sportboothafen",
+  "lat": 54.69493,
+  "lon": 8.57621
+ },
+ {
+  "name": "Sportboothafen / Wasserwanderrastplatz Ziemitz",
+  "lat": 54.01889,
+  "lon": 13.77876
+ },
+ {
+  "name": "Sportboothafen Fleckeby",
+  "lat": 54.49069,
+  "lon": 9.70028
+ },
+ {
+  "name": "Sportboothafen Kühlungsborn",
+  "lat": 54.15318,
+  "lon": 11.77074
+ },
+ {
+  "name": "Sportboothafen Lindaunis",
+  "lat": 54.58612,
+  "lon": 9.82259
+ },
+ {
+  "name": "Sportboothafen List",
+  "lat": 55.01627,
+  "lon": 8.43989
+ },
+ {
+  "name": "Sportboothafen Wieck",
+  "lat": 54.40821,
+  "lon": 12.59341
+ },
+ {
+  "name": "Sportboothafen Yacht-Club-Eider",
+  "lat": 54.22049,
+  "lon": 9.43969
+ },
+ {
+  "name": "Sporthafen",
+  "lat": 54.35245,
+  "lon": 13.68718
+ },
+ {
+  "name": "Sporthafen Schwentine",
+  "lat": 54.32724,
+  "lon": 10.18474
+ },
+ {
+  "name": "Stadthafen Barth Marina Ost",
+  "lat": 54.37136,
+  "lon": 12.73047
+ },
+ {
+  "name": "Stadthafen Barth Marina West",
+  "lat": 54.37168,
+  "lon": 12.72743
+ },
+ {
+  "name": "Stadthafen Ribnitz",
+  "lat": 54.24672,
+  "lon": 12.42843
+ },
+ {
+  "name": "Stadthafen Rostock",
+  "lat": 54.09336,
+  "lon": 12.1372
+ },
+ {
+  "name": "Stadthafen Sassnitz",
+  "lat": 54.51267,
+  "lon": 13.64531
+ },
+ {
+  "name": "Stadthafen Schleswig",
+  "lat": 54.51128,
+  "lon": 9.57002
+ },
+ {
+  "name": "Stapelfeldt",
+  "lat": 54.67103,
+  "lon": 9.93984
+ },
+ {
+  "name": "Staun Havn",
+  "lat": 57.01572,
+  "lon": 9.48935
+ },
+ {
+  "name": "Stavreby Havn",
+  "lat": 55.07956,
+  "lon": 12.14537
+ },
+ {
+  "name": "Steenodder Mole",
+  "lat": 54.63899,
+  "lon": 8.38276
+ },
+ {
+  "name": "Stensjö hamn",
+  "lat": 56.79307,
+  "lon": 12.61144
+ },
+ {
+  "name": "Stenungsunds gästhamn",
+  "lat": 58.06974,
+  "lon": 11.81616
+ },
+ {
+  "name": "Stigsnæs Færgehavn",
+  "lat": 55.21266,
+  "lon": 11.24365
+ },
+ {
+  "name": "Stockens gästhamn",
+  "lat": 58.15037,
+  "lon": 11.41344
+ },
+ {
+  "name": "Stockeviks småbåtshamn",
+  "lat": 58.23555,
+  "lon": 11.43032
+ },
+ {
+  "name": "Stora Dyrön, Nordhamnen",
+  "lat": 57.92993,
+  "lon": 11.60174
+ },
+ {
+  "name": "Stora Dyrön, Sydhamnen",
+  "lat": 57.92606,
+  "lon": 11.61865
+ },
+ {
+  "name": "Stora Enen",
+  "lat": 57.40457,
+  "lon": 12.0306
+ },
+ {
+  "name": "Stora Kornö småbåtshamn",
+  "lat": 58.30357,
+  "lon": 11.3759
+ },
+ {
+  "name": "Strandby Lystbådehavn",
+  "lat": 57.49408,
+  "lon": 10.5035
+ },
+ {
+  "name": "Strib Bådehavn",
+  "lat": 55.5386,
+  "lon": 9.76277
+ },
+ {
+  "name": "Strucklahnungshörn",
+  "lat": 54.49778,
+  "lon": 8.80732
+ },
+ {
+  "name": "Stubbekøbing",
+  "lat": 54.89183,
+  "lon": 12.04751
+ },
+ {
+  "name": "Styrsö Bratten",
+  "lat": 57.61519,
+  "lon": 11.79721
+ },
+ {
+  "name": "Styrsö Sandvikshamn",
+  "lat": 57.61755,
+  "lon": 11.76213
+ },
+ {
+  "name": "Styrsö Tången",
+  "lat": 57.62108,
+  "lon": 11.7739
+ },
+ {
+  "name": "Styrsö Tången",
+  "lat": 57.62123,
+  "lon": 11.76849
+ },
+ {
+  "name": "Stärnö Gästhamn",
+  "lat": 56.14587,
+  "lon": 14.85702
+ },
+ {
+  "name": "Stångholmesunds småbåtshamn",
+  "lat": 58.26762,
+  "lon": 11.42104
+ },
+ {
+  "name": "Sukkerfabrikshavn",
+  "lat": 54.98221,
+  "lon": 12.2793
+ },
+ {
+  "name": "Sundby Sejlforenings Havn",
+  "lat": 55.66454,
+  "lon": 12.63413
+ },
+ {
+  "name": "Sundsøre Færgeleje",
+  "lat": 56.70894,
+  "lon": 9.1751
+ },
+ {
+  "name": "Sundsøre Lystbådehavn",
+  "lat": 56.70958,
+  "lon": 9.1746
+ },
+ {
+  "name": "Suså Havn",
+  "lat": 55.22612,
+  "lon": 11.75663
+ },
+ {
+  "name": "Svanemøllehavnen",
+  "lat": 55.71622,
+  "lon": 12.58939
+ },
+ {
+  "name": "Svanemøllehavnen",
+  "lat": 55.7199,
+  "lon": 12.59945
+ },
+ {
+  "name": "Svinø Broer",
+  "lat": 55.45899,
+  "lon": 9.79651
+ },
+ {
+  "name": "Svinø Havn",
+  "lat": 55.12508,
+  "lon": 11.72052
+ },
+ {
+  "name": "Sydhavn",
+  "lat": 55.04083,
+  "lon": 9.42416
+ },
+ {
+  "name": "Sydhavn",
+  "lat": 56.00125,
+  "lon": 8.12507
+ },
+ {
+  "name": "Syrens Jolleplads",
+  "lat": 57.05472,
+  "lon": 9.94481
+ },
+ {
+  "name": "Säljö Brygga Gästhamn",
+  "lat": 56.15674,
+  "lon": 15.67594
+ },
+ {
+  "name": "Sæby Havn",
+  "lat": 57.33316,
+  "lon": 10.53248
+ },
+ {
+  "name": "Sælvig Færgehavn",
+  "lat": 55.86504,
+  "lon": 10.54876
+ },
+ {
+  "name": "Södra Hamnen",
+  "lat": 57.13723,
+  "lon": 12.21828
+ },
+ {
+  "name": "Södra hamnen",
+  "lat": 56.04261,
+  "lon": 12.69215
+ },
+ {
+  "name": "Sölvesborgs innerhamn",
+  "lat": 56.05147,
+  "lon": 14.59098
+ },
+ {
+  "name": "Sønderballe Bådehavn",
+  "lat": 55.12964,
+  "lon": 9.4805
+ },
+ {
+  "name": "Sønderborg Havn",
+  "lat": 54.90925,
+  "lon": 9.78424
+ },
+ {
+  "name": "Sønderborg Lystbådehavn",
+  "lat": 54.89843,
+  "lon": 9.7948
+ },
+ {
+  "name": "Sønderby Lystbådehavn",
+  "lat": 55.72931,
+  "lon": 12.03478
+ },
+ {
+  "name": "Søndre Frihavn Lystbådehavn",
+  "lat": 55.6973,
+  "lon": 12.59613
+ },
+ {
+  "name": "Søndre Havn",
+  "lat": 55.05827,
+  "lon": 10.61596
+ },
+ {
+  "name": "Søndre Refshalebassin",
+  "lat": 55.69212,
+  "lon": 12.60916
+ },
+ {
+  "name": "Sørup Havn",
+  "lat": 55.96909,
+  "lon": 12.36911
+ },
+ {
+  "name": "Südhafen",
+  "lat": 54.17682,
+  "lon": 7.89402
+ },
+ {
+  "name": "Südhafen",
+  "lat": 54.17613,
+  "lon": 7.89426
+ },
+ {
+  "name": "Taarbæk Havn",
+  "lat": 55.78751,
+  "lon": 12.59589
+ },
+ {
+  "name": "Tambohus Naturhavn",
+  "lat": 56.63644,
+  "lon": 8.59375
+ },
+ {
+  "name": "Tejn",
+  "lat": 55.24837,
+  "lon": 14.83656
+ },
+ {
+  "name": "Thisted Lystbådehavn",
+  "lat": 56.95246,
+  "lon": 8.69641
+ },
+ {
+  "name": "Thorsminde Slusehavn",
+  "lat": 56.37209,
+  "lon": 8.12426
+ },
+ {
+  "name": "Thorsminde Vesthavn",
+  "lat": 56.36799,
+  "lon": 8.12052
+ },
+ {
+  "name": "Thyborøn Lystbådehavn",
+  "lat": 56.70125,
+  "lon": 8.22155
+ },
+ {
+  "name": "Tjuvkils hamn",
+  "lat": 57.89921,
+  "lon": 11.71323
+ },
+ {
+  "name": "Tjörnekalvs gästhamn",
+  "lat": 57.93565,
+  "lon": 11.57182
+ },
+ {
+  "name": "Toldbodens Bådehavn",
+  "lat": 55.68912,
+  "lon": 12.5994
+ },
+ {
+  "name": "Torekovs hamn",
+  "lat": 56.42788,
+  "lon": 12.62567
+ },
+ {
+  "name": "Torslanda Lagun",
+  "lat": 57.7002,
+  "lon": 11.78379
+ },
+ {
+  "name": "Traditionshafen Bodstedt",
+  "lat": 54.3727,
+  "lon": 12.62108
+ },
+ {
+  "name": "Trafikhavn",
+  "lat": 55.95928,
+  "lon": 11.8451
+ },
+ {
+  "name": "Träslövsläges småbåtshamn",
+  "lat": 57.05718,
+  "lon": 12.27019
+ },
+ {
+  "name": "Tunø Havn",
+  "lat": 55.9482,
+  "lon": 10.45517
+ },
+ {
+  "name": "Tunø bådehavn",
+  "lat": 55.949,
+  "lon": 10.4533
+ },
+ {
+  "name": "Turbinhamnen",
+  "lat": 55.60953,
+  "lon": 12.97415
+ },
+ {
+  "name": "Tärnö Naturhamn",
+  "lat": 56.12177,
+  "lon": 14.97457
+ },
+ {
+  "name": "Tärnö gästhamn",
+  "lat": 56.12141,
+  "lon": 14.96417
+ },
+ {
+  "name": "Tårs Fiskeri- og Lystbådehavn",
+  "lat": 54.87764,
+  "lon": 11.02411
+ },
+ {
+  "name": "Tærø Havn",
+  "lat": 54.95636,
+  "lon": 12.08252
+ },
+ {
+  "name": "Tømmerstø gjestehavn",
+  "lat": 58.12032,
+  "lon": 8.09112
+ },
+ {
+  "name": "Udbyhøj Lystbådehavn",
+  "lat": 56.61021,
+  "lon": 10.3061
+ },
+ {
+  "name": "Udbyhøj Syd Lystbådehavn",
+  "lat": 56.60669,
+  "lon": 10.30177
+ },
+ {
+  "name": "Uddevalla Hamn",
+  "lat": 58.34625,
+  "lon": 11.90287
+ },
+ {
+  "name": "Uggelhuse Jollehavn",
+  "lat": 56.47322,
+  "lon": 10.21604
+ },
+ {
+  "name": "Uggelhuse Marina",
+  "lat": 56.47152,
+  "lon": 10.20632
+ },
+ {
+  "name": "Ulebergshamns småbåtshamn",
+  "lat": 58.45446,
+  "lon": 11.29862
+ },
+ {
+  "name": "Ulkebøl Krigshavn",
+  "lat": 54.93385,
+  "lon": 9.83494
+ },
+ {
+  "name": "Ulvesunds Hamn",
+  "lat": 58.21931,
+  "lon": 11.88547
+ },
+ {
+  "name": "Urne Havn",
+  "lat": 54.95188,
+  "lon": 11.28467
+ },
+ {
+  "name": "Valbodalen småbåtshamn",
+  "lat": 58.28931,
+  "lon": 11.43442
+ },
+ {
+  "name": "Vallensbæk Havn",
+  "lat": 55.61137,
+  "lon": 12.39587
+ },
+ {
+  "name": "Vallhamn",
+  "lat": 58.01294,
+  "lon": 11.69859
+ },
+ {
+  "name": "Vang Havn",
+  "lat": 55.24868,
+  "lon": 14.73628
+ },
+ {
+  "name": "Vang Pier",
+  "lat": 55.24545,
+  "lon": 14.72917
+ },
+ {
+  "name": "Varbergs Innerhamn",
+  "lat": 57.11107,
+  "lon": 12.24213
+ },
+ {
+  "name": "Varde Havn",
+  "lat": 55.61727,
+  "lon": 8.47723
+ },
+ {
+  "name": "Varvet i Sjöhed",
+  "lat": 57.80944,
+  "lon": 11.86405
+ },
+ {
+  "name": "Vedbæk Havn",
+  "lat": 55.84964,
+  "lon": 12.57247
+ },
+ {
+  "name": "Veddelev Strand Bådelaug",
+  "lat": 55.67888,
+  "lon": 12.06868
+ },
+ {
+  "name": "Vejbystrands hamn",
+  "lat": 56.31584,
+  "lon": 12.76163
+ },
+ {
+  "name": "Vejrø Havn",
+  "lat": 55.0353,
+  "lon": 11.37529
+ },
+ {
+  "name": "Velling Havn",
+  "lat": 56.04034,
+  "lon": 8.31135
+ },
+ {
+  "name": "Venø Havn",
+  "lat": 56.55077,
+  "lon": 8.61476
+ },
+ {
+  "name": "Vesterø Havn",
+  "lat": 57.29585,
+  "lon": 10.92378
+ },
+ {
+  "name": "Vesthavn",
+  "lat": 56.00161,
+  "lon": 8.11909
+ },
+ {
+  "name": "Vesthavnen",
+  "lat": 55.67761,
+  "lon": 11.0822
+ },
+ {
+  "name": "Vestre havn",
+  "lat": 58.14369,
+  "lon": 7.98839
+ },
+ {
+  "name": "Videbergs hamn",
+  "lat": 57.24968,
+  "lon": 12.11115
+ },
+ {
+  "name": "Vikens Båtklubb",
+  "lat": 57.74642,
+  "lon": 11.74458
+ },
+ {
+  "name": "Vindöns gästhamn",
+  "lat": 58.2981,
+  "lon": 11.68796
+ },
+ {
+  "name": "Vinga gästhamn",
+  "lat": 57.63139,
+  "lon": 11.60863
+ },
+ {
+  "name": "Vinterleje Havn",
+  "lat": 55.91879,
+  "lon": 8.17303
+ },
+ {
+  "name": "Virksund Lystbådehavn",
+  "lat": 56.60913,
+  "lon": 9.29138
+ },
+ {
+  "name": "Voerså Fiskerleje",
+  "lat": 57.20351,
+  "lon": 10.49472
+ },
+ {
+  "name": "Vrångö fiskehamn",
+  "lat": 57.57437,
+  "lon": 11.7781
+ },
+ {
+  "name": "Vrångö hamn",
+  "lat": 57.57486,
+  "lon": 11.77589
+ },
+ {
+  "name": "Väjerns gästhamn",
+  "lat": 58.38041,
+  "lon": 11.26029
+ },
+ {
+  "name": "Västra kajen",
+  "lat": 56.16346,
+  "lon": 14.86102
+ },
+ {
+  "name": "Værfthavn",
+  "lat": 55.09497,
+  "lon": 10.23356
+ },
+ {
+  "name": "WSC Lührs Hohner Fähre",
+  "lat": 54.28691,
+  "lon": 9.39705
+ },
+ {
+  "name": "WSV Am Schmarler Graben",
+  "lat": 54.13566,
+  "lon": 12.0898
+ },
+ {
+  "name": "Warnemünder Segel-Club",
+  "lat": 54.1796,
+  "lon": 12.08812
+ },
+ {
+  "name": "Wasser-Wanderrastplatz Born",
+  "lat": 54.3819,
+  "lon": 12.53045
+ },
+ {
+  "name": "Wassersport Borgwedel",
+  "lat": 54.50044,
+  "lon": 9.66981
+ },
+ {
+  "name": "Wassersportverein 'Am Fischergraben' e. V.",
+  "lat": 54.28355,
+  "lon": 13.10527
+ },
+ {
+  "name": "Wassersportverein Fleckeby",
+  "lat": 54.49054,
+  "lon": 9.69708
+ },
+ {
+  "name": "Wassersportzentrum Dänholm-Nord",
+  "lat": 54.3122,
+  "lon": 13.10957
+ },
+ {
+  "name": "Wasserwanderrastplatz",
+  "lat": 54.4322,
+  "lon": 12.69418
+ },
+ {
+  "name": "Wasserwanderrastplatz Dierhagen",
+  "lat": 54.29437,
+  "lon": 12.36467
+ },
+ {
+  "name": "Wasserwanderrastplatz Fuhlendorf (dauerhaft geschlossen)",
+  "lat": 54.37124,
+  "lon": 12.60685
+ },
+ {
+  "name": "Wasserwanderrastplatz Wustrow",
+  "lat": 54.3439,
+  "lon": 12.39834
+ },
+ {
+  "name": "Wyk auf Föhr",
+  "lat": 54.69335,
+  "lon": 8.57871
+ },
+ {
+  "name": "Yachtbau Janssen & Renkhoff",
+  "lat": 54.66639,
+  "lon": 9.93662
+ },
+ {
+  "name": "Yachtclub \"Fischland\"",
+  "lat": 54.27207,
+  "lon": 12.37657
+ },
+ {
+  "name": "Yachtclub Strelasund",
+  "lat": 54.30526,
+  "lon": 13.12061
+ },
+ {
+  "name": "Yachtclub Warnow",
+  "lat": 54.10473,
+  "lon": 12.10791
+ },
+ {
+  "name": "Yachtclub Zingst",
+  "lat": 54.42886,
+  "lon": 12.68608
+ },
+ {
+  "name": "Yachthafen Althagen (Ahrenshoop)",
+  "lat": 54.37216,
+  "lon": 12.4193
+ },
+ {
+  "name": "Yachthafen Baabe",
+  "lat": 54.35062,
+  "lon": 13.68544
+ },
+ {
+  "name": "Yachthafen Burgstaaken",
+  "lat": 54.41969,
+  "lon": 11.18994
+ },
+ {
+  "name": "Yachthafen Burgtiefe",
+  "lat": 54.41316,
+  "lon": 11.19964
+ },
+ {
+  "name": "Yachthafen Grömitz",
+  "lat": 54.13561,
+  "lon": 10.94735
+ },
+ {
+  "name": "Yachthafen Hohe Düne",
+  "lat": 54.18203,
+  "lon": 12.10001
+ },
+ {
+  "name": "Yachthafen Hörnum - Sylter Yacht Club",
+  "lat": 54.76023,
+  "lon": 8.29578
+ },
+ {
+  "name": "Yachthafen Lohme",
+  "lat": 54.58466,
+  "lon": 13.60793
+ },
+ {
+  "name": "Yachthafen Mittelmole - Sportschule Warnemünde",
+  "lat": 54.18148,
+  "lon": 12.0886
+ },
+ {
+  "name": "Yachthafen Schaprode",
+  "lat": 54.51164,
+  "lon": 13.1675
+ },
+ {
+  "name": "Yachthafen Stahlbrode",
+  "lat": 54.23372,
+  "lon": 13.28978
+ },
+ {
+  "name": "Yachthafen Vitte-Lange Ort",
+  "lat": 54.5718,
+  "lon": 13.11034
+ },
+ {
+  "name": "Yachthäfen in Großenbrode - A. Koch u. Söhne Sportboothafen GmbH",
+  "lat": 54.39275,
+  "lon": 11.11779
+ },
+ {
+  "name": "Yachtklubben Furesøen",
+  "lat": 55.80862,
+  "lon": 12.44317
+ },
+ {
+  "name": "Yachtlieger Achterwasser",
+  "lat": 54.02584,
+  "lon": 13.91077
+ },
+ {
+  "name": "Yachtwerft Klemens",
+  "lat": 54.35333,
+  "lon": 11.07862
+ },
+ {
+  "name": "Yderhavn",
+  "lat": 55.09349,
+  "lon": 10.23957
+ },
+ {
+  "name": "Yderhavnen Svajebassin",
+  "lat": 55.4931,
+  "lon": 9.49642
+ },
+ {
+  "name": "Ydre Havn",
+  "lat": 54.98276,
+  "lon": 12.28097
+ },
+ {
+  "name": "Yttre Saltholmen",
+  "lat": 57.66027,
+  "lon": 11.83727
+ },
+ {
+  "name": "im jaich Naturhafen Gustow",
+  "lat": 54.2964,
+  "lon": 13.19159
+ },
+ {
+  "name": "Älvnabben",
+  "lat": 57.68065,
+  "lon": 11.86103
+ },
+ {
+  "name": "Ängholmens Varv",
+  "lat": 57.66562,
+  "lon": 11.84302
+ },
+ {
+  "name": "Ålabodarnas hamn",
+  "lat": 55.93977,
+  "lon": 12.77238
+ },
+ {
+  "name": "Åros gjestehavn",
+  "lat": 58.0729,
+  "lon": 7.8208
+ },
+ {
+  "name": "Årøsund Lystbådehavn",
+  "lat": 55.26242,
+  "lon": 9.70865
+ },
+ {
+  "name": "Åstols Hamn",
+  "lat": 57.92407,
+  "lon": 11.58756
+ },
+ {
+  "name": "Ærøskøbing Havn",
+  "lat": 54.89106,
+  "lon": 10.41385
+ },
+ {
+  "name": "ÖBS Klubbhamn",
+  "lat": 57.72515,
+  "lon": 11.65175
+ },
+ {
+  "name": "Öckerö Hamn",
+  "lat": 57.70597,
+  "lon": 11.662
+ },
+ {
+  "name": "Öckerö Hamn",
+  "lat": 57.70656,
+  "lon": 11.65848
+ },
+ {
+  "name": "Önnereds Båtförening",
+  "lat": 57.63847,
+  "lon": 11.86907
+ },
+ {
+  "name": "Önnereds Båtlag",
+  "lat": 57.63618,
+  "lon": 11.87274
+ },
+ {
+  "name": "Önneredsvikens Marina",
+  "lat": 57.63657,
+  "lon": 11.87111
+ },
+ {
+  "name": "Øer Maritime Havn",
+  "lat": 56.15148,
+  "lon": 10.68849
+ },
+ {
+  "name": "Ørndalens Bådelaug",
+  "lat": 56.63709,
+  "lon": 9.84051
+ },
+ {
+  "name": "Ørodde Havn",
+  "lat": 56.78726,
+  "lon": 8.87639
+ },
+ {
+  "name": "Øster Hurup Havn",
+  "lat": 56.80532,
+  "lon": 10.28238
+ },
+ {
+  "name": "Østerby Fiskerihavn",
+  "lat": 57.32161,
+  "lon": 11.12696
+ },
+ {
+  "name": "Østerby Fiskerihavn",
+  "lat": 57.32093,
+  "lon": 11.12615
+ },
+ {
+  "name": "Østerby Havn Marina",
+  "lat": 57.32094,
+  "lon": 11.12292
+ },
+ {
+  "name": "Østerhavn",
+  "lat": 55.30933,
+  "lon": 10.79306
+ },
+ {
+  "name": "Østhavn",
+  "lat": 55.99939,
+  "lon": 8.13109
+ }
+]

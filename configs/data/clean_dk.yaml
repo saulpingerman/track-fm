@@ -1,0 +1,41 @@
+cleaning:
+  track_gap_hours: 4.0
+  min_track_points: 2
+
+  bounds:
+    lat_min: 54.0
+    lat_max: 58.5
+    lon_min: 7.0
+    lon_max: 16.0
+
+  max_velocity_knots: 50.0
+  velocity_by_ship_type:
+    cargo: 25.0
+    tanker: 20.0
+    passenger: 35.0
+    fishing: 15.0
+    default: 50.0
+
+  collision:
+    distance_threshold_km: 50.0
+    dbscan_eps_km: 5.0
+    min_bounce_count: 3
+    lookback_window: 10
+
+storage:
+  raw_dir: "~/data/ais/raw"
+  clean_dir: "~/data/ais/clean"
+  state_dir: "~/data/ais/state"
+
+output:
+  format: "parquet"
+  compression: "zstd"
+  compression_level: 3
+  partition_by: ["year", "month", "day"]
+  target_file_size_mb: 200
+  row_group_size: 100000
+
+processing:
+  batch_size_days: 7
+  checkpoint_interval: 1
+  num_workers: 8

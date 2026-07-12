@@ -1,0 +1,10 @@
+# Smoke subset: first 7 cleaned days only.
+clean_dir: ~/data/ais/clean
+out_dir: ~/data/trackfm/materialized/smoke
+window_size: 928
+input_len: 128
+stride: 32
+num_output_shards: 8
+train_frac: 0.8
+val_frac: 0.1
+seed: 17

@@ -13,7 +13,7 @@ __pycache__/
 *.npy
 *.npz
 *.pkl
-data/
+/data/
 outputs/
 mlruns/
 checkpoints/

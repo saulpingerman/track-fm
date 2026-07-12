@@ -1,0 +1,11 @@
+# Full materialization: 928-window shards from all cleaned data.
+clean_dir: ~/data/ais/clean
+out_dir: ~/data/trackfm/materialized/v1
+window_size: 928
+input_len: 128
+stride: 32
+num_output_shards: 256
+train_frac: 0.8
+val_frac: 0.1
+seed: 17
+num_workers: 40
