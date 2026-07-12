@@ -3,6 +3,16 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-12 — Campaign plan: hybrid geometries (Paul's pick)
+
+Measured at ±0.9/192/F18: head+loss dominates at EVERY scale (~300-400
+samples/s, 41% MFU) -> single-geometry campaign = ~12 GPU-days. Chosen
+hybrid: **scaling study at the paper's exact geometry** (0.3/64/F12, 50M
+samples per scale — doubles as the direct "paper architecture x 26 months"
+comparison to Table 1) and **only the XLarge flagship at 0.9/192/F18**
+(~8 GPU-days total). Horizon-scaled cone remains the efficiency play if a
+future run needs both coverage and speed (would be ~5 days, ~99% coverage).
+
 ## 2026-07-12 — Head ablation OUTCOME: near-tie, mixed regime -> keep Fourier
 
 Ran overnight at golden geometry (0.3°/64/F12), medium encoder, test split:
