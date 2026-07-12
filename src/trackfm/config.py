@@ -94,8 +94,14 @@ class TrainConfig(BaseModel):
     # Saturation = opportunity cost: stop when the trend (fit over the last
     # `window` validations vs log-step) projects < min_remaining_frac
     # further improvement over the ENTIRE remaining budget. Power-law-safe.
-    early_stop_window: int = 24
-    early_stop_min_remaining_frac: float = 0.001
+    # Saturation = no-progress, noise-robust: compare MEDIANS of the two
+    # halves of the validation history; stop when half-over-half gain stays
+    # below min_gain_frac for `confirmations` consecutive validations.
+    # Median blocks grow with the run (noise ~1/sqrt(n)), so noise cannot
+    # fake saturation on a healthy power-law curve.
+    early_stop_min_history: int = 48
+    early_stop_min_gain_frac: float = 0.004
+    early_stop_confirmations: int = 4
     num_workers: int = 8
     seed: int = 17
     # Practical bf16 peak of this GPU (scripts/gpu_peak_bench.py) — the

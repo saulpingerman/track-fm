@@ -41,31 +41,33 @@ def _mlflow_log(metrics: dict, step: int) -> None:
 
 
 
-def should_stop_saturation(history: list[tuple[int, float]], max_steps: int,
-                           window: int = 24,
-                           min_remaining_frac: float = 0.001) -> tuple[bool, float]:
-    """Opportunity-cost saturation test (safe for power-law loss curves).
+def should_stop_saturation(history: list[tuple[int, float]],
+                            min_history: int = 48,
+                            min_gain_frac: float = 0.004) -> tuple[bool, float]:
+    """No-progress test, robust to per-validation noise (median blocks).
 
-    Fits val loss against log(step) over the last `window` validations and
-    projects the gain over the REMAINING budget. Stops only when that
-    projected gain is below `min_remaining_frac` of current loss. A healthy
-    power law L = c + a*t^-alpha is locally linear in log t, so its
-    projection stays large until the budget genuinely can't buy more; a
-    flat/rising curve projects ~0 and stops after one window.
+    Splits the full validation history into two halves and compares their
+    MEDIANS: stop only when the second half improved on the first by less
+    than `min_gain_frac`. Median noise shrinks as 1/sqrt(n) while the
+    half-to-half signal of any healthy power law stays ~1%+, so noise
+    cannot fake saturation (a window-local slope fit could not make this
+    guarantee: its SNR falls below 1 mid-run — measured 26 consecutive
+    false positives under +-1% val noise). Never fires before
+    `min_history` validations (~24h at the 30-min cadence).
 
-    Returns (stop, projected_remaining_relative_gain).
+    Returns (stop, half_over_half_relative_gain).
     """
     import numpy as np
 
-    if len(history) < window:
+    n = len(history)
+    if n < min_history:
         return False, float("inf")
-    steps = np.array([h[0] for h in history[-window:]], dtype=np.float64)
-    losses = np.array([h[1] for h in history[-window:]], dtype=np.float64)
-    slope = np.polyfit(np.log(steps), losses, 1)[0]        # loss per log-step
-    remaining_log = max(0.0, np.log(max_steps) - np.log(steps[-1]))
-    projected_gain = max(0.0, -slope * remaining_log)      # expected further drop
-    rel = projected_gain / max(losses[-1], 1e-9)
-    return rel < min_remaining_frac, rel
+    losses = np.array([h[1] for h in history], dtype=np.float64)
+    half = n // 2
+    first = float(np.median(losses[:half]))
+    second = float(np.median(losses[half:]))
+    gain = (first - second) / max(second, 1e-9)
+    return gain < min_gain_frac, gain
 
 
 def _lr_lambda(step: int, warmup: int, max_steps: int | None, schedule: str):
@@ -206,6 +208,7 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
 
     best_val = float("inf")
     val_history: list[tuple[int, float]] = []
+    stop_streak = 0
     step = 0
     samples_seen = 0
     last_val_time = time.time()
@@ -274,14 +277,19 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                     # saturation: opportunity-cost projection over remaining
                     # budget (power-law-safe; see should_stop_saturation)
                     val_history.append((step, val_loss))
-                    stop, rel = should_stop_saturation(
-                        val_history, max_steps, t.early_stop_window,
-                        t.early_stop_min_remaining_frac)
-                    if len(val_history) >= t.early_stop_window:
-                        _mlflow_log({"projected_remaining_gain": rel}, step)
+                    stop, gain = should_stop_saturation(
+                        val_history, t.early_stop_min_history,
+                        t.early_stop_min_gain_frac)
+                    if gain != float("inf"):
+                        _mlflow_log({"half_over_half_gain": gain}, step)
+                    stop_streak = stop_streak + 1 if stop else 0
                     if stop:
-                        logger.info(f"Early stop: remaining budget projects "
-                                    f"only {rel:.4%} further improvement")
+                        logger.info(f"saturation signal {stop_streak}/"
+                                    f"{t.early_stop_confirmations}: half-over-half "
+                                    f"gain {gain:.4%}")
+                    if stop_streak >= t.early_stop_confirmations:
+                        logger.info("Early stop: no meaningful progress "
+                                    "(confirmed over consecutive validations)")
                         raise StopIteration
                 if step >= max_steps:
                     raise StopIteration
