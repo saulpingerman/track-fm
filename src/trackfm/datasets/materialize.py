@@ -279,7 +279,10 @@ def materialize_dataset(cfg: MaterializeConfig, subset_days: int | None = None) 
     )
 
     # val/test are small: a handful of piles is plenty
-    piles_per_split = {"train": cfg.num_output_shards, "val": 8, "test": 8}
+    # val/test piles must stay RAM-shuffleable: pass 2 loads one pile whole.
+    # 8 piles was sized for small slices; 26 months of val = ~45GB/pile = OOM.
+    aux = max(8, cfg.num_output_shards // 8)
+    piles_per_split = {"train": cfg.num_output_shards, "val": aux, "test": aux}
 
     rng = np.random.default_rng(cfg.seed)
     for split_name, split_days in splits.items():
