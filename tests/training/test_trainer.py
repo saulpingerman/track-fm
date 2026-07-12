@@ -54,3 +54,28 @@ def test_loss_decreases_on_memorizable_batch(tiny):
     assert losses[-1] < losses[0] * 0.9, f"no learning: {losses[0]:.3f} -> {losses[-1]:.3f}"
     # and it should be monotone-ish: final quarter below first quarter average
     assert sum(losses[-5:]) < sum(losses[:5]), "loss not trending down"
+
+
+def test_saturation_stop_spares_power_law_kills_flat():
+    """GPT-3-style power-law progress must survive; a flat curve must not."""
+    import numpy as np
+
+    from trackfm.training.pretrain import should_stop_saturation
+
+    max_steps = 400_000
+    val_steps = np.linspace(2000, max_steps, 336).astype(int)  # ~7d @ 30min
+
+    # power law: L = 1.5 + 2.2 * t^-0.28  (relative gains shrink steadily)
+    power = [(int(t), 1.5 + 2.2 * t ** -0.28) for t in val_steps]
+    # must survive until at least 90% of the budget; stopping in the final
+    # ~10% is CORRECT thrift (the analytic tail there buys < 0.1%)
+    for i in range(24, int(len(power) * 0.9)):
+        stop, _ = should_stop_saturation(power[: i + 1], max_steps)
+        assert not stop, f"killed a power-law run at validation {i}"
+
+    # flat: converged, pure noise
+    rng = np.random.default_rng(0)
+    flat = [(int(t), 1.7 + rng.normal(0, 1e-4)) for t in val_steps[:40]]
+    stopped = any(should_stop_saturation(flat[: i + 1], max_steps)[0]
+                  for i in range(24, 40))
+    assert stopped, "failed to stop a flat run"

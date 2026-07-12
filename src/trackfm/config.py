@@ -89,11 +89,13 @@ class TrainConfig(BaseModel):
     compile: bool = False
     grad_accum_steps: int = 1
     val_interval_minutes: float = 30.0
-    early_stop_patience: int = 10
-    # patience resets only on a MEANINGFUL improvement (relative). Strict-<
-    # resets let 1e-5 blips keep a saturated run alive forever; best.pt still
-    # updates on any improvement.
-    early_stop_min_delta_frac: float = 0.001
+    early_stop_patience: int = 10          # legacy knob, unused by pretrain
+    early_stop_min_delta_frac: float = 0.001  # legacy knob, unused by pretrain
+    # Saturation = opportunity cost: stop when the trend (fit over the last
+    # `window` validations vs log-step) projects < min_remaining_frac
+    # further improvement over the ENTIRE remaining budget. Power-law-safe.
+    early_stop_window: int = 24
+    early_stop_min_remaining_frac: float = 0.001
     num_workers: int = 8
     seed: int = 17
     # Practical bf16 peak of this GPU (scripts/gpu_peak_bench.py) — the

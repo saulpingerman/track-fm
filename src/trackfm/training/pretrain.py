@@ -40,6 +40,34 @@ def _mlflow_log(metrics: dict, step: int) -> None:
         logger.warning(f"mlflow logging failed at step {step} (continuing): {e}")
 
 
+
+def should_stop_saturation(history: list[tuple[int, float]], max_steps: int,
+                           window: int = 24,
+                           min_remaining_frac: float = 0.001) -> tuple[bool, float]:
+    """Opportunity-cost saturation test (safe for power-law loss curves).
+
+    Fits val loss against log(step) over the last `window` validations and
+    projects the gain over the REMAINING budget. Stops only when that
+    projected gain is below `min_remaining_frac` of current loss. A healthy
+    power law L = c + a*t^-alpha is locally linear in log t, so its
+    projection stays large until the budget genuinely can't buy more; a
+    flat/rising curve projects ~0 and stops after one window.
+
+    Returns (stop, projected_remaining_relative_gain).
+    """
+    import numpy as np
+
+    if len(history) < window:
+        return False, float("inf")
+    steps = np.array([h[0] for h in history[-window:]], dtype=np.float64)
+    losses = np.array([h[1] for h in history[-window:]], dtype=np.float64)
+    slope = np.polyfit(np.log(steps), losses, 1)[0]        # loss per log-step
+    remaining_log = max(0.0, np.log(max_steps) - np.log(steps[-1]))
+    projected_gain = max(0.0, -slope * remaining_log)      # expected further drop
+    rel = projected_gain / max(losses[-1], 1e-9)
+    return rel < min_remaining_frac, rel
+
+
 def _lr_lambda(step: int, warmup: int, max_steps: int | None, schedule: str):
     if step < warmup:
         return (step + 1) / max(warmup, 1)
@@ -177,8 +205,7 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
 
 
     best_val = float("inf")
-    best_meaningful = float("inf")
-    bad_vals = 0
+    val_history: list[tuple[int, float]] = []
     step = 0
     samples_seen = 0
     last_val_time = time.time()
@@ -244,18 +271,18 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                                     "val_loss": val_loss,
                                     "config": cfg.model_dump(mode="json")},
                                    ckpt_dir / "best.pt")
-                    # patience: only MEANINGFUL improvement resets the clock
-                    if val_loss < best_meaningful * (1 - t.early_stop_min_delta_frac):
-                        best_meaningful = val_loss
-                        bad_vals = 0
-                    else:
-                        bad_vals += 1
-                        logger.info(f"no meaningful val improvement "
-                                    f"({bad_vals}/{t.early_stop_patience}): "
-                                    f"{val_loss:.5f} vs {best_meaningful:.5f}")
-                        if bad_vals >= t.early_stop_patience:
-                            logger.info("Early stop: validation saturated")
-                            raise StopIteration
+                    # saturation: opportunity-cost projection over remaining
+                    # budget (power-law-safe; see should_stop_saturation)
+                    val_history.append((step, val_loss))
+                    stop, rel = should_stop_saturation(
+                        val_history, max_steps, t.early_stop_window,
+                        t.early_stop_min_remaining_frac)
+                    if len(val_history) >= t.early_stop_window:
+                        _mlflow_log({"projected_remaining_gain": rel}, step)
+                    if stop:
+                        logger.info(f"Early stop: remaining budget projects "
+                                    f"only {rel:.4%} further improvement")
+                        raise StopIteration
                 if step >= max_steps:
                     raise StopIteration
     except StopIteration:
