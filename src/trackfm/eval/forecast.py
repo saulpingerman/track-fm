@@ -83,6 +83,7 @@ def evaluate_forecasting(
 
     n = 0
     rank_accum: dict[str, list] = {"model": [], "dr_tuned": [], "kalman": []}
+    strat_accum: dict[str, list] = {"difficulty": [], "ce_model": [], "ce_dr_tuned": []}
     for i, batch in enumerate(loader):
         if i >= max_batches:
             break
@@ -98,6 +99,14 @@ def evaluate_forecasting(
         kf_pred, kf_sig = kalman_cv_forecast(batch, h_idx, m.max_seq_len,
                                              cfg.normalization, kf_q, kf_r)
         from trackfm.eval.search import gaussian_grid_log_density, search_ranks
+        from trackfm.eval.stratified import difficulty_score, per_sample_soft_ce
+        strat_accum["difficulty"].append(difficulty_score(dr, tgt).cpu())
+        strat_accum["ce_model"].append(per_sample_soft_ce(
+            ld, tgt, m.grid_range, m.grid_size, t.sigma).cpu())
+        strat_accum["ce_dr_tuned"].append(per_sample_soft_ce(
+            gaussian_grid_log_density(dr, dr_sigmas.to(device).view(1, -1, 1).expand_as(dr),
+                                      m.grid_range, m.grid_size),
+            tgt, m.grid_range, m.grid_size, t.sigma).cpu())
         rank_accum["model"].append(search_ranks(ld, tgt, m.grid_range).cpu())
         rank_accum["dr_tuned"].append(search_ranks(
             gaussian_grid_log_density(dr, dr_sigmas.to(device).view(1, -1, 1).expand_as(dr),
@@ -164,6 +173,26 @@ def evaluate_forecasting(
         logger.info(f"search h={h}: " + " | ".join(
             f"{nm} k@90={v['curve']['k@90']} med={v.get('median_rank', float('nan')):.0f}"
             for nm, v in row.items()))
+
+    # difficulty-stratified report (DR-residual deciles) per horizon
+    from trackfm.eval.stratified import stratified_table
+    diff = torch.cat(strat_accum["difficulty"])
+    ce_m = torch.cat(strat_accum["ce_model"])
+    ce_d = torch.cat(strat_accum["ce_dr_tuned"])
+    model_ranks = torch.cat(rank_accum["model"])
+    out["stratified"] = {}
+    for k, h in enumerate(horizons):
+        out["stratified"][h] = stratified_table(
+            diff[:, k], {"ce_model": ce_m[:, k], "ce_dr_tuned": ce_d[:, k],
+                         "rank_model": model_ranks[:, k].float()})
+        top = out["stratified"][h].get(9, {})
+        bot = out["stratified"][h].get(0, {})
+        if top and bot:
+            logger.info(
+                f"stratified h={h}: easy-decile CE {bot['ce_model_mean']:.3f} "
+                f"(DRtuned {bot['ce_dr_tuned_mean']:.3f}) | hard-decile CE "
+                f"{top['ce_model_mean']:.3f} (DRtuned {top['ce_dr_tuned_mean']:.3f}), "
+                f"hard capture@10 {top.get('capture10', float('nan')):.0%}")
 
     hdr = f"{'h':>5} {'model':>7} " + " ".join(f"{b:>9}" for b in BASELINES)
     logger.info(hdr)
