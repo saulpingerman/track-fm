@@ -196,9 +196,20 @@ def _haversine_km(lat1, lon1, lat2, lon2):
 
 # ------------------------------------------------------------------ registry
 def load_registry(path: Path | None = None) -> pl.DataFrame:
-    """OSM harbour registry: name, lat, lon."""
-    path = Path(path or REGISTRY_PATH)
-    entries = json.loads(path.read_text())
+    """Harbour registry: name, lat, lon.
+
+    Base OSM extraction (marina-biased tags) + the major-commercial-port
+    supplement (the OSM pass missed Copenhagen, Aalborg, Fredericia, ...;
+    supplement coordinates are snapped to our own dwell-mass medians).
+    An explicit path loads that file alone (tests, alternate registries).
+    """
+    if path is not None:
+        return pl.DataFrame(json.loads(Path(path).read_text()))
+    entries = json.loads(REGISTRY_PATH.read_text())
+    sup_path = REGISTRY_PATH.parent / "port_registry_supplement.json"
+    if sup_path.exists():
+        entries += [{"name": e["name"], "lat": e["lat"], "lon": e["lon"]}
+                    for e in json.loads(sup_path.read_text())]
     return pl.DataFrame(entries)
 
 

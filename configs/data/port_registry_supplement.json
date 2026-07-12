@@ -1,0 +1,156 @@
+[
+ {
+  "name": "Københavns Havn",
+  "lat": 55.69543,
+  "lon": 12.60801,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 65924
+ },
+ {
+  "name": "Aarhus Havn",
+  "lat": 56.15257,
+  "lon": 10.22236,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 18446
+ },
+ {
+  "name": "Aalborg Havn",
+  "lat": 57.05761,
+  "lon": 9.89732,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 13351
+ },
+ {
+  "name": "Fredericia Havn",
+  "lat": 55.55822,
+  "lon": 9.75382,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 8950
+ },
+ {
+  "name": "Kalundborg Havn",
+  "lat": 55.67596,
+  "lon": 11.08856,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 6419
+ },
+ {
+  "name": "Odense Havn (Lindø)",
+  "lat": 55.47517,
+  "lon": 10.5384,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 3988
+ },
+ {
+  "name": "Rønne Havn",
+  "lat": 55.09881,
+  "lon": 14.6925,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 16413
+ },
+ {
+  "name": "Køge Havn",
+  "lat": 55.45839,
+  "lon": 12.19785,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 6028
+ },
+ {
+  "name": "Randers Havn",
+  "lat": 56.46001,
+  "lon": 10.05694,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 1102
+ },
+ {
+  "name": "Kolding Havn",
+  "lat": 55.49215,
+  "lon": 9.49936,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 3489
+ },
+ {
+  "name": "Vejle Havn",
+  "lat": 55.70652,
+  "lon": 9.55666,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 3388
+ },
+ {
+  "name": "Horsens Havn",
+  "lat": 55.85686,
+  "lon": 9.8738,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 2772
+ },
+ {
+  "name": "Aabenraa Havn",
+  "lat": 55.03905,
+  "lon": 9.42424,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 3693
+ },
+ {
+  "name": "Nakskov Havn",
+  "lat": 54.83114,
+  "lon": 11.1237,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 2037
+ },
+ {
+  "name": "Malmö Hamn",
+  "lat": 55.61383,
+  "lon": 12.99085,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 10547
+ },
+ {
+  "name": "Landskrona Hamn",
+  "lat": 55.8664,
+  "lon": 12.82456,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 9119
+ },
+ {
+  "name": "Halmstads Hamn",
+  "lat": 56.65726,
+  "lon": 12.85326,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 3275
+ },
+ {
+  "name": "Varbergs Hamn",
+  "lat": 57.10973,
+  "lon": 12.24508,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 5686
+ },
+ {
+  "name": "Göteborgs Hamn",
+  "lat": 57.69049,
+  "lon": 11.888,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 13201
+ },
+ {
+  "name": "Trelleborgs Hamn",
+  "lat": 55.36705,
+  "lon": 13.15488,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 10444
+ },
+ {
+  "name": "Ystads Hamn",
+  "lat": 55.42521,
+  "lon": 13.82313,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 7693
+ },
+ {
+  "name": "Kiel (Port)",
+  "lat": 54.35366,
+  "lon": 10.14817,
+  "source": "major-port supplement 2026-07-13: nominatim/manual seed snapped to dwell-mass median",
+  "dwells_within_3km": 7462
+ }
+]
