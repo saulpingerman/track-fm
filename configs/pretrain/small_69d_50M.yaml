@@ -20,7 +20,7 @@ normalization:
 train:
   learning_rate: 0.0003
   weight_decay: 1.0e-05
-  batch_size: 512
+  batch_size: 384
   max_horizon: 800
   num_horizon_samples: 4
   warmup_steps: 500
@@ -33,7 +33,7 @@ train:
   early_stop_patience: 10
   num_workers: 8
   seed: 17
-  max_steps: 97656
+  max_steps: 130208
 mlflow:
   tracking_uri: http://127.0.0.1:5000
   experiment: trackfm/scaling
