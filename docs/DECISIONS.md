@@ -3,6 +3,27 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-12 — Data-vs-capacity at the small end (Paul's challenge)
+
+Claim "data volume is doing enormous work" from small@26mo ~= golden-
+medium@69d was CONFOUNDED (varied model and data together). Decisive
+cell launched: **small@69d, identical 50M-sample budget** (4.5 repeated
+epochs of golden69 vs fresh 26-month windows; same model, protocol,
+sample count — only data DIVERSITY differs). Combined with the running
+medium@26mo vs golden-medium@69d pair this gives a 2x2 mini scaling grid
+{small,medium} x {69d,26mo}.
+
+Outcome interpretation:
+- small@69d ~= small@26mo -> Paul right: Small saturates; capacity binds
+  at the small end; the 26-month corpus pays only at scale (watch the
+  medium/large/xlarge points for where diversity starts mattering).
+  Data-scaling claims must then be made per-scale, never pooled.
+- small@26mo clearly better (>~0.05 val CE or >0.15x tuned-DR ratio) ->
+  data diversity pays even at 1M params; repeated-epoch training on
+  small corpora underperforms fresh data at matched sample counts.
+- Intermediate -> report the interaction; the 2x2 grid becomes a paper
+  figure either way.
+
 ## 2026-07-12 — Saturation stop v2: median-block halves (noise-robust)
 
 Iterated twice under Paul's challenges: (1) a rate-floor stop kills
