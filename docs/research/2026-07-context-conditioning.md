@@ -170,6 +170,18 @@ Storage: bbox subsets are GB-scale vs 1.4TB free — not a constraint.
   open-water; judge on strata, not averages.)
 - C2 **Drift audit**: heading-vs-COG differences vs CMEMS current + ERA5
   wind vectors — validates both the drift channel and join correctness.
+  **RESULT 2026-07-13: PASSED.** 523,350 points, 4 days across seasons,
+  cross-heading drift (SOG·sin(COG−heading), no STW assumption) vs
+  heading-perpendicular current + 3% wind sampled via FieldStore at
+  exact position/hour: pooled r = 0.52 (current alone 0.44, wind alone
+  0.42; every season 0.42–0.58; r highest at low SOG as physics
+  predicts). Regression slope 0.68 vs physical 1.0 — expected shortfall
+  from grid smoothing (2–7 km), surface-vs-hull current, crude 3%
+  leeway, heading noise. Conclusions: (1) the free drift channel
+  carries real physical signal; (2) the FieldStore join is correct end
+  to end (a broken join would give r≈0); (3) vessels measurably respond
+  to the fields — the conditioning premise has direct physical support
+  in OUR data, not just the literature's.
 - C3 Add weather-severity deciles to the stratified eval.
 
 ### Track D — GPU experiments (post-flagship-gate; each logged in DECISIONS.md)
