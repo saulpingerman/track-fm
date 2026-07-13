@@ -177,3 +177,16 @@ Evaluation lessons: overlap metrics reward overconfidence on static-heavy data (
 (c3) §2/rec 9 endorse DriftNet-style one-shot full-horizon field ingestion [CONFIRMED] while §5 praises deepSSF's recompute-fields-per-rollout-step as "exactly how forecast-time fields would feed each horizon" — directly opposed ingestion strategies, both presented approvingly.
 
 (c4) Verification-key discipline breaks twice: Slaughter's Region B harm is [CONFIRMED] while overall paper access is [DISPUTED] (2/2 checks impossible if one verifier lacked the text), and AISFormer is "[CONFIRMED, abstract-level only]" despite the key defining CONFIRMED as checks against primary source.
+
+---
+
+## Post-review addendum (2026-07-13): AISFormer full text obtained
+
+Gap 5 (AISFormer paywalled) is resolved via PSU ILL. Finding: AISFormer
+has NO wave input pathway — x_t = [lat,lon,SOG,COG]; "wave-aware" means
+a two-phase curriculum where ERA5 waves only SELECT training subsets
+(1,200s / 15,000s spans). §5's caveat was understated; the paper is not
+evidence for OR against wave conditioning of a grid-CE forecaster.
+Honest-gap #4 (no maritime environmental-field-conditioned forecaster
+exists) now holds with no asterisk. Details and comparison cautions in
+2026-07-method-comparisons.md.
