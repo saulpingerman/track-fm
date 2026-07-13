@@ -3,6 +3,35 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-13 — Gate evidence in: 7-point curve bends; 2x2 flips (with one confound left)
+
+**Scaling curve (identical protocol, 26mo, 50M samples):** nano 2.078 /
+micro 1.945 / mini 1.801 / tiny 1.730 / small 1.656 / medium 1.545 /
+large 1.493. Pairwise exponents: ~0.06 flat across nano->small (clean
+power law), then 0.042, 0.027 — the curve BENDS above ~1M params. A
+floored fit L = 1.25 + 5.79*N^-0.191 matches all 7 points (max resid
+0.009) and predicts xlarge ~1.417 (−5.1% vs large) and a hypothetical
+1B model only 1.361: **capacity alone is approaching an irreducible
+floor ~1.25 on kinematics-only inputs.** The remaining headroom argument
+shifts to the INFORMATION axis (context conditioning — C2 already shows
+the physical coupling is real).
+
+**2x2 data-vs-capacity, now split-controlled (cross-evals):**
+small@69d beats small@26mo on BOTH test sets — 1.184 vs 1.282 on the
+26mo test (the diverse model's home split!), 1.242 vs 1.300 on 69d;
+tuned-DR ratios agree. At the small end, REPEATED focused data (4.5
+epochs of 69d) beat single-epoch diverse data at matched sample count —
+Paul's saturation intuition vindicated in a stronger form. CAVEAT
+(one confound left): small-69d ran batch 384 / 130,208 steps vs
+small-26mo's 1638 / 30,525 — 4.3x more optimizer updates. Resolver
+armed: scaling-small-26mo-b384 (same data as small-26mo, same
+batch/steps as small-69d) queued after the isoFLOP control
+(b384_queue.sh). Outcome tree: b384-control ~= small-69d -> the "win"
+was optimizer steps, not focused data (batch policy matters more than
+data policy at small scale); b384-control ~= small-26mo-b1638 -> the
+focused-data win is real -> repeated-epoch curricula are a legitimate
+small-model strategy and diversity claims must be scale-qualified.
+
 ## 2026-07-13 — Port clustering eps: 3.0 -> 0.75 km (chaining at full density)
 
 At full corpus density (1.46M dwells vs the 165k it was tuned on), DBSCAN
