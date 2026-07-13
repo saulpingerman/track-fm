@@ -30,9 +30,19 @@ import pyarrow.parquet as pq
 from tqdm import tqdm
 
 from trackfm.config import MaterializeConfig
-from trackfm.datasets.windowing import FEATURE_COLUMNS, extract_windows_from_track
+from trackfm.datasets.windowing import (FEATURE_COLUMNS, FEATURE_COLUMNS_V3,
+                                        HEADING_MISSING, META_FLOATS,
+                                        extract_windows_from_track,
+                                        pack_window_meta)
 
 logger = logging.getLogger(__name__)
+
+
+def floats_per_sample(cfg: MaterializeConfig) -> int:
+    """Row width in float32 for the configured format version."""
+    if cfg.format_version == 1:
+        return cfg.window_size * len(FEATURE_COLUMNS)
+    return META_FLOATS + cfg.window_size * len(FEATURE_COLUMNS_V3)
 
 
 # ------------------------------------------------------------------ helpers
@@ -146,11 +156,17 @@ def pass1_extract(cfg: MaterializeConfig, split_days: list[Path], out_dir: Path,
     temp_dir.mkdir(parents=True, exist_ok=True)
     pile_files = [_CompressedPile(temp_dir / f"pile_{i:03d}.bin") for i in range(num_piles)]
 
+    v3 = cfg.format_version >= 3
+    feature_cols = FEATURE_COLUMNS_V3 if v3 else FEATURE_COLUMNS
     buffers: dict[str, list[np.ndarray]] = defaultdict(list)
+    epoch_buffers: dict[str, list[np.ndarray]] = defaultdict(list)
+    track_mmsi: dict[str, int] = {}
     last_seen: dict[str, str] = {}
 
     def finalize_track(track_id: str) -> int:
         chunks = buffers.pop(track_id)
+        mmsi = track_mmsi.pop(track_id, 0)
+        echunks = epoch_buffers.pop(track_id, None)
         last_seen.pop(track_id, None)
         feats = np.vstack(chunks) if len(chunks) > 1 else chunks[0]
         if len(feats) < cfg.min_track_length:
@@ -158,10 +174,18 @@ def pass1_extract(cfg: MaterializeConfig, split_days: list[Path], out_dir: Path,
         windows = extract_windows_from_track(feats, cfg.window_size, cfg.stride)
         if len(windows) == 0:
             return 0
-        assignment = rng.integers(0, num_piles, size=len(windows))
+        if v3:
+            epochs = np.concatenate(echunks)
+            starts = np.arange(len(windows)) * cfg.stride
+            meta = pack_window_meta(epochs[starts], mmsi)
+            rows = np.concatenate(
+                [meta, windows.reshape(len(windows), -1)], axis=1)
+        else:
+            rows = windows.reshape(len(windows), -1)
+        assignment = rng.integers(0, num_piles, size=len(rows))
         for pile_id in np.unique(assignment):
-            pile_files[pile_id].write(windows[assignment == pile_id])
-        return len(windows)
+            pile_files[pile_id].write(np.ascontiguousarray(rows[assignment == pile_id]))
+        return len(rows)
 
     total_windows = 0
     try:
@@ -170,9 +194,19 @@ def pass1_extract(cfg: MaterializeConfig, split_days: list[Path], out_dir: Path,
             if day in done_days:
                 continue
 
-            df = pl.read_parquet(
-                day_path, columns=["track_id", "timestamp", *FEATURE_COLUMNS]
-            )
+            read_cols = ["track_id", "timestamp", *FEATURE_COLUMNS]
+            if v3:
+                read_cols += ["heading", "mmsi"]
+            df = pl.read_parquet(day_path, columns=read_cols)
+            if v3:
+                # 511 = AIS "not available"; keep an explicit sentinel —
+                # nan_to_num would fold missing into heading 0 (a real value)
+                df = df.with_columns(
+                    pl.when(pl.col("heading").is_null()
+                            | (pl.col("heading") >= 511))
+                    .then(HEADING_MISSING)
+                    .otherwise(pl.col("heading"))
+                    .cast(pl.Float32).alias("heading"))
             if cfg.min_sog_knots > 0:
                 # NOTE: drops individual slow positions; dt_seconds is NOT
                 # recomputed (see docs/MIGRATION.md). Legacy materialization
@@ -184,9 +218,14 @@ def pass1_extract(cfg: MaterializeConfig, split_days: list[Path], out_dir: Path,
                 tid = track_df.item(0, "track_id")
                 day_tracks.add(tid)
                 feats = (
-                    track_df.select(FEATURE_COLUMNS).to_numpy().astype(np.float32)
+                    track_df.select(feature_cols).to_numpy().astype(np.float32)
                 )
                 buffers[tid].append(np.nan_to_num(feats, nan=0.0))
+                if v3:
+                    epoch_buffers[tid].append(
+                        track_df["timestamp"].to_numpy()
+                        .astype("datetime64[s]").astype(np.int64))
+                    track_mmsi[tid] = int(track_df.item(0, "mmsi"))
                 last_seen[tid] = day
 
             # Finalize tracks not present in this day (they've ended)
@@ -219,7 +258,7 @@ def pass2_shuffle(cfg: MaterializeConfig, out_dir: Path, rng: np.random.Generato
     dest_dir = out_dir / split_name
     dest_dir.mkdir(parents=True, exist_ok=True)
 
-    sample_floats = cfg.window_size * len(FEATURE_COLUMNS)
+    sample_floats = floats_per_sample(cfg)
 
     for pile_id in tqdm(range(num_piles), desc=f"pass2[{split_name}]"):
         if pile_id in done:

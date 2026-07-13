@@ -11,6 +11,39 @@ import numpy as np
 FEATURE_COLUMNS = ["lat", "lon", "sog", "cog", "dt_seconds"]
 NUM_FEATURES = len(FEATURE_COLUMNS)
 
+# ---- v3 format: adds per-position heading + per-window metadata ----------
+# Row layout: [META_FLOATS meta slots][window_size * NUM_FEATURES_V3 floats].
+# Absolute time of position j = t0 + cumsum(dt_seconds)[j] (dt[0] belongs to
+# the gap BEFORE the first stored position and is excluded), so one t0 per
+# window recovers every position's timestamp — the weather-join key.
+FEATURE_COLUMNS_V3 = ["lat", "lon", "sog", "cog", "dt_seconds", "heading"]
+NUM_FEATURES_V3 = len(FEATURE_COLUMNS_V3)
+META_FLOATS = 4                      # [day_num, sec_in_day, mmsi_hi, mmsi_lo]
+HEADING_MISSING = -1.0               # AIS 511 / null sentinel (0 is a valid heading)
+
+
+def pack_window_meta(t0_epoch_s: np.ndarray, mmsi: int) -> np.ndarray:
+    """(N,) int64 epoch seconds + mmsi -> (N, META_FLOATS) float32, EXACT.
+
+    float32 cannot hold an epoch (needs 31 bits); day number (<2^24) and
+    second-in-day (<2^17) fit exactly, as do the two mmsi halves.
+    """
+    t0 = np.asarray(t0_epoch_s, dtype=np.int64)
+    out = np.empty((len(t0), META_FLOATS), dtype=np.float32)
+    out[:, 0] = t0 // 86400
+    out[:, 1] = t0 % 86400
+    out[:, 2] = mmsi // 100_000
+    out[:, 3] = mmsi % 100_000
+    return out
+
+
+def unpack_window_meta(meta: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """(N, META_FLOATS) float32 -> (t0 epoch-seconds int64, mmsi int64)."""
+    m = np.asarray(meta, dtype=np.float64)
+    t0 = (m[:, 0] * 86400 + m[:, 1]).astype(np.int64)
+    mmsi = (m[:, 2] * 100_000 + m[:, 3]).astype(np.int64)
+    return t0, mmsi
+
 
 def extract_windows_from_track(
     features: np.ndarray,

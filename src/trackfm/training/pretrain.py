@@ -207,6 +207,7 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
 
 
     best_val = float("inf")
+    crashed = False
     val_history: list[tuple[int, float]] = []
     stop_streak = 0
     step = 0
@@ -295,12 +296,16 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                     raise StopIteration
     except StopIteration:
         pass
+    except BaseException:
+        crashed = True
+        raise
     finally:
         try:
             mlflow.log_metric("best_val_loss", best_val)
             if (ckpt_dir / "best.pt").exists():
                 mlflow.log_artifact(str(ckpt_dir / "best.pt"))
-            mlflow.end_run()
+            # a crash (incl. OOM/KeyboardInterrupt) must not read FINISHED
+            mlflow.end_run("FAILED" if crashed else "FINISHED")
         except Exception as e:
             logger.warning(f"mlflow finalization failed (checkpoints are safe "
                            f"on disk in {ckpt_dir}): {e}")

@@ -39,6 +39,9 @@ class MaterializeConfig(BaseModel):
     val_frac: float = 0.1
     start_date: Optional[str] = None   # "YYYY-MM-DD" — golden-slice selection
     end_date: Optional[str] = None
+    # 1 = legacy 5-feature rows; 3 = +heading feature and per-window
+    # [t0, mmsi] meta slots (weather-join / conditioning prerequisite).
+    format_version: Literal[1, 3] = 3
     seed: int = 17
     num_workers: int = 40
 
