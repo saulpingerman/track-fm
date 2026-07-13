@@ -183,6 +183,22 @@ Storage: bbox subsets are GB-scale vs 1.4TB free — not a constraint.
 - D4 Forecast adaptation: evaluate reanalysis-trained conditioning under
   archived real forecasts (paired ECMWF vs ERA5); adapt conditioning
   pathway on paired data before any operational claim.
+- D5 **Spatial-holdout transfer** (Paul's feature-generalization
+  hypothesis, 2026-07-13): places should be encoded by WHAT they are
+  (distance-to-lane, lane bearing, anchorage/restricted/wind-farm masks,
+  depth), not where they are — behavior learned around a feature type
+  pools across all instances and transfers to feature-similar spots with
+  little local data. TrackFM's egocentric formulation already prevents
+  location memorization; static layers enter as Stage-2 crop channels.
+  Test: hold out a region entirely (e.g. Bornholm waters) during
+  training; compare kinematics-only vs static-feature-conditioned on the
+  held-out region. Feature model degrading much less = the world-model
+  generalization claim in one figure, and the value proposition for
+  sparse-AIS regions. Sources: OSM seamark:* (OpenSeaMap layer) + EMODnet
+  Human Activities; extraction running to
+  ~/data/context/seamarks/static_layers.npz. Supporting precedent:
+  deepSSF (raw covariate rasters generalized where curated local
+  features overfit), inland-waterway fairway fusion (+19-22%).
 
 Paul's actions: CDS + Copernicus Marine registrations (free, minutes);
 AISFormer full text via PSU library (requested 2026-07-13).
