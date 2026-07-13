@@ -16,21 +16,28 @@ floor ~1.25 on kinematics-only inputs.** The remaining headroom argument
 shifts to the INFORMATION axis (context conditioning — C2 already shows
 the physical coupling is real).
 
-**2x2 data-vs-capacity, now split-controlled (cross-evals):**
-small@69d beats small@26mo on BOTH test sets — 1.184 vs 1.282 on the
-26mo test (the diverse model's home split!), 1.242 vs 1.300 on 69d;
-tuned-DR ratios agree. At the small end, REPEATED focused data (4.5
-epochs of 69d) beat single-epoch diverse data at matched sample count —
-Paul's saturation intuition vindicated in a stronger form. CAVEAT
-(one confound left): small-69d ran batch 384 / 130,208 steps vs
-small-26mo's 1638 / 30,525 — 4.3x more optimizer updates. Resolver
-armed: scaling-small-26mo-b384 (same data as small-26mo, same
-batch/steps as small-69d) queued after the isoFLOP control
-(b384_queue.sh). Outcome tree: b384-control ~= small-69d -> the "win"
-was optimizer steps, not focused data (batch policy matters more than
-data policy at small scale); b384-control ~= small-26mo-b1638 -> the
-focused-data win is real -> repeated-epoch curricula are a legitimate
-small-model strategy and diversity claims must be scale-qualified.
+**2x2 data-vs-capacity — CONTAMINATION CAUGHT (Paul), one cell retracted:**
+The headline cross-eval cell "small@69d on 26mo test = 1.184, beats
+1.282" is INVALID: golden69 TRAIN = 2025-01-01..02-14 sits inside v1
+TEST = 2024-12-09..2025-02-26 — the model was scored partly on days it
+trained on. Retracted; never cite it. Cells that survive:
+- Feb 20-26 window (clean for both: after golden train, inside v1
+  never-trained test): small@69d 1.242 vs small@26mo 1.300 (69d +4.5%)
+  — but 69d has a RECENCY+SEASON advantage (6-day vs 5-month gap to
+  train data) on top of the batch confound below.
+- CONFOUND 1 (optimizer): small-69d = batch 384 / 130,208 steps;
+  small-26mo = 1638 / 30,525 (4.3x fewer updates). Resolver armed:
+  scaling-small-26mo-b384 after the isoFLOP control (b384_queue.sh).
+- NEUTRAL WINDOW armed (valwindow_xeval_queue.sh): v1 val days
+  2024-09-22..12-08 — never trained on by EITHER model. Caveats: 26mo
+  model checkpoint-selected on it (mild optimism); 69d model
+  generalizes BACKWARD in time; autumn window less season-matched to
+  golden. All three checkpoints (69d, 26mo-b1638, 26mo-b384) evaluated
+  there once b384 finishes.
+Verdict on the data axis: OPEN until the neutral-window + batch-matched
+results land. Lesson institutionalized: any cross-dataset eval must
+begin with a MANIFEST split-overlap check — cross-eval date ranges are
+now a mandatory line in every such report.
 
 ## 2026-07-13 — Port clustering eps: 3.0 -> 0.75 km (chaining at full density)
 
