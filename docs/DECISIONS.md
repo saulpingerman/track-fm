@@ -3,6 +3,23 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-13 — FLOPs accounting for the scaling ladder (Paul's challenge)
+
+Paul asked whether medium's win over small is just MORE FLOPS. Analytic
+accounting (training/flops.py, paper geometry): the Fourier head + loss
+dominate — 96% of small's per-sample FLOPs, 82% of medium's — so 5.2x
+params cost only **1.24x training FLOPs** (854 vs 1062 PF @50M samples).
++24% compute cannot explain -6.7% val CE (data exponent would credit
+~1%). Consequences: (1) nano..small ladder points are within 8% total
+FLOPs — the ladder bottom is accidentally a clean ISO-FLOP capacity
+sweep; (2) compute-matched control armed: small @62M samples (= medium's
+total FLOPs), runs at the flagship gate (isoflop_queue.sh). Outcome
+interpretation: small-62M ~= small-50M -> capacity, not compute, is the
+currency at this rung (expected); small-62M closes most of the gap ->
+FLOPs confound is real, all same-samples comparisons must be redone
+compute-matched. Report scaling BOTH ways (vs params at fixed samples,
+vs total FLOPs) in the paper.
+
 ## 2026-07-12 — Flagship GATED on scaling evidence (Paul's call)
 
 Paul predicts small@26mo ~= medium@26mo — i.e. capacity is NOT the binding
