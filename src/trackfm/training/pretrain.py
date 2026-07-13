@@ -80,6 +80,30 @@ def _lr_lambda(step: int, warmup: int, max_steps: int | None, schedule: str):
 
 
 @torch.no_grad()
+@torch.no_grad()
+def fast_val(model, cached_batches, cfg: PretrainConfig, device, autocast_dtype):
+    """Loss-only validation on a small FIXED subset with FIXED horizons —
+    seconds per call, so it can run every few hundred steps and give
+    GPT-3-density val curves. Full validate() (search metrics, selection)
+    stays on its wall-clock schedule; this is a monitoring curve only.
+    """
+    model.eval()
+    m, t = cfg.model, cfg.train
+    horizons = torch.linspace(1, t.max_horizon, t.num_horizon_samples,
+                              dtype=torch.long, device=device)
+    total = 0.0
+    for batch in cached_batches:
+        batch = batch.to(device, non_blocking=True)
+        with torch.autocast(device_type=device.type, dtype=autocast_dtype,
+                            enabled=autocast_dtype is not None):
+            ld, tgt, _, _ = model.forward_train(batch, horizon_indices=horizons,
+                                                causal=False)
+        total += compute_soft_target_loss(ld.float(), tgt.float(), m.grid_range,
+                                          m.grid_size, t.sigma).item()
+    model.train()
+    return total / max(len(cached_batches), 1)
+
+
 def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
              max_batches: int = 100):
     """Val loss (causal=False) + DR ratio + search metrics.
@@ -186,6 +210,11 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                               if t.num_workers else None)
     val_loader = DataLoader(val_ds, batch_size=None, num_workers=2,
                             pin_memory=device.type == "cuda")
+    # fixed CPU-cached subset for the dense loss-only fast-val curve
+    fast_batches = []
+    if t.fast_val_interval_steps > 0:
+        fast_batches = [b for _, b in
+                        zip(range(t.fast_val_batches), val_loader)]
 
     n_train = num_samples(cfg.data_dir / "train")
     steps_per_epoch = max(1, n_train // t.batch_size)
@@ -253,6 +282,11 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                         "achieved_tflops": achieved_tflops,
                         "mfu": achieved_tflops / t.peak_tflops,
                     }, step=step)
+
+                if fast_batches and step % t.fast_val_interval_steps == 0:
+                    _mlflow_log({"val_loss_fast": fast_val(
+                        model, fast_batches, cfg, device, autocast_dtype)},
+                        step=step)
 
                 if time.time() - last_val_time > t.val_interval_minutes * 60 \
                         or step >= max_steps:

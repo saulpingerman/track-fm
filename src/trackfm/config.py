@@ -92,6 +92,10 @@ class TrainConfig(BaseModel):
     compile: bool = False
     grad_accum_steps: int = 1
     val_interval_minutes: float = 30.0
+    # dense loss-only val curve (GPT-3-style); 0 disables. Full validate()
+    # keeps its wall-clock schedule and remains the selection metric.
+    fast_val_interval_steps: int = 200
+    fast_val_batches: int = 3
     early_stop_patience: int = 10          # legacy knob, unused by pretrain
     early_stop_min_delta_frac: float = 0.001  # legacy knob, unused by pretrain
     # Saturation = opportunity cost: stop when the trend (fit over the last
