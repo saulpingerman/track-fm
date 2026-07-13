@@ -68,8 +68,16 @@ class WindowTaskDataset(Dataset):
                  max_windows: int | None = None, seed: int = 0):
         import polars as pl
 
+        split_dir = Path(split_dir)
         cols = ["features", label_column]
-        df = pl.read_parquet(Path(split_dir) / "windows.parquet", columns=cols)
+        legacy = split_dir / "windows.parquet"
+        if legacy.exists():
+            df = pl.read_parquet(legacy, columns=cols)
+        else:  # v2 sharded layout: <data_dir>/port_windows/shard_XXXX.parquet
+            shards = sorted((split_dir.parent / "port_windows").glob("shard_*.parquet"))
+            df = (pl.scan_parquet(shards)
+                  .filter(pl.col("split") == split_dir.name)
+                  .select(cols).collect())
         if max_windows and df.height > max_windows:
             df = df.sample(max_windows, seed=seed)
 

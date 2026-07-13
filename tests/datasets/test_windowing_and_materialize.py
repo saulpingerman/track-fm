@@ -72,7 +72,7 @@ def test_materialize_end_to_end(tiny_dataset, tmp_path):
     out_dir = tmp_path / "mat"
     cfg = MaterializeConfig(
         clean_dir=tiny_dataset, out_dir=out_dir,
-        num_output_shards=4, seed=7,
+        num_output_shards=4, seed=7, format_version=1,
     )
     materialize_dataset(cfg)
 
@@ -93,7 +93,7 @@ def test_materialize_end_to_end(tiny_dataset, tmp_path):
 def test_loader_batches(tiny_dataset, tmp_path):
     out_dir = tmp_path / "mat2"
     cfg = MaterializeConfig(clean_dir=tiny_dataset, out_dir=out_dir,
-                            num_output_shards=2, seed=7)
+                            num_output_shards=2, seed=7, format_version=1)
     materialize_dataset(cfg)
 
     ds = ShardedWindowDataset(out_dir / "train", batch_size=16)

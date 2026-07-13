@@ -107,9 +107,11 @@ def audit(
 @app.command()
 def port_data(
     clean_dir: Path = typer.Option(Path("~/data/ais/clean")),
-    out_dir: Path = typer.Option(Path("~/data/trackfm/ports/v1")),
+    out_dir: Path = typer.Option(Path("~/data/trackfm/ports/v2")),
     subset_days: Optional[int] = typer.Option(None, help="Only use first N cleaned days"),
     stride: int = typer.Option(64),
+    ports_path: Optional[Path] = typer.Option(
+        None, help="Reuse an existing ports.parquet (skip pass A discovery)"),
 ):
     """Discover ports/anchorages and materialize the voyage-labeled dataset."""
     import logging
@@ -117,7 +119,8 @@ def port_data(
     from trackfm.datasets.port_task import build_port_dataset
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
-    build_port_dataset(clean_dir, out_dir, stride=stride, subset_days=subset_days)
+    build_port_dataset(clean_dir, out_dir, stride=stride, subset_days=subset_days,
+                       ports_path=ports_path)
 
 
 @app.command()

@@ -45,8 +45,12 @@ REGISTRY_PATH = Path(__file__).parents[3] / "configs/data/port_registry_osm.json
 class PortLabelConfig:
     stop_sog: float = 0.5              # below this = stopped
     min_dwell_s: float = 3600.0        # sustained stop >= 1h = dwell event
-    eps_km: float = 3.0                # DBSCAN radius for port clustering
+    eps_km: float = 0.75               # DBSCAN radius; validated 2026-07-13:
+                                       # recovers 22/22 known major ports at
+                                       # full dwell density (3.0 chains the
+                                       # whole Oresund into one mega-cluster)
     min_samples: int = 30              # min dwells to form a port/anchorage
+    bin_km: float = 0.15               # pre-clustering grid pitch (memory bound)
     edge_margin_km: float = 10.0       # within this of bbox edge = entry/exit
     min_track_positions: int = 200
     min_voyage_positions: int = 128    # voyages shorter than a window are useless
@@ -231,6 +235,43 @@ def collect_dwell_centroids(day_files: list[Path], cfg: PortLabelConfig,
     return df
 
 
+def _bin_centroids(lat: np.ndarray, lon: np.ndarray, bin_km: float, bbox: dict,
+                   ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Snap points to a fixed ~bin_km grid; aggregate count + mean per bin.
+
+    Returns (bin_lat, bin_lon, counts, inverse). Bin positions are the exact
+    means of member points, so count-weighted cluster centroids match the
+    unbinned ones. Deterministic: the grid is anchored at (0, 0) with a pitch
+    derived from the bbox mid-latitude.
+    """
+    lat_step = bin_km / 111.32
+    lon_step = bin_km / (111.32 * math.cos(
+        math.radians((bbox["lat_min"] + bbox["lat_max"]) / 2)))
+    code = (np.floor(lat / lat_step).astype(np.int64) << 32) \
+        + np.floor(lon / lon_step).astype(np.int64)
+    _, inverse, counts = np.unique(code, return_inverse=True, return_counts=True)
+    bin_lat = np.bincount(inverse, weights=lat) / counts
+    bin_lon = np.bincount(inverse, weights=lon) / counts
+    return bin_lat, bin_lon, counts.astype(np.float64), inverse
+
+
+def _binned_dbscan(lat: np.ndarray, lon: np.ndarray, cfg: PortLabelConfig,
+                   bbox: dict) -> np.ndarray:
+    """DBSCAN over grid-binned points; returns a cluster label per input point.
+
+    Unique bins are clustered with per-bin dwell counts as sample_weight, so
+    min_samples still counts dwells (not bins) while memory stays O(bins)
+    instead of O(dwells^2) neighborhoods. Each point inherits its bin's label.
+    """
+    from sklearn.cluster import DBSCAN
+
+    bin_lat, bin_lon, counts, inverse = _bin_centroids(lat, lon, cfg.bin_km, bbox)
+    db = DBSCAN(eps=cfg.eps_km / EARTH_RADIUS_KM, min_samples=cfg.min_samples,
+                metric="haversine").fit(np.radians(np.c_[bin_lat, bin_lon]),
+                                        sample_weight=counts)
+    return db.labels_[inverse]
+
+
 def discover_ports(dwells: pl.DataFrame, cfg: PortLabelConfig = PortLabelConfig(),
                    bbox: dict = BBOX, registry: pl.DataFrame | None = None,
                    ) -> pl.DataFrame:
@@ -238,8 +279,6 @@ def discover_ports(dwells: pl.DataFrame, cfg: PortLabelConfig = PortLabelConfig(
 
     Returns: port_id, lat, lon, n_dwells, kind ('port'|'anchorage'), name.
     """
-    from sklearn.cluster import DBSCAN
-
     if registry is None:
         registry = load_registry()
 
@@ -248,9 +287,7 @@ def discover_ports(dwells: pl.DataFrame, cfg: PortLabelConfig = PortLabelConfig(
     interior = _km_to_edge(lat, lon, bbox) > cfg.edge_margin_km
     lat, lon = lat[interior], lon[interior]
 
-    db = DBSCAN(eps=cfg.eps_km / EARTH_RADIUS_KM, min_samples=cfg.min_samples,
-                metric="haversine").fit(np.radians(np.c_[lat, lon]))
-    labels = db.labels_
+    labels = _binned_dbscan(lat, lon, cfg, bbox)
 
     r_lat = registry["lat"].to_numpy()
     r_lon = registry["lon"].to_numpy()

@@ -3,6 +3,23 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-13 — Port clustering eps: 3.0 -> 0.75 km (chaining at full density)
+
+At full corpus density (1.46M dwells vs the 165k it was tuned on), DBSCAN
+eps=3.0 CHAINS: one 201k-dwell cluster spanned the whole Oresund and
+swallowed Copenhagen; Fredericia merged into Middelfart; Ronne into a
+west-Bornholm blob. The binned-DBSCAN memory fix was verified faithful —
+this is pure density-dependent chaining. Selection criterion (Paul's
+cross-referencing methodology turned into a validation set): eps must
+recover the 22 independently-verified major commercial ports. Sweep:
+0.75 km -> 22/22 recovered (970 clusters, 456 ports); 1.0 -> 21/22;
+1.5 -> 20/22; 3.0 -> catastrophic. Chose 0.75. Residual fragmentation is
+terminal-level granularity (benign for origin/destination labels);
+chaining is wrong-label (harmful). Note: eps is now a DENSITY-DEPENDENT
+parameter — revalidate against the known-port set if the dwell corpus
+changes materially. v2 table: 970 clusters = 456 ports / 514 anchorages;
+Copenhagen = "Lynettehavnen" (nearest registry basin), 82,317 dwells.
+
 ## 2026-07-13 — FLOPs accounting for the scaling ladder (Paul's challenge)
 
 Paul asked whether medium's win over small is just MORE FLOPS. Analytic
