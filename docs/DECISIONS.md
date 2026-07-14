@@ -40,6 +40,29 @@ Outcome interpretation:
   plus scale-stationary targets) -> consider hybrid: cone for training
   signal, evaluate anywhere via the continuous density.
 
+## 2026-07-14 — Rotation + anisotropy = the cone's phase 2 (Paul's Q on translation/rotation)
+
+Motion forecasting canonicalizes per-query by translation AND rotation
+(agent-centric, +12-24%). TrackFM already has translation (egocentric
+displacement; DR-centered rejected earlier) and scale (the cone). The
+missing axis is ROTATION — align the box to the origin course so along-/
+cross-track become separate axes, which unlocks ANISOTROPY (R_along >
+R_cross). Measured on v1 val (moving vessels, SOG>1kn): along-track p99 /
+cross-track p99 = 3.8x @<15min, ~2x @2-4.5h — a course-aligned box can be
+44-74% narrower cross-track, ~HALF the canvas area at every horizon. This
+(a) directly attacks the review's #2 risk (isotropic shape collapse),
+(b) dissolves most of the containment-box resolution cost (the wasted
+canvas is almost all cross-track), (c) makes long-horizon boxes actually
+efficient — the reachable set of a moving vessel IS a thin course-aligned
+ellipse, not a disc. Caveat: COG is undefined at SOG~0 (stopped) — rotate
+only above a speed threshold, fall back to axis-aligned; stopped vessels
+have tiny boxes anyway. COG must stay a conditioning input (it is) so
+absolute direction is not hidden. SEQUENCING: keep the current study
+scale-only (one variable; clean 'does normalization hurt' test); add
+rotation+anisotropy as phase 2 IF the scale-cone clears the 'no-hurt'
+bar. Two scale functions R_along(t), R_cross(t) to calibrate (same
+percentile-envelope method, split by axis).
+
 ## 2026-07-14 — Cone R(t): LINEAR containment bound (Paul's requirement overrides resolution fit)
 
 CORRECTION to the concave recalibration earlier today. Paul: "capture ALL
