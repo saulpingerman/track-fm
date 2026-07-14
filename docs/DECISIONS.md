@@ -40,6 +40,26 @@ Outcome interpretation:
   plus scale-stationary targets) -> consider hybrid: cone for training
   signal, evaluate anywhere via the continuous density.
 
+## 2026-07-14 — 2x2 data-vs-capacity RESOLVED (neutral window, both confounds controlled)
+
+All three small checkpoints scored on the v1-val window (2024-09-22..12-08)
+that NONE trained on. Both confounds now separated:
+- small-69d  (69d,  b384):  CE 1.2695, 2.421x tuned-DR
+- small-b384 (26mo, b384):  CE 1.2519, 2.461x tuned-DR
+- small-26mo (26mo, b1638): CE 1.3033, 2.358x tuned-DR
+BATCH effect (26mo, b384 vs b1638): b384 +3.9% (smaller batch / 4.3x more
+updates helped). DATA effect (b384, 69d vs 26mo, the CLEAN cell): 26mo
++1.4%. Verdict: (1) the earlier "69d wins" reads were the BATCH confound
+(69d used b384), not data — retracted for good; (2) data diversity pays
+MODESTLY and in the diversity direction (26mo>69d by 1.4%), opposite to
+the saturation hypothesis; (3) batch/optimization (3.9%) > data diversity
+(1.4%) at this scale — consistent with capacity near the ~1.25 floor:
+when the model is near-saturated, how you spend samples matters more than
+which samples. Actionable: revisit batch size for the scaling runs (the
+50M-sample family used large batches / few updates; smaller-batch may
+recover a few % everywhere). Data-axis claims must stay scale-qualified
+and modest.
+
 ## 2026-07-14 — Head x Geometry matrix, judged on containment km^2 (Paul: h1 was silly)
 
 Old head ablation judged h1 (a ~2s forecast) on raw CE — wrong question,
