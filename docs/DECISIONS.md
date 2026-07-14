@@ -40,6 +40,34 @@ Outcome interpretation:
   plus scale-stationary targets) -> consider hybrid: cone for training
   signal, evaluate anywhere via the continuous density.
 
+## 2026-07-14 — Head x Geometry matrix, judged on containment km^2 (Paul: h1 was silly)
+
+Old head ablation judged h1 (a ~2s forecast) on raw CE — wrong question,
+wrong metric. Replaced by a 2x2 {geometry: fixed, cone} x {head: fourier,
+direct} at small/26mo/50M/F12, judged on the CONTAINMENT metric in
+PHYSICAL km^2-to-capture-90% per time bucket (15m/30m/1h/2h) + ceilings
+reported separately. Raw CE / cell-counts are NOT cross-geometry
+comparable (a cone cell @2h is ~17x a fixed cell; fixed clips ~20% of 2h
+targets). New scorer: eval/xgeometry.py -> km^2@90, ceiling, ranks on one
+physical basis; driver scripts/xgeom_matrix.py. Cells: fixed+fourier
+(scaling-small-50M, done) and cone+fourier (queued) exist; the two
+direct-head cells train in head_geom_matrix_queue.sh after the cone study,
+then all four are scored.
+
+Validated baseline (fixed+fourier, val, 2-batch smoke): 15m ceiling 0.999
+km2@90=5.4; 30m 0.994 km2@90=18; 1h 0.922 km2@90=266; 2h ceiling 0.797
+km2@90=UNREACHABLE (20% escape the +-0.3deg grid). The 2h-unreachable
+cell IS the cone's reason to exist: cone ceiling @2h should be ~0.99 (it
+contains 37kn straight-liners by construction), so it can reach 90% where
+fixed cannot — at the cost of coarser cells (bigger km2 per cell). The
+matrix answers, in one table: does the cone restore long-horizon
+containment (ceiling), at what km^2 cost, and does the head choice change
+under the cone (fourier's F12 band-limit blur at long horizons may be
+rescued because the band limit is relative to the growing canvas).
+Success = cone reaches 90% at 1h/2h where fixed can't, without inflating
+km^2@90 at short horizons; the direct head is the control for whether the
+continuous Fourier density costs long-horizon sharpness.
+
 ## 2026-07-14 — Rotation + anisotropy = the cone's phase 2 (Paul's Q on translation/rotation)
 
 Motion forecasting canonicalizes per-query by translation AND rotation
