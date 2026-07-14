@@ -57,11 +57,22 @@ efficient — the reachable set of a moving vessel IS a thin course-aligned
 ellipse, not a disc. Caveat: COG is undefined at SOG~0 (stopped) — rotate
 only above a speed threshold, fall back to axis-aligned; stopped vessels
 have tiny boxes anyway. COG must stay a conditioning input (it is) so
-absolute direction is not hidden. SEQUENCING: keep the current study
-scale-only (one variable; clean 'does normalization hurt' test); add
-rotation+anisotropy as phase 2 IF the scale-cone clears the 'no-hurt'
-bar. Two scale functions R_along(t), R_cross(t) to calibrate (same
-percentile-envelope method, split by axis).
+absolute direction is not hidden. CORRECTION (Paul, 2026-07-14): rotation is NOT a standalone phase 2 —
+it BREAKS geography. A course-aligned frame makes "where is land / where
+do lanes run" heading-dependent: the same coast maps to a different
+canvas location per vessel, so the model must learn geography in absolute
+terms and un-rotate it per query via COG. Cost is worst at LONG horizons
+(where geography, not kinematics, sets position) — exactly the target
+regime; benefit (anisotropy) is largest at SHORT horizons where geography
+is irrelevant. Cost/benefit is backwards. Motion forecasting (HiVT/QCNet)
+gets away with rotation ONLY because it rotates the MAP into the same
+frame; TrackFM has no explicit geography input yet, so rotating the
+output alone is the worst case. Scale (the cone) is geography-safe by
+contrast: isotropic zoom, north stays north; only a landmark's canvas
+RADIUS shifts with horizon (1D, recoverable), not its direction.
+DECISION: cone stays SCALE-ONLY. Rotation+anisotropy is GATED on
+co-rotated Tier-3 context grids (bathymetry/lanes/land-mask cropped and
+rotated with the output) — revisit only in that package, never before.
 
 ## 2026-07-14 — Cone R(t): LINEAR containment bound (Paul's requirement overrides resolution fit)
 
