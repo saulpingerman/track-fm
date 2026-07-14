@@ -89,6 +89,23 @@ R(t) = 0.015 + 1.55e-3 * t^0.67 (p99 * 1.25 margin), holding fill ratio
 recovers the linear bound. Legitimate pre-registration (calibration data,
 not model-outcome data). Full suite 86 green.
 
+OBJECTIVE CLARIFIED (Paul, 2026-07-14): the cone does NOT need to BEAT
+the fixed grid. Its job is to ENABLE very-long-horizon forecasts (6-8h)
+WITHOUT hurting quality at the horizons we already do. The alternative
+way to reach 6-8h — one FIXED box sized for 8h (~±2.8deg) used for every
+forecast including 15min — is the real waste the cone avoids: it would
+be huge and coarse for short forecasts. So the comparison that matters is
+cone vs FIXED-HUGE (cone wins by construction: small sharp box short, big
+box long), not cone vs the current fixed-small grid (which cannot reach
+6-8h at all). SUCCESS CRITERION: (a) parity with fixed-small at the
+overlapping horizons (<=~2h) on shared-window CE/containment, and (b)
+graceful, contained forecasts out to the data's horizon limit. A cone
+that merely MATCHES fixed at short range and extends cleanly to long
+range is a SUCCESS, not a tie. DATA LIMIT: current windows reach only
+~1.3-4.5h (800 steps); TRUE 6-8h needs longer horizon targets
+(materialization v4, time-targeted windows) — the small-scale study
+tests the mechanism up to ~4.5h; 6-8h is gated on the data rebuild.
+
 Falsifiable expectation for the study (from the review, unchanged by
 recalibration): cone MATCHES/BEATS fixed on long-horizon calibrated
 NLL/miss-rate with the gap WIDENING as horizon grows, roughly NEUTRAL at
