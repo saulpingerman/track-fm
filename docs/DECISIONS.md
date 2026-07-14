@@ -3,6 +3,30 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-14 — Cross-geometry eval harness (flagship vs family), incl. the clamp bias
+
+Family (±0.3/64) and flagship (±0.9/192) share CELL PITCH (0.009375°),
+so rank/containment metrics compare in physical units. Raw CE does NOT
+compare: bigger-grid normalization, and — Paul's catch — the CLAMP BIAS:
+small-grid training clamps ~25% of long-horizon targets to the boundary,
+teaching family models an "edge exit bucket". Scoring a shared window
+with clamped targets rewards that artifact on exactly the samples the
+flagship predicts better (its mass is correctly OUTSIDE the window).
+
+Harness spec:
+1. Flagship density evaluated on the ±0.3° window via the continuous
+   Fourier form, renormalized over that window.
+2. Shared-window CE compares ONLY samples with true targets strictly
+   inside ±0.3° (no clamped samples in any head-to-head number).
+3. Off-window fraction reported separately; flagship performance there
+   reported WITHOUT comparator (capability only it has).
+4. Containment: ranks among the shared capturable subset (+ both
+   ceilings), cells == km² since pitch matches.
+Comparison is thereby conservative toward the flagship — a shared-subset
+win cannot be attributed to grid size. Family-internal results (7-pt
+curve, floor fit) unaffected: identical clamping distribution + baselines
+clamped identically. Cone grid remains the artifact-free fix long-term.
+
 ## 2026-07-14 — isoFLOP control OUTCOME: capacity, not compute
 
 small pushed to medium's exact total training FLOPs (62M samples,
