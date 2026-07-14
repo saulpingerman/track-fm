@@ -193,34 +193,30 @@ def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
     ranks = torch.cat(rank_chunks)
     bucket_ok = torch.cat(valid_chunks)
     search = {}
+    # Slimmed metric set (Paul, 2026-07-14): keep only the metrics that
+    # actually drive the flagship decision. Removed: val_p90rank/medrank
+    # (native cell size drifts by geometry — incomparable), val_capture10
+    # (same), val_avail (nearly-flat sanity), val_fine_medrank_km2 &
+    # val_fixcell_medrank (median hides tail), dr_loss & dr_ratio (also
+    # geometry-locked in raw form). Kept: val_ceiling (companion to km²@90),
+    # val_km2_at_capture90 (operational, 1×1 km, cross-geometry-comparable),
+    # val_fixcell_p90rank (matches fixed's native cell for direct compare).
     for k, name in enumerate(TIME_BUCKETS):
-        # censor ranks where the bucket time isn't reachable in the window
         col = torch.where(bucket_ok[:, k], ranks[:, k], torch.full_like(ranks[:, k], -1))
         n_avail = bucket_ok[:, k].sum().clamp(min=1).float()
-        valid = col[col > 0].float()
-        if len(valid):
-            # p90 rank among CAPTURABLE targets — k@90-of-total is undefined
-            # whenever the grid ceiling is below 90%
-            search[f"val_p90rank_{name}"] = float(valid.quantile(0.9))
-            search[f"val_medrank_{name}"] = float(valid.median())
-        search[f"val_capture10_{name}"] = float(((col > 0) & (col <= 10)).sum() / n_avail)
         search[f"val_ceiling_{name}"] = float((col > 0).sum() / n_avail)
-        search[f"val_avail_{name}"] = float(bucket_ok[:, k].float().mean())
-        # fine 1x1 km grid — operational km²@90 (Paul, 2026-07-14)
+        # fine 1×1 km grid — operational km²@90
         fine = torch.cat(model._fine_bucket_chunks[name])[:len(bucket_ok)]
         fine_ok = torch.where(bucket_ok[:, k], fine, torch.full_like(fine, -1))
         fine_valid = fine_ok[fine_ok > 0].float()
         if len(fine_valid):
             search[f"val_km2_at_capture90_{name}"] = float(fine_valid.quantile(0.9))
-            search[f"val_fine_medrank_km2_{name}"] = float(fine_valid.median())
-        # fixed-native cell size (0.009375°) — directly comparable to the
-        # fixed-grid p90rank numbers we've been reading in MLflow
+        # fixed-native cell size (0.009375°) — directly comparable to fixed's own p90rank
         fx = torch.cat(model._fixcell_bucket_chunks[name])[:len(bucket_ok)]
         fx_ok = torch.where(bucket_ok[:, k], fx, torch.full_like(fx, -1))
         fx_valid = fx_ok[fx_ok > 0].float()
         if len(fx_valid):
             search[f"val_fixcell_p90rank_{name}"] = float(fx_valid.quantile(0.9))
-            search[f"val_fixcell_medrank_{name}"] = float(fx_valid.median())
     if hasattr(model, "_fine_bucket_chunks"):
         del model._fine_bucket_chunks
         del model._fixcell_bucket_chunks
@@ -358,8 +354,9 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                     val_loss, dr_loss, search = validate(model, val_loader, cfg,
                                                          device, autocast_dtype)
                     ratio = dr_loss / val_loss if val_loss and not math.isnan(val_loss) else float("nan")
-                    _mlflow_log({"val_loss": val_loss, "dr_loss": dr_loss,
-                                        "dr_ratio": ratio, **search}, step=step)
+                    # dr_loss/dr_ratio computed but not logged — geometry-locked
+                    # (Paul, 2026-07-14). Kept in console for the log line.
+                    _mlflow_log({"val_loss": val_loss, **search}, step=step)
                     logger.info(f"step {step}: val {val_loss:.4f}, DR-ratio {ratio:.2f}x, "
                                 + ", ".join(f"{k}={v:.3g}" for k, v in search.items()
                                             if "p90rank" in k))
