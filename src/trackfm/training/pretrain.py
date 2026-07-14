@@ -172,6 +172,7 @@ def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
         if not hasattr(model, "_fine_bucket_chunks"):
             model._fine_bucket_chunks = {b: [] for b in TIME_BUCKETS}
             model._fixcell_bucket_chunks = {b: [] for b in TIME_BUCKETS}
+            model._fixgrid_bucket_chunks = {b: [] for b in TIME_BUCKETS}
         for k_b, b_name in enumerate(TIME_BUCKETS):
             tau = TIME_BUCKETS[b_name]
             R_deg = (m.cone_r0 + m.cone_v * tau ** m.cone_p) if cone else m.grid_range
@@ -182,6 +183,15 @@ def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
             frF, _, _ = ranks_on_fine_grid(ld_t[:, k_b].float(), tc, R_deg,
                                             cell_deg=FIXED_NATIVE_CELL_DEG)
             model._fixcell_bucket_chunks[b_name].append(frF.cpu())
+            # apples-to-apples with the fixed grid: SAME cell size (0.6 km²)
+            # AND SAME vessel population (only targets within ±0.3° box).
+            # For fixed runs, restrict_deg == grid_range so this metric equals
+            # val_fixcell_p90rank; for cone runs it excludes the ~20% at 2h
+            # that a fixed grid would censor.
+            frG, _, _ = ranks_on_fine_grid(ld_t[:, k_b].float(), tc, R_deg,
+                                            cell_deg=FIXED_NATIVE_CELL_DEG,
+                                            restrict_deg=0.3)
+            model._fixgrid_bucket_chunks[b_name].append(frG.cpu())
         valid_chunks.append(bucket_valid.cpu())
         total += loss.item()
         dr_total += dr_loss.item()
@@ -211,15 +221,28 @@ def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
         fine_valid = fine_ok[fine_ok > 0].float()
         if len(fine_valid):
             search[f"val_km2_at_capture90_{name}"] = float(fine_valid.quantile(0.9))
-        # fixed-native cell size (0.009375°) — directly comparable to fixed's own p90rank
+        # fixed-native cell size (0.009375°) — SAME cell as fixed but ALL
+        # cone-capturable vessels (~100%). Compares cone's density resolution
+        # to fixed's without population-matching.
         fx = torch.cat(model._fixcell_bucket_chunks[name])[:len(bucket_ok)]
         fx_ok = torch.where(bucket_ok[:, k], fx, torch.full_like(fx, -1))
         fx_valid = fx_ok[fx_ok > 0].float()
         if len(fx_valid):
             search[f"val_fixcell_p90rank_{name}"] = float(fx_valid.quantile(0.9))
+        # APPLES-TO-APPLES with fixed's own val_p90rank — SAME cell size AND
+        # SAME vessel population (only targets within ±0.3° of origin).
+        # For fixed runs this equals val_fixcell_p90rank; for cone runs it
+        # excludes the ~20% at 2h that a fixed grid would censor, so the
+        # number is directly comparable to fixed's old val_p90rank curves.
+        fg = torch.cat(model._fixgrid_bucket_chunks[name])[:len(bucket_ok)]
+        fg_ok = torch.where(bucket_ok[:, k], fg, torch.full_like(fg, -1))
+        fg_valid = fg_ok[fg_ok > 0].float()
+        if len(fg_valid):
+            search[f"val_fixgrid_p90rank_{name}"] = float(fg_valid.quantile(0.9))
     if hasattr(model, "_fine_bucket_chunks"):
         del model._fine_bucket_chunks
         del model._fixcell_bucket_chunks
+        del model._fixgrid_bucket_chunks
     return total / n, dr_total / n, search
 
 

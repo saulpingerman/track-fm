@@ -44,7 +44,8 @@ FIXED_NATIVE_CELL_DEG = 0.009375   # = 2 * 0.3 / 64 — fixed-grid native cell
 
 def ranks_on_fine_grid(log_density: torch.Tensor, targets_canvas: torch.Tensor,
                         R_deg: float, cell_deg: float | None = None,
-                        target_cell_km: float | None = 1.0
+                        target_cell_km: float | None = 1.0,
+                        restrict_deg: float | None = None
                         ) -> tuple[torch.Tensor, int, float]:
     """Rank the target on a physical fine grid over the ±R_deg canvas.
 
@@ -58,6 +59,12 @@ def ranks_on_fine_grid(log_density: torch.Tensor, targets_canvas: torch.Tensor,
               fixed grid's native cell; ~1.04 x 0.58 km ~= 0.60 km²).
     target_cell_km: else, size cells to ~this many km per side (default 1;
                     fine cells are ~1 km lat × cos(lat) km lon).
+    restrict_deg: optional. If given (< R_deg), the fine grid spans only
+                  ±restrict_deg (not the model's full ±R_deg canvas), AND
+                  targets outside this restricted box are censored — same
+                  vessel population a fixed-grid model of ±restrict_deg
+                  would evaluate. Used to compare cone runs apples-to-
+                  apples with fixed-grid runs (same cells, same vessels).
 
     Returns (ranks (B,) 1-based, or -1 if off-canvas; n_fine_cells;
     cell_area_km2 — for converting rank -> km² of area searched).
@@ -65,20 +72,25 @@ def ranks_on_fine_grid(log_density: torch.Tensor, targets_canvas: torch.Tensor,
     B, G, _ = log_density.shape
     device = log_density.device
     cos_lat = math.cos(math.radians(LAT0))
-    R_lat_km = R_deg * KM_PER_DEG
-    R_lon_km = R_deg * KM_PER_DEG * cos_lat
+    extent_deg = restrict_deg if restrict_deg is not None else R_deg
+    R_lat_km = extent_deg * KM_PER_DEG
+    R_lon_km = extent_deg * KM_PER_DEG * cos_lat
     if cell_deg is not None:
-        N_lat = max(2, int(round(2 * R_deg / cell_deg)))
+        N_lat = max(2, int(round(2 * extent_deg / cell_deg)))
         N_lon = N_lat                                              # square in DEGREES
         cell_km2 = (cell_deg * KM_PER_DEG) * (cell_deg * KM_PER_DEG * cos_lat)
     else:
         N_lat = max(2, int(round(2 * R_lat_km / target_cell_km)))
         N_lon = max(2, int(round(2 * R_lon_km / target_cell_km)))
         cell_km2 = (2 * R_lat_km / N_lat) * (2 * R_lon_km / N_lon)
+    scan = extent_deg / R_deg                                       # <= 1.0
 
-    # fine cell centers in canvas coords ∈ (-1, 1) — align_corners=False
-    y_c = (torch.arange(N_lat, device=device, dtype=torch.float32) + 0.5) / N_lat * 2 - 1
-    x_c = (torch.arange(N_lon, device=device, dtype=torch.float32) + 0.5) / N_lon * 2 - 1
+    # fine cell centers in canvas coords ∈ (-scan, +scan); when scan<1
+    # this only samples the restricted region of the model's canvas.
+    y_c = ((torch.arange(N_lat, device=device, dtype=torch.float32) + 0.5)
+           / N_lat * 2 - 1) * scan
+    x_c = ((torch.arange(N_lon, device=device, dtype=torch.float32) + 0.5)
+           / N_lon * 2 - 1) * scan
     yy, xx = torch.meshgrid(y_c, x_c, indexing="ij")
     # grid_sample expects (…, 2) = (x=col, y=row) in normalized [-1, 1]
     grid = torch.stack([xx, yy], dim=-1).unsqueeze(0).expand(B, -1, -1, -1)
@@ -88,9 +100,10 @@ def ranks_on_fine_grid(log_density: torch.Tensor, targets_canvas: torch.Tensor,
         mode="bilinear", padding_mode="border", align_corners=False,
     ).squeeze(1)                                          # (B, N_lat, N_lon)
 
-    inside = ((targets_canvas > -1) & (targets_canvas < 1)).all(dim=-1)
-    lat_i = ((targets_canvas[:, 0] + 1) / 2 * N_lat).floor().long().clamp(0, N_lat - 1)
-    lon_i = ((targets_canvas[:, 1] + 1) / 2 * N_lon).floor().long().clamp(0, N_lon - 1)
+    # inside the RESTRICTED box (targets in [-scan, +scan] canvas units)
+    inside = ((targets_canvas > -scan) & (targets_canvas < scan)).all(dim=-1)
+    lat_i = ((targets_canvas[:, 0] + scan) / (2 * scan) * N_lat).floor().long().clamp(0, N_lat - 1)
+    lon_i = ((targets_canvas[:, 1] + scan) / (2 * scan) * N_lon).floor().long().clamp(0, N_lon - 1)
     flat = fine.reshape(B, -1)
     truth_flat = lat_i * N_lon + lon_i
     p_truth = torch.gather(flat, 1, truth_flat.unsqueeze(-1)).squeeze(-1)
