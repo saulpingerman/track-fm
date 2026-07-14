@@ -21,6 +21,22 @@ def test_degenerate_cone_equals_fixed_grid():
     torch.testing.assert_close(fixed, cone, rtol=1e-5, atol=1e-6)
 
 
+def test_concave_powerlaw_holds_fill_ratio():
+    """p<1 (concave) tracks the measured sub-linear displacement envelope:
+    if true spread ~ t^0.67, R(t)=v*t^0.67 keeps spread/R constant, whereas
+    a linear R over-covers at long horizons (fill ratio collapses)."""
+    t = torch.tensor([300.0, 3000.0, 12000.0])
+    spread = 1.24e-3 * t ** 0.67                      # measured p99 form
+    R_concave = cone_ranges(t, 0.0, 1.55e-3, p=0.67).squeeze(-1)
+    R_linear = cone_ranges(t, 0.0, 1.5e-4, p=1.0).squeeze(-1)
+    fill_concave = (spread / R_concave)
+    fill_linear = (spread / R_linear)
+    # concave: fill ratio ~flat across 40x horizon span
+    assert fill_concave.max() - fill_concave.min() < 0.05
+    # linear: fill ratio collapses (over-covers long horizons)
+    assert fill_linear.max() - fill_linear.min() > 0.2
+
+
 def test_growth_is_per_time_not_per_step():
     """Two vessels at the same STEP horizon but different report cadence
     must get different windows — Paul's correction: AIS deltas are

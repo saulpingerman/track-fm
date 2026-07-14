@@ -40,6 +40,44 @@ Outcome interpretation:
   plus scale-stationary targets) -> consider hybrid: cone for training
   signal, evaluate anywhere via the continuous density.
 
+## 2026-07-14 — Cone R(t) recalibrated CONCAVE from measured envelope + review verdict
+
+Verified mini-review (docs/research/2026-07-scale-normalized-outputs.md,
+35 works) on scale-normalized outputs answered Paul's "changing-scale map
+would confuse the model" worry: that failure (over-stationarization,
+Non-stationary Transformers 2022 [CONFIRMED]) occurs ONLY when scale is
+HIDDEN from the network; TrackFM feeds horizon t to the conditioning MLP,
+so it is excluded by construction. Domain-matched precedent: a lead-time-
+conditioned TC-track net showed no skill loss vs horizon-specialized nets
+[CONFIRMED]; per-query canonicalization HELPS 12-24% in motion forecasting
+(HiVT/QCNet [CONFIRMED]). The review relocated the real risk to R(t)
+CALIBRATION (dominant ~2x failure across diffusion scaling papers).
+
+Pre-flight CPU check (120k val windows, before the cone run): displacement-
+from-origin vs elapsed time is CONCAVE, p99 ~ 1.24e-3 * t^0.67 — sub-linear
+because vessels maneuver/stop (opposite of the NHC convex cone, which
+tracks forecast ERROR not reachable displacement). The pre-registered
+LINEAR R(t) was therefore over-scaled at long horizons (fill ratio
+0.72->0.34: ~89% of canvas area holds ~1% of mass) — the review's #1
+false-negative risk, caught before spending GPU. RECALIBRATED to
+R(t) = 0.015 + 1.55e-3 * t^0.67 (p99 * 1.25 margin), holding fill ratio
+~0.77 across all horizons = true scale-stationarity. cone_p=1 still
+recovers the linear bound. Legitimate pre-registration (calibration data,
+not model-outcome data). Full suite 86 green.
+
+Falsifiable expectation for the study (from the review, unchanged by
+recalibration): cone MATCHES/BEATS fixed on long-horizon calibrated
+NLL/miss-rate with the gap WIDENING as horizon grows, roughly NEUTRAL at
+short horizons. Falsified if fixed >= cone at the LONGEST horizons, or if
+the cone edge does not grow with t. Guardrail: do NOT justify the cone on
+short-horizon accuracy (every well-conditioned control says neutral-to-
+slightly-negative there — a short-horizon win would be motivated
+reasoning). Diagnostics to log in the harness: off-canvas target mass vs t
+(under-scaling indicator) and density anisotropy (rho->0 shape-collapse,
+the DISPUTED TC-track risk). Live follow-up levers if the calibrated cone
+still loses long: anisotropic R (along/cross-track), per-horizon lambda(t)
+weighting, beta-NLL beta~0.5.
+
 ## 2026-07-14 — Cross-geometry eval harness (flagship vs family), incl. the clamp bias
 
 Family (±0.3/64) and flagship (±0.9/192) share CELL PITCH (0.009375°),

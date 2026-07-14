@@ -133,13 +133,17 @@ def cone_elapsed_seconds(features: torch.Tensor, horizons: torch.Tensor,
     return torch.gather(cs, 1, idx) - last
 
 
-def cone_ranges(elapsed_s: torch.Tensor, r0: float, v: float) -> torch.Tensor:
-    """Cone-grid window half-range: R(t) = r0 + v * elapsed_seconds.
+def cone_ranges(elapsed_s: torch.Tensor, r0: float, v: float,
+                p: float = 1.0) -> torch.Tensor:
+    """Cone-grid window half-range: R(t) = r0 + v * elapsed_seconds ** p.
 
-    Origin-centred reachable-set window (light-cone bound: max displacement
-    from the CURRENT position is speed*time regardless of path shape, so
-    maneuvers are contained by construction; only sustained speed outliers
-    beyond v can escape). Returns R with a trailing singleton dim for
-    broadcasting against (…, 2) displacements.
+    Origin-centred containment window. p=1 is a straight-line reachable-set
+    bound; p<1 (concave) matches the MEASURED vessel displacement-from-
+    origin envelope (p99 ~ t^0.67 on v1 val — sub-linear because vessels
+    maneuver/stop, so net displacement curls back), which keeps the canvas
+    fill ratio ~constant across horizons (the scale-stationarity goal).
+    Fitted to p99 * margin; the small r0 floor bounds R away from 0 as
+    t->0 (avoids the diverging-normalizer failure). Returns R with a
+    trailing singleton dim for broadcasting against (…, 2) displacements.
     """
-    return (r0 + v * elapsed_s.float()).unsqueeze(-1)
+    return (r0 + v * elapsed_s.float().clamp_min(0) ** p).unsqueeze(-1)

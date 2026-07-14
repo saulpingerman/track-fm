@@ -69,11 +69,14 @@ class ModelConfig(BaseModel):
     # normalized canvas (targets / R, sigma scaled by 1/grid_range).
     # 'fixed' = paper behavior.
     grid_mode: Literal["fixed", "cone"] = "fixed"
-    cone_r0: float = 0.05
-    # deg per SECOND of elapsed track time (AIS intervals are irregular —
-    # growth must be per time delta, never per step). 1.5e-4 deg/s ~= 32 kn
-    # sustained, ~= p99 displacement speed * margin.
-    cone_v: float = 0.00015
+    # R(t) = cone_r0 + cone_v * elapsed_seconds ** cone_p. Fitted to the
+    # MEASURED p99 displacement-from-origin envelope on v1 val (2026-07-14):
+    # concave (p<1) because vessel net displacement grows sub-linearly
+    # (maneuvering), holding canvas fill ratio ~0.77 across all horizons.
+    # cone_p=1 recovers a straight-line reachable-set bound.
+    cone_r0: float = 0.015
+    cone_v: float = 0.00155
+    cone_p: float = 0.67
 
 
 class NormalizationConfig(BaseModel):

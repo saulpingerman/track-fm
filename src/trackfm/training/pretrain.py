@@ -100,7 +100,7 @@ def fast_val(model, cached_batches, cfg: PretrainConfig, device, autocast_dtype)
         if m.grid_mode == "cone":
             el = cone_elapsed_seconds(batch, hz, m.max_seq_len,
                                       cfg.normalization.dt_scale, causal=False)
-            tgt = tgt / cone_ranges(el, m.cone_r0, m.cone_v)
+            tgt = tgt / cone_ranges(el, m.cone_r0, m.cone_v, m.cone_p)
             total += compute_soft_target_loss(ld.float(), tgt.float(), 1.0,
                                               m.grid_size,
                                               t.sigma / m.grid_range).item()
@@ -148,17 +148,17 @@ def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
         if cone:
             el = cone_elapsed_seconds(batch, horizons, m.max_seq_len,
                                       cfg.normalization.dt_scale, causal=False)
-            tgt = tgt / cone_ranges(el, m.cone_r0, m.cone_v)
+            tgt = tgt / cone_ranges(el, m.cone_r0, m.cone_v, m.cone_p)
             el_t = cone_elapsed_seconds(batch, step_idx, m.max_seq_len,
                                         cfg.normalization.dt_scale, causal=False)
-            tgt_t = tgt_t / cone_ranges(el_t, m.cone_r0, m.cone_v)
+            tgt_t = tgt_t / cone_ranges(el_t, m.cone_r0, m.cone_v, m.cone_p)
         g_rng = 1.0 if cone else m.grid_range
         g_sig = t.sigma / m.grid_range if cone else t.sigma
         loss = compute_soft_target_loss(ld.float(), tgt.float(), g_rng,
                                         m.grid_size, g_sig)
         dr_pred = dead_reckoning_displacement(batch, horizons, m.max_seq_len, cfg.normalization)
         if cone:
-            dr_pred = dr_pred / cone_ranges(el, m.cone_r0, m.cone_v)
+            dr_pred = dr_pred / cone_ranges(el, m.cone_r0, m.cone_v, m.cone_p)
         dr_loss = gaussian_log_density_loss(dr_pred, tgt.float(), g_rng,
                                             m.grid_size, g_sig,
                                             t.dr_sigma / m.grid_range if cone else t.dr_sigma)
@@ -278,7 +278,7 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                         el = cone_elapsed_seconds(batch, hz, m.max_seq_len,
                                                   cfg.normalization.dt_scale,
                                                   causal=True)
-                        tgt = tgt / cone_ranges(el, m.cone_r0, m.cone_v)
+                        tgt = tgt / cone_ranges(el, m.cone_r0, m.cone_v, m.cone_p)
                         loss = loss_fn(ld.float(), tgt.float(), 1.0,
                                        m.grid_size, t.sigma / m.grid_range)
                     else:
