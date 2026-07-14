@@ -3,6 +3,36 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-14 — Cone-grid study at small scale (pre-registered)
+
+Paul asked for a direct cone-vs-fixed comparison at the small slot (the
+comparison workhorse). Setup: scaling-small-cone-50M — identical to
+scaling-small-50M except grid_mode=cone: origin-centred canvas with
+R(h) = 0.05 + 0.0015*h (light-cone reachable-set bound: maneuvers are
+contained by construction; only sustained speed outliers escape).
+Canvas-normalized loss (targets/R, sigma and dr_sigma scaled by
+1/grid_range); degenerate-cone==fixed equivalence is unit-tested.
+Queued behind the neutral-window xevals (cone_study_queue.sh).
+
+Judged via the cross-geometry harness (shared-window CE excluding
+clamped samples + containment in km^2), NEVER raw CE across geometries.
+Physical resolution: cone is SHARPER than fixed below h~170 (R<0.3),
+coarser above (at h800: lobe ~9 km vs fixed 2.8 km) but with ~99%
+ceiling everywhere vs fixed's ~75% at 2h.
+
+Outcome interpretation:
+- Cone ~= fixed on shared-window CE at all horizons -> cone dominates
+  (same interior quality + no censoring + constant cost): becomes the
+  default geometry for long-horizon work and a strong flagship
+  alternative; fixed grids survive only for paper continuity.
+- Cone worse at long horizons on shared window (resolution trade bites
+  harder than scale-stationarity helps) -> fixed+bigger stays the
+  flagship answer; cone reserved for >4h horizons where fixed is
+  impossible anyway.
+- Cone BETTER at short horizons (its resolution advantage below h~170,
+  plus scale-stationary targets) -> consider hybrid: cone for training
+  signal, evaluate anywhere via the continuous density.
+
 ## 2026-07-14 — Cross-geometry eval harness (flagship vs family), incl. the clamp bias
 
 Family (±0.3/64) and flagship (±0.9/192) share CELL PITCH (0.009375°),

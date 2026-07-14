@@ -40,6 +40,11 @@ def evaluate_forecasting(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     horizons = horizons or [h for h in DEFAULT_HORIZONS if h <= cfg.train.max_horizon]
     m, t = cfg.model, cfg.train
+    if m.grid_mode != "fixed":
+        raise NotImplementedError(
+            "evaluate_forecasting scores physical fixed-grid densities; "
+            "cone-grid checkpoints go through the cross-geometry study "
+            "harness (eval/xgeometry) instead.")
 
     state = torch.load(Path(checkpoint).expanduser(), map_location="cpu",
                        weights_only=False)

@@ -105,3 +105,15 @@ def dead_reckoning_displacement(features: torch.Tensor, horizon_indices: torch.T
         elapsed = cumsum_dt[:, seq_len + h_val - 1] - last_cumsum
         preds.append(torch.stack([vlat * elapsed, vlon * elapsed], dim=-1))
     return torch.stack(preds, dim=1)
+
+
+def cone_ranges(horizons: torch.Tensor, r0: float, v: float) -> torch.Tensor:
+    """Cone-grid window half-range per horizon step: R(h) = r0 + v*h.
+
+    Origin-centred reachable-set window (light-cone bound: max displacement
+    from the CURRENT position is speed*time regardless of path shape, so
+    maneuvers are contained by construction; only sustained speed outliers
+    beyond v can escape). horizons: (P,) or (B, K) step indices -> R with a
+    trailing singleton dim for broadcasting against (…, 2) displacements.
+    """
+    return (r0 + v * horizons.float()).unsqueeze(-1)

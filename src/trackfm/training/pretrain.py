@@ -20,8 +20,8 @@ from torch.utils.data import DataLoader
 from trackfm.config import PretrainConfig
 from trackfm.datasets.loaders import ShardedWindowDataset, num_samples
 from trackfm.models.factory import build_model, count_parameters
-from trackfm.training.losses import compute_soft_target_loss, dead_reckoning_displacement, \
-    gaussian_log_density_loss
+from trackfm.training.losses import compute_soft_target_loss, cone_ranges, \
+    dead_reckoning_displacement, gaussian_log_density_loss
 from trackfm.training.mlflow_utils import start_run
 
 logger = logging.getLogger(__name__)
@@ -80,7 +80,6 @@ def _lr_lambda(step: int, warmup: int, max_steps: int | None, schedule: str):
 
 
 @torch.no_grad()
-@torch.no_grad()
 def fast_val(model, cached_batches, cfg: PretrainConfig, device, autocast_dtype):
     """Loss-only validation on a small FIXED subset with FIXED horizons —
     seconds per call, so it can run every few hundred steps and give
@@ -96,10 +95,17 @@ def fast_val(model, cached_batches, cfg: PretrainConfig, device, autocast_dtype)
         batch = batch.to(device, non_blocking=True)
         with torch.autocast(device_type=device.type, dtype=autocast_dtype,
                             enabled=autocast_dtype is not None):
-            ld, tgt, _, _ = model.forward_train(batch, horizon_indices=horizons,
-                                                causal=False)
-        total += compute_soft_target_loss(ld.float(), tgt.float(), m.grid_range,
-                                          m.grid_size, t.sigma).item()
+            ld, tgt, hz, _ = model.forward_train(batch, horizon_indices=horizons,
+                                                 causal=False)
+        if m.grid_mode == "cone":
+            hz_p = hz.repeat_interleave(tgt.shape[1] // hz.numel())
+            tgt = tgt / cone_ranges(hz_p, m.cone_r0, m.cone_v)
+            total += compute_soft_target_loss(ld.float(), tgt.float(), 1.0,
+                                              m.grid_size,
+                                              t.sigma / m.grid_range).item()
+        else:
+            total += compute_soft_target_loss(ld.float(), tgt.float(), m.grid_range,
+                                              m.grid_size, t.sigma).item()
     model.train()
     return total / max(len(cached_batches), 1)
 
@@ -137,12 +143,22 @@ def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
             step_idx, bucket_valid = time_bucket_indices(batch, cfg.normalization,
                                                          m.max_seq_len)
             ld_t, tgt_t = model.forward_at_indices(batch, step_idx)
-        loss = compute_soft_target_loss(ld.float(), tgt.float(), m.grid_range,
-                                        m.grid_size, t.sigma)
+        cone = m.grid_mode == "cone"
+        if cone:
+            h_p = h.repeat_interleave(tgt.shape[1] // h.numel())
+            tgt = tgt / cone_ranges(h_p, m.cone_r0, m.cone_v)
+            tgt_t = tgt_t / cone_ranges(step_idx, m.cone_r0, m.cone_v)
+        g_rng = 1.0 if cone else m.grid_range
+        g_sig = t.sigma / m.grid_range if cone else t.sigma
+        loss = compute_soft_target_loss(ld.float(), tgt.float(), g_rng,
+                                        m.grid_size, g_sig)
         dr_pred = dead_reckoning_displacement(batch, horizons, m.max_seq_len, cfg.normalization)
-        dr_loss = gaussian_log_density_loss(dr_pred, tgt.float(), m.grid_range,
-                                            m.grid_size, t.sigma, t.dr_sigma)
-        rank_chunks.append(search_ranks(ld_t.float(), tgt_t.float(), m.grid_range).cpu())
+        if cone:
+            dr_pred = dr_pred / cone_ranges(horizons, m.cone_r0, m.cone_v)
+        dr_loss = gaussian_log_density_loss(dr_pred, tgt.float(), g_rng,
+                                            m.grid_size, g_sig,
+                                            t.dr_sigma / m.grid_range if cone else t.dr_sigma)
+        rank_chunks.append(search_ranks(ld_t.float(), tgt_t.float(), g_rng).cpu())
         valid_chunks.append(bucket_valid.cpu())
         total += loss.item()
         dr_total += dr_loss.item()
@@ -253,9 +269,16 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                 batch = batch.to(device, non_blocking=True)
                 with torch.autocast(device_type=device.type, dtype=autocast_dtype,
                                     enabled=autocast_dtype is not None):
-                    ld, tgt, _, _ = model.forward_train(batch, causal=True)
-                    loss = loss_fn(ld.float(), tgt.float(),
-                                   m.grid_range, m.grid_size, t.sigma)
+                    ld, tgt, hz, _ = model.forward_train(batch, causal=True)
+                    if m.grid_mode == "cone":
+                        # causal pairs = [h0 x seq, h1 x seq, ...]
+                        hz_p = hz.repeat_interleave(tgt.shape[1] // hz.numel())
+                        tgt = tgt / cone_ranges(hz_p, m.cone_r0, m.cone_v)
+                        loss = loss_fn(ld.float(), tgt.float(), 1.0,
+                                       m.grid_size, t.sigma / m.grid_range)
+                    else:
+                        loss = loss_fn(ld.float(), tgt.float(),
+                                       m.grid_range, m.grid_size, t.sigma)
                 loss = loss / t.grad_accum_steps
                 loss.backward()
 
