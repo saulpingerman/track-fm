@@ -163,6 +163,25 @@ def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
                                             m.grid_size, g_sig,
                                             t.dr_sigma / m.grid_range if cone else t.dr_sigma)
         rank_chunks.append(search_ranks(ld_t.float(), tgt_t.float(), g_rng).cpu())
+        # ALSO: physical fine-grid ranks per bucket. Two grids, so cone runs
+        # log metrics directly comparable to (a) fixed's native cell size
+        # and (b) a 1×1 km operational unit — the native cell size drifts
+        # with the cone geometry and can't be compared across runs.
+        from trackfm.eval.xgeometry import (ranks_on_fine_grid,
+                                             FIXED_NATIVE_CELL_DEG)
+        if not hasattr(model, "_fine_bucket_chunks"):
+            model._fine_bucket_chunks = {b: [] for b in TIME_BUCKETS}
+            model._fixcell_bucket_chunks = {b: [] for b in TIME_BUCKETS}
+        for k_b, b_name in enumerate(TIME_BUCKETS):
+            tau = TIME_BUCKETS[b_name]
+            R_deg = (m.cone_r0 + m.cone_v * tau ** m.cone_p) if cone else m.grid_range
+            tc = tgt_t[:, k_b].float() if cone else tgt_t[:, k_b].float() / m.grid_range
+            fr1, _, _ = ranks_on_fine_grid(ld_t[:, k_b].float(), tc, R_deg,
+                                            target_cell_km=1.0)
+            model._fine_bucket_chunks[b_name].append(fr1.cpu())
+            frF, _, _ = ranks_on_fine_grid(ld_t[:, k_b].float(), tc, R_deg,
+                                            cell_deg=FIXED_NATIVE_CELL_DEG)
+            model._fixcell_bucket_chunks[b_name].append(frF.cpu())
         valid_chunks.append(bucket_valid.cpu())
         total += loss.item()
         dr_total += dr_loss.item()
@@ -187,6 +206,24 @@ def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
         search[f"val_capture10_{name}"] = float(((col > 0) & (col <= 10)).sum() / n_avail)
         search[f"val_ceiling_{name}"] = float((col > 0).sum() / n_avail)
         search[f"val_avail_{name}"] = float(bucket_ok[:, k].float().mean())
+        # fine 1x1 km grid — operational km²@90 (Paul, 2026-07-14)
+        fine = torch.cat(model._fine_bucket_chunks[name])[:len(bucket_ok)]
+        fine_ok = torch.where(bucket_ok[:, k], fine, torch.full_like(fine, -1))
+        fine_valid = fine_ok[fine_ok > 0].float()
+        if len(fine_valid):
+            search[f"val_km2_at_capture90_{name}"] = float(fine_valid.quantile(0.9))
+            search[f"val_fine_medrank_km2_{name}"] = float(fine_valid.median())
+        # fixed-native cell size (0.009375°) — directly comparable to the
+        # fixed-grid p90rank numbers we've been reading in MLflow
+        fx = torch.cat(model._fixcell_bucket_chunks[name])[:len(bucket_ok)]
+        fx_ok = torch.where(bucket_ok[:, k], fx, torch.full_like(fx, -1))
+        fx_valid = fx_ok[fx_ok > 0].float()
+        if len(fx_valid):
+            search[f"val_fixcell_p90rank_{name}"] = float(fx_valid.quantile(0.9))
+            search[f"val_fixcell_medrank_{name}"] = float(fx_valid.median())
+    if hasattr(model, "_fine_bucket_chunks"):
+        del model._fine_bucket_chunks
+        del model._fixcell_bucket_chunks
     return total / n, dr_total / n, search
 
 

@@ -39,6 +39,66 @@ def _cell_area_km2(cell_deg: float) -> float:
     return (cell_deg * KM_PER_DEG) * (cell_deg * KM_PER_DEG * math.cos(math.radians(LAT0)))
 
 
+FIXED_NATIVE_CELL_DEG = 0.009375   # = 2 * 0.3 / 64 — fixed-grid native cell
+
+
+def ranks_on_fine_grid(log_density: torch.Tensor, targets_canvas: torch.Tensor,
+                        R_deg: float, cell_deg: float | None = None,
+                        target_cell_km: float | None = 1.0
+                        ) -> tuple[torch.Tensor, int, float]:
+    """Rank the target on a physical fine grid over the ±R_deg canvas.
+
+    Bilinearly resamples the model's native log_density (whose canvas spans
+    [-R_deg, +R_deg]² in physical degrees) onto fine cells at LAT0, then
+    returns each target's rank on that grid. Comparable across geometries
+    because the fine cell size is uniform, regardless of the model's
+    native cell size.
+
+    cell_deg: if given, use this square-in-DEGREES cell size (0.009375° =
+              fixed grid's native cell; ~1.04 x 0.58 km ~= 0.60 km²).
+    target_cell_km: else, size cells to ~this many km per side (default 1;
+                    fine cells are ~1 km lat × cos(lat) km lon).
+
+    Returns (ranks (B,) 1-based, or -1 if off-canvas; n_fine_cells;
+    cell_area_km2 — for converting rank -> km² of area searched).
+    """
+    B, G, _ = log_density.shape
+    device = log_density.device
+    cos_lat = math.cos(math.radians(LAT0))
+    R_lat_km = R_deg * KM_PER_DEG
+    R_lon_km = R_deg * KM_PER_DEG * cos_lat
+    if cell_deg is not None:
+        N_lat = max(2, int(round(2 * R_deg / cell_deg)))
+        N_lon = N_lat                                              # square in DEGREES
+        cell_km2 = (cell_deg * KM_PER_DEG) * (cell_deg * KM_PER_DEG * cos_lat)
+    else:
+        N_lat = max(2, int(round(2 * R_lat_km / target_cell_km)))
+        N_lon = max(2, int(round(2 * R_lon_km / target_cell_km)))
+        cell_km2 = (2 * R_lat_km / N_lat) * (2 * R_lon_km / N_lon)
+
+    # fine cell centers in canvas coords ∈ (-1, 1) — align_corners=False
+    y_c = (torch.arange(N_lat, device=device, dtype=torch.float32) + 0.5) / N_lat * 2 - 1
+    x_c = (torch.arange(N_lon, device=device, dtype=torch.float32) + 0.5) / N_lon * 2 - 1
+    yy, xx = torch.meshgrid(y_c, x_c, indexing="ij")
+    # grid_sample expects (…, 2) = (x=col, y=row) in normalized [-1, 1]
+    grid = torch.stack([xx, yy], dim=-1).unsqueeze(0).expand(B, -1, -1, -1)
+
+    fine = torch.nn.functional.grid_sample(
+        log_density.unsqueeze(1).float(), grid.float(),
+        mode="bilinear", padding_mode="border", align_corners=False,
+    ).squeeze(1)                                          # (B, N_lat, N_lon)
+
+    inside = ((targets_canvas > -1) & (targets_canvas < 1)).all(dim=-1)
+    lat_i = ((targets_canvas[:, 0] + 1) / 2 * N_lat).floor().long().clamp(0, N_lat - 1)
+    lon_i = ((targets_canvas[:, 1] + 1) / 2 * N_lon).floor().long().clamp(0, N_lon - 1)
+    flat = fine.reshape(B, -1)
+    truth_flat = lat_i * N_lon + lon_i
+    p_truth = torch.gather(flat, 1, truth_flat.unsqueeze(-1)).squeeze(-1)
+    ranks = (flat > p_truth.unsqueeze(-1)).sum(dim=-1) + 1
+    ranks = torch.where(inside, ranks, torch.full_like(ranks, -1))
+    return ranks, int(N_lat * N_lon), float(cell_km2)
+
+
 @torch.no_grad()
 def score_geometry(checkpoint: Path, cfg: PretrainConfig, split: str = "test",
                    max_batches: int = 120) -> dict:
@@ -59,6 +119,9 @@ def score_geometry(checkpoint: Path, cfg: PretrainConfig, split: str = "test",
 
     buckets = list(TIME_BUCKETS)                       # ["15m","30m","1h","2h"]
     rank_chunks = {b: [] for b in buckets}
+    fine_rank_chunks = {b: [] for b in buckets}          # 1×1 km
+    fixcell_rank_chunks = {b: [] for b in buckets}       # fixed-native cell
+    fine_ncells = {b: 0 for b in buckets}
     for i, batch in enumerate(loader):
         if i >= max_batches:
             break
@@ -78,7 +141,22 @@ def score_geometry(checkpoint: Path, cfg: PretrainConfig, split: str = "test",
         ranks = torch.where(valid, ranks, torch.full_like(ranks, -2))
         for k, b in enumerate(buckets):
             r = ranks[:, k]
-            rank_chunks[b].append(r[r != -2].cpu())    # keep censored(-1), drop unavail(-2)
+            keep = r != -2
+            rank_chunks[b].append(r[keep].cpu())
+            # fine ranks per bucket on TWO physical grids:
+            # (a) 1×1 km — operational unit;
+            # (b) fixed's native cell size (0.009375° = ~0.60 km²) — for
+            # direct comparison to the fixed-grid p90rank numbers.
+            tau = TIME_BUCKETS[b]
+            R_deg = (m.cone_r0 + m.cone_v * tau ** m.cone_p) if cone else m.grid_range
+            tgt_canvas = tgt[:, k] if cone else tgt[:, k] / m.grid_range
+            fr1, n_fine, _ = ranks_on_fine_grid(ld[:, k], tgt_canvas, R_deg,
+                                                 target_cell_km=1.0)
+            fine_ncells[b] = n_fine
+            fine_rank_chunks[b].append(fr1[keep].cpu())
+            frF, _, _ = ranks_on_fine_grid(ld[:, k], tgt_canvas, R_deg,
+                                            cell_deg=FIXED_NATIVE_CELL_DEG)
+            fixcell_rank_chunks[b].append(frF[keep].cpu())
 
     n_cells = m.grid_size * m.grid_size
     out = {"checkpoint": str(checkpoint), "geometry": m.grid_mode,
@@ -95,18 +173,42 @@ def score_geometry(checkpoint: Path, cfg: PretrainConfig, split: str = "test",
             cell_deg = 2.0 * m.grid_range / m.grid_size
         cell_km2 = _cell_area_km2(cell_deg)
         k90 = curve["k@90"]
+
+        # fine 1x1 km grid rankings
+        fine_ranks = torch.cat(fine_rank_chunks[b]) if fine_rank_chunks[b] else torch.zeros(0)
+        fine_curve = capture_curve(fine_ranks, max(fine_ncells[b], 1))
+        fine_summ = summarize_ranks(fine_ranks)
+        k90_fine = fine_curve["k@90"]
+
+        # fixed-cell-size grid (0.009375° = ~0.60 km²) — direct rank
+        # comparison to the fixed-grid p90 numbers we've been tracking
+        fx_ranks = torch.cat(fixcell_rank_chunks[b]) if fixcell_rank_chunks[b] else torch.zeros(0)
+        fx_summ = summarize_ranks(fx_ranks)
+        R_bucket = (m.cone_r0 + m.cone_v * tau ** m.cone_p) if cone else m.grid_range
+        n_fx_side = max(2, int(round(2 * R_bucket / 0.009375)))
+        fx_curve = capture_curve(fx_ranks, n_fx_side * n_fx_side)
+        fx_cell_km2 = (0.009375 * KM_PER_DEG) * (0.009375 * KM_PER_DEG * math.cos(math.radians(LAT0)))
+        k90_fx = fx_curve["k@90"]
+
         out["buckets"][b] = {
             "n": int(ranks.numel()),
-            "ceiling": round(curve["ceiling"], 4),          # on-canvas fraction
-            "cell_km2": round(cell_km2, 4),
-            "k90_cells": k90,
-            "km2_to_capture90": round(k90 * cell_km2, 1) if k90 else None,
-            "unreachable_reason": None if k90 else (
-                "ceiling<0.9 (targets escape grid)" if curve["ceiling"] < 0.9
-                else "ceiling>=0.9 but curve never hits 90% within grid"),
-            "median_rank": summ.get("median_rank"),
-            "p90_rank": summ.get("p90_rank"),
-            "capture@10_km2": round(10 * cell_km2, 1),      # area of a 10-cell search
-            "capture@10": summ.get("capture@10"),
+            "ceiling": round(curve["ceiling"], 4),
+            "native_cell_km2": round(cell_km2, 4),
+            "native_k90_cells": k90,
+            "native_km2_to_capture90": round(k90 * cell_km2, 1) if k90 else None,
+            # (A) fixed-native-cell fine grid — SAME cell size as the fixed
+            #     grid you've been reading in MLflow, so counts compare directly.
+            "fixcell_k90_cells": k90_fx,
+            "fixcell_km2_to_capture90": round(k90_fx * fx_cell_km2, 1) if k90_fx else None,
+            "fixcell_p90_rank": fx_summ.get("p90_rank"),
+            "fixcell_median_rank": fx_summ.get("median_rank"),
+            # (B) 1×1 km fine grid — operational unit; km² == cell count.
+            "km2_at_capture_90": k90_fine,
+            "fine_median_rank_km2": fine_summ.get("median_rank"),
+            "fine_p90_rank_km2": fine_summ.get("p90_rank"),
+            "fine_capture@10km2": fine_summ.get("capture@10"),
+            "unreachable_reason": None if k90_fine else (
+                "ceiling<0.9 (targets escape grid)" if fine_curve["ceiling"] < 0.9
+                else "ceiling>=0.9 but curve never hits 90%"),
         }
     return out
