@@ -3,6 +3,21 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-14 — isoFLOP control OUTCOME: capacity, not compute
+
+small pushed to medium's exact total training FLOPs (62M samples,
++24%): val CE 1.6557 -> 1.6344. Closes only 19% of the small->medium
+gap; medium stays 0.089 ahead at matched compute. p90rank_2h 113 ->
+106 (vs medium's 76). The same-samples scaling comparisons stand as
+capacity effects. Implied data exponent at small ~0.060 (== the params
+exponent at the small end). CONSEQUENCE FOR THE GATE: the xlarge@50M
+prediction (1.417) UNDERESTIMATES a real flagship, which trains on
+~190M windows (3.8x this family's data budget) — and the data axis
+still pays even for a capacity-saturated small model, so it pays more
+for larger ones. Treat 1.417 as the flagship's pessimistic bound; the
+data axis adds an unquantified but positive margin (not measurable
+without a large-scale data-budget run).
+
 ## 2026-07-13 — Gate evidence in: 7-point curve bends; 2x2 flips (with one confound left)
 
 **Scaling curve (identical protocol, 26mo, 50M samples):** nano 2.078 /
