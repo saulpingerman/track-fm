@@ -64,12 +64,16 @@ class ModelConfig(BaseModel):
     grid_range: float = 0.3          # degrees
     num_freqs: int = 12
     head_type: Literal["fourier", "direct"] = "fourier"  # 'direct' = ablation
-    # 'cone': origin-centred window whose half-range grows with horizon,
-    # R(h) = cone_r0 + cone_v*h; loss/eval operate on the normalized canvas
-    # (targets / R, sigma scaled by 1/grid_range). 'fixed' = paper behavior.
+    # 'cone': origin-centred window whose half-range grows with ELAPSED
+    # TIME, R(t) = cone_r0 + cone_v * seconds; loss/eval operate on the
+    # normalized canvas (targets / R, sigma scaled by 1/grid_range).
+    # 'fixed' = paper behavior.
     grid_mode: Literal["fixed", "cone"] = "fixed"
     cone_r0: float = 0.05
-    cone_v: float = 0.0015           # ~p99 displacement/step * 1.25 margin
+    # deg per SECOND of elapsed track time (AIS intervals are irregular —
+    # growth must be per time delta, never per step). 1.5e-4 deg/s ~= 32 kn
+    # sustained, ~= p99 displacement speed * margin.
+    cone_v: float = 0.00015
 
 
 class NormalizationConfig(BaseModel):

@@ -107,13 +107,39 @@ def dead_reckoning_displacement(features: torch.Tensor, horizon_indices: torch.T
     return torch.stack(preds, dim=1)
 
 
-def cone_ranges(horizons: torch.Tensor, r0: float, v: float) -> torch.Tensor:
-    """Cone-grid window half-range per horizon step: R(h) = r0 + v*h.
+def cone_elapsed_seconds(features: torch.Tensor, horizons: torch.Tensor,
+                         max_seq_len: int, dt_scale: float,
+                         causal: bool) -> torch.Tensor:
+    """Per-pair ELAPSED TIME from source position to target, in seconds.
+
+    Mirrors the encoder's cum_dt math exactly (AIS report intervals are
+    irregular — the same step count spans very different wall-clock times
+    across vessels, so the cone must grow with TIME, never with steps).
+    causal: pairs laid out [h0 x seq, h1 x seq, ...] -> (B, P).
+    non-causal / step_idx: from the last input position -> (B, H);
+    horizons may be (H,) shared steps or (B, H) per-sample step indices.
+    """
+    dt = features[..., 5] * dt_scale
+    cs = torch.cumsum(dt, dim=1)
+    if causal:
+        parts = [cs[:, h:max_seq_len + h] - cs[:, :max_seq_len]
+                 for h in horizons.tolist()]
+        return torch.cat(parts, dim=1)
+    last = cs[:, max_seq_len - 1].unsqueeze(1)
+    if horizons.dim() == 1:
+        idx = (max_seq_len - 1 + horizons).view(1, -1).expand(cs.shape[0], -1)
+    else:
+        idx = max_seq_len - 1 + horizons
+    return torch.gather(cs, 1, idx) - last
+
+
+def cone_ranges(elapsed_s: torch.Tensor, r0: float, v: float) -> torch.Tensor:
+    """Cone-grid window half-range: R(t) = r0 + v * elapsed_seconds.
 
     Origin-centred reachable-set window (light-cone bound: max displacement
     from the CURRENT position is speed*time regardless of path shape, so
     maneuvers are contained by construction; only sustained speed outliers
-    beyond v can escape). horizons: (P,) or (B, K) step indices -> R with a
-    trailing singleton dim for broadcasting against (…, 2) displacements.
+    beyond v can escape). Returns R with a trailing singleton dim for
+    broadcasting against (…, 2) displacements.
     """
-    return (r0 + v * horizons.float()).unsqueeze(-1)
+    return (r0 + v * elapsed_s.float()).unsqueeze(-1)

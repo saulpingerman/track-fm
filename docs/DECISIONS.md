@@ -8,10 +8,17 @@ what each possible outcome would mean. Newest first.
 Paul asked for a direct cone-vs-fixed comparison at the small slot (the
 comparison workhorse). Setup: scaling-small-cone-50M — identical to
 scaling-small-50M except grid_mode=cone: origin-centred canvas with
-R(h) = 0.05 + 0.0015*h (light-cone reachable-set bound: maneuvers are
-contained by construction; only sustained speed outliers escape).
+R(t) = 0.05 + 1.5e-4 deg/s * ELAPSED SECONDS (light-cone reachable-set
+bound: maneuvers are contained by construction; only sustained speed
+outliers ~>32 kn escape). AMENDED same day per Paul: growth is per TIME
+DELTA, never per step — AIS report intervals are irregular, so a
+per-step cone would hand a 2s-cadence vessel a 10x smaller window than
+a 20s-cadence vessel at the same step (the identical bug class as
+step-indexed horizon metrics). Elapsed time computed per pair from the
+cumulative dt channel, mirroring the encoder's own conditioning math.
 Canvas-normalized loss (targets/R, sigma and dr_sigma scaled by
-1/grid_range); degenerate-cone==fixed equivalence is unit-tested.
+1/grid_range); degenerate-cone==fixed equivalence AND per-time-not-
+per-step growth are unit-tested.
 Queued behind the neutral-window xevals (cone_study_queue.sh).
 
 Judged via the cross-geometry harness (shared-window CE excluding

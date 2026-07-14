@@ -12,7 +12,7 @@ model:
   num_freqs: 12
   grid_mode: cone
   cone_r0: 0.05
-  cone_v: 0.0015
+  cone_v: 0.00015
 normalization:
   lat_center: 56.25
   lat_scale: 1.0

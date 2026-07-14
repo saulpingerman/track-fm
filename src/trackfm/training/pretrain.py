@@ -20,8 +20,8 @@ from torch.utils.data import DataLoader
 from trackfm.config import PretrainConfig
 from trackfm.datasets.loaders import ShardedWindowDataset, num_samples
 from trackfm.models.factory import build_model, count_parameters
-from trackfm.training.losses import compute_soft_target_loss, cone_ranges, \
-    dead_reckoning_displacement, gaussian_log_density_loss
+from trackfm.training.losses import compute_soft_target_loss, cone_elapsed_seconds, \
+    cone_ranges, dead_reckoning_displacement, gaussian_log_density_loss
 from trackfm.training.mlflow_utils import start_run
 
 logger = logging.getLogger(__name__)
@@ -98,8 +98,9 @@ def fast_val(model, cached_batches, cfg: PretrainConfig, device, autocast_dtype)
             ld, tgt, hz, _ = model.forward_train(batch, horizon_indices=horizons,
                                                  causal=False)
         if m.grid_mode == "cone":
-            hz_p = hz.repeat_interleave(tgt.shape[1] // hz.numel())
-            tgt = tgt / cone_ranges(hz_p, m.cone_r0, m.cone_v)
+            el = cone_elapsed_seconds(batch, hz, m.max_seq_len,
+                                      cfg.normalization.dt_scale, causal=False)
+            tgt = tgt / cone_ranges(el, m.cone_r0, m.cone_v)
             total += compute_soft_target_loss(ld.float(), tgt.float(), 1.0,
                                               m.grid_size,
                                               t.sigma / m.grid_range).item()
@@ -145,16 +146,19 @@ def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
             ld_t, tgt_t = model.forward_at_indices(batch, step_idx)
         cone = m.grid_mode == "cone"
         if cone:
-            h_p = h.repeat_interleave(tgt.shape[1] // h.numel())
-            tgt = tgt / cone_ranges(h_p, m.cone_r0, m.cone_v)
-            tgt_t = tgt_t / cone_ranges(step_idx, m.cone_r0, m.cone_v)
+            el = cone_elapsed_seconds(batch, horizons, m.max_seq_len,
+                                      cfg.normalization.dt_scale, causal=False)
+            tgt = tgt / cone_ranges(el, m.cone_r0, m.cone_v)
+            el_t = cone_elapsed_seconds(batch, step_idx, m.max_seq_len,
+                                        cfg.normalization.dt_scale, causal=False)
+            tgt_t = tgt_t / cone_ranges(el_t, m.cone_r0, m.cone_v)
         g_rng = 1.0 if cone else m.grid_range
         g_sig = t.sigma / m.grid_range if cone else t.sigma
         loss = compute_soft_target_loss(ld.float(), tgt.float(), g_rng,
                                         m.grid_size, g_sig)
         dr_pred = dead_reckoning_displacement(batch, horizons, m.max_seq_len, cfg.normalization)
         if cone:
-            dr_pred = dr_pred / cone_ranges(horizons, m.cone_r0, m.cone_v)
+            dr_pred = dr_pred / cone_ranges(el, m.cone_r0, m.cone_v)
         dr_loss = gaussian_log_density_loss(dr_pred, tgt.float(), g_rng,
                                             m.grid_size, g_sig,
                                             t.dr_sigma / m.grid_range if cone else t.dr_sigma)
@@ -271,9 +275,10 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                                     enabled=autocast_dtype is not None):
                     ld, tgt, hz, _ = model.forward_train(batch, causal=True)
                     if m.grid_mode == "cone":
-                        # causal pairs = [h0 x seq, h1 x seq, ...]
-                        hz_p = hz.repeat_interleave(tgt.shape[1] // hz.numel())
-                        tgt = tgt / cone_ranges(hz_p, m.cone_r0, m.cone_v)
+                        el = cone_elapsed_seconds(batch, hz, m.max_seq_len,
+                                                  cfg.normalization.dt_scale,
+                                                  causal=True)
+                        tgt = tgt / cone_ranges(el, m.cone_r0, m.cone_v)
                         loss = loss_fn(ld.float(), tgt.float(), 1.0,
                                        m.grid_size, t.sigma / m.grid_range)
                     else:
