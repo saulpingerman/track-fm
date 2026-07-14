@@ -69,14 +69,17 @@ class ModelConfig(BaseModel):
     # normalized canvas (targets / R, sigma scaled by 1/grid_range).
     # 'fixed' = paper behavior.
     grid_mode: Literal["fixed", "cone"] = "fixed"
-    # R(t) = cone_r0 + cone_v * elapsed_seconds ** cone_p. Fitted to the
-    # MEASURED p99 displacement-from-origin envelope on v1 val (2026-07-14):
-    # concave (p<1) because vessel net displacement grows sub-linearly
-    # (maneuvering), holding canvas fill ratio ~0.77 across all horizons.
-    # cone_p=1 recovers a straight-line reachable-set bound.
-    cone_r0: float = 0.015
-    cone_v: float = 0.00155
-    cone_p: float = 0.67
+    # R(t) = cone_r0 + cone_v * elapsed_seconds ** cone_p.
+    # LINEAR reachable-set bound (cone_p=1) so a constant-speed straight-line
+    # vessel is contained at EVERY horizon (its displacement is v_ship*t; a
+    # sub-linear box would eventually fall beneath any straight line and let
+    # it escape — containment is the requirement, not average resolution).
+    # cone_v = 1.71e-4 deg/s = p99.9 effective vessel speed (~37 kn) measured
+    # on v1 val; >37 kn is GPS-glitch tail (p99.99=140 kn), excluded by
+    # design and caught by the physics-bound censor, not sized into the box.
+    cone_r0: float = 0.02
+    cone_v: float = 0.000171
+    cone_p: float = 1.0
 
 
 class NormalizationConfig(BaseModel):

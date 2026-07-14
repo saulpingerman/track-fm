@@ -37,6 +37,24 @@ def test_concave_powerlaw_holds_fill_ratio():
     assert fill_linear.max() - fill_linear.min() > 0.2
 
 
+def test_straight_line_vessel_contained_at_all_horizons():
+    """Paul's requirement: a constant-speed straight-line vessel must stay
+    inside the box at ANY reasonable horizon. With the production LINEAR
+    bound (cone_p=1, v=37kn), displacement v_ship*t <= R(t) for all
+    realistic v_ship <= the containment speed, at every horizon — a
+    property a sub-linear (p<1) box provably CANNOT guarantee."""
+    from trackfm.config import ModelConfig
+    m = ModelConfig(grid_mode="cone")
+    assert m.cone_p == 1.0, "production cone must be linear for containment"
+    t = torch.tensor([60., 900., 3600., 7200., 16200.])
+    R = cone_ranges(t, m.cone_r0, m.cone_v, m.cone_p).squeeze(-1)
+    for v_ship in (9.24e-5, 1.39e-4, m.cone_v):     # 20kn, 30kn, containment speed
+        assert bool((R >= v_ship * t).all()), f"straight-liner {v_ship} escaped"
+    # a concave box fails this exact guarantee at long enough horizon
+    R_concave = cone_ranges(t, 0.015, 1.55e-3, p=0.67).squeeze(-1)
+    assert not bool((R_concave >= m.cone_v * t).all()), "concave should NOT contain"
+
+
 def test_growth_is_per_time_not_per_step():
     """Two vessels at the same STEP horizon but different report cadence
     must get different windows — Paul's correction: AIS deltas are

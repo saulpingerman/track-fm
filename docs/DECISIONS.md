@@ -40,6 +40,30 @@ Outcome interpretation:
   plus scale-stationary targets) -> consider hybrid: cone for training
   signal, evaluate anywhere via the continuous density.
 
+## 2026-07-14 — Cone R(t): LINEAR containment bound (Paul's requirement overrides resolution fit)
+
+CORRECTION to the concave recalibration earlier today. Paul: "capture ALL
+movement as a forecast at any reasonable horizon." A constant-speed
+straight-line vessel has displacement v_ship*t (LINEAR); a concave box
+(p<1) eventually falls beneath any straight line, so the fast straight-
+liner ESCAPES at long horizons — the concave fit optimized average
+resolution efficiency, the WRONG objective. Containment requires a linear
+(reachable-set) box. Measured effective-speed distribution (v1 val):
+p99=20.7kn, p99.9=37.0kn, p99.99=140kn, max=12500kn (GPS teleports).
+Real movement tops out ~37kn; above that is sensor glitch, excluded by
+design (physics-bound censor, not sized into the box). Chosen:
+R(t) = 0.02 + 1.71e-4 * t  (LINEAR, cone_p=1; 1.71e-4 deg/s = 37kn =
+p99.9 speed). Verified: 20/30/37kn straight-liners contained at every
+horizon; off-canvas 0.00% beyond 30min, <1% short-horizon (glitch tail).
+Unit test pins the straight-line-containment guarantee. TRADEOFF (logged
+honestly): the linear box is larger at long horizons than the fixed grid
+(R(2h)=1.25deg vs fixed 0.3), so coarser resolution at fixed num_freqs —
+num_freqs is the lever to buy it back (same coverage-vs-resolution knob as
+the flagship geometry). This is the honest coverage/resolution trade the
+cone-vs-fixed study measures: cone = full containment/coarser lobes vs
+fixed = fine lobes/25% escape at 2h. The power-law code (cone_p) is
+retained as a generalization but defaults to 1.0.
+
 ## 2026-07-14 — Cone R(t) recalibrated CONCAVE from measured envelope + review verdict
 
 Verified mini-review (docs/research/2026-07-scale-normalized-outputs.md,
