@@ -40,6 +40,41 @@ Outcome interpretation:
   plus scale-stationary targets) -> consider hybrid: cone for training
   signal, evaluate anywhere via the continuous density.
 
+## 2026-07-14 — C1 headroom gate: fields do NOT explain hard-tail difficulty
+
+Ran on 47,237 val windows at 2h horizon, 6 sampled days Sep-Dec 2024,
+regressing DR-residual (km) on origin-sampled ERA5 wind + CMEMS Baltic
+current + wave height:
+  R^2 overall (wind+cur):     0.011  (1.1%)
+  R^2 hard-decile only:       0.0013 (0.1%)
+  + waves:                    0.0117 (no change)
+  Pearson r, hard, wind:     -0.034
+  Pearson r, hard, current:  -0.016
+Decile means (0=easiest → 9=hardest): median residual 0.0 → 44.6 km, but
+mean wind 5.6 → 5.2 m/s (DECREASES), mean current 0.09 → 0.12 m/s
+(flat). Hard cases are in LOWER-wind, average-current conditions —
+opposite of what a "weather causes hardness" story predicts.
+
+Interpretation: hard forecasting is DECISION-driven (maneuvers, route
+choice, port approaches), NOT weather-driven. Reconciles with C2's
+r=0.52 for cross-heading drift vs currents (fields DO push vessels
+physically, but drift is small vs maneuver-driven residuals at 2h).
+
+Implication for flagship decision — the Tier-4 conditioning story
+(weather/currents/waves recovers the ~1.25 kinematic floor) looks much
+weaker than earlier estimates. Tier-3 STATIC geography (lanes, ports,
+land, TSS) is the stronger conditioning direction because it captures
+DECISION structure — where routes are, where vessels turn — which is
+what makes hard cases hard. The flagship's ~5% CE headroom via pure
+capacity remains a real option and is not automatically dominated by
+conditioning if conditioning turns out to be weather-dominated.
+
+Caveats: local weather at origin only (not along trajectory or
+forecast-integrated); linear R^2 misses nonlinearities; 47k windows in
+6 autumn/winter days (not a storm sample); test doesn't rule out fields
+being useful in a more sophisticated integration or as a feature to
+help stratify hard-vs-noisy cases — only that the simple version fails.
+
 ## 2026-07-14 — 2x2 data-vs-capacity RESOLVED (neutral window, both confounds controlled)
 
 All three small checkpoints scored on the v1-val window (2024-09-22..12-08)
