@@ -1,0 +1,78 @@
+# Does deterministic output-space rescaling help? (verified mini-review, 2026-07)
+
+**Question under review.** TrackFM's "cone" proposal: predict a 2D density on a canvas normalized by a deterministic, condition-known half-range R(t)=r0+v·t, with horizon t already fed to a time-conditioning MLP. The PI's worry: a network conditioned on a query whose output space changes physical meaning per query will be "confused." Below, FOR-evidence, adversarial AGAINST-evidence, a mapping onto TrackFM's specific construction, and a falsifiable prediction for the queued cone-vs-fixed study.
+
+Verification tags are those assigned by the source review: **CONFIRMED** = 2/2 adversarial checks; **DISPUTED** = 1/2; **REFUTED** = failed; **unaudited** = stated but not independently re-checked.
+
+---
+
+## 1. Evidence FOR condition-known target normalization
+
+**Diffusion preconditioning (the closest mechanistic twin).** EDM parameterizes the denoiser so the raw trained network always regresses a unit-variance target at every noise level σ, via deterministic c_in/c_out/c_skip(σ) — a condition-known rescaling of target/input, exactly the cone's move (σ↔t). *EDM, 2022, arxiv.org/abs/2206.00364.* On well-conditioned CIFAR-10, preconditioning alone is roughly FID-neutral (VP 2.31→2.29) [CONFIRMED], but on high-scale-variation 64×64 it **rescues catastrophic failure**: FFHQ-64 VE 41.62→3.39 (>12×), AFHQv2-64 VE 15.04→3.81. It also unlocks per-condition loss reweighting (config D→E, the largest single jump, uncond VE 3.10→1.99). The paper's own stated motivation directly rebuts the PI: representing the model unnormalized is "far from ideal" because magnitude "varies immensely" across conditions [CONFIRMED].
+
+**Other diffusion parameterizations corroborate.** v-prediction rescales/rotates the target as a known function of t and trains fine (CIFAR FID 2.51–2.87), while a *badly*-scaled target (ε with truncated-SNR) fully diverges — "converges to SOTA vs does not train." *Progressive Distillation, 2022, arxiv.org/abs/2202.00512* [CONFIRMED]. A single shared network conditioned on the scale variable learns the entire continuous scale range to SOTA (ImageNet-256 FID 2.06). *Min-SNR, 2023, arxiv.org/abs/2303.09556* [CONFIRMED]. Deterministic input-scaling by a known factor b substantially *improves* a conditioned model when matched to data scale (256×256 FID 7.21→3.52). *Noise Scheduling, 2023, arxiv.org/abs/2301.10972* [CONFIRMED]. The endpoint failure is specifically a normalizer that *diverges* (1/t as t→0); a bounded normalizer avoids it. *Flow-Matching Parameterization, 2026, arxiv.org/abs/2603.06454* [CONFIRMED].
+
+**Instance normalization on probabilistic / forecasting outputs.** DeepAR divides inputs by a deterministic per-item scale ν_i and multiplies likelihood parameters back (μ=ν·softplus, α=softplus/√ν) — a probabilistic head on a normalized canvas. Removing it costs ~34% on heavy-tailed ec-sub (0.77→1.17 0.5-risk). *DeepAR, 2017, arxiv.org/abs/1704.04110* [CONFIRMED]. RevIN's reversible normalize-then-denormalize improves accuracy across 3 backbones/4 datasets, with benefit **growing at long horizons** (N-BEATS ETTh1 960-step ~29%), and beats naive fixed normalization by an order of magnitude (~0.465 vs ~3.0 MSE). *RevIN, 2022, openreview.net/forum?id=cGDAkQo1C0p* [CONFIRMED]. A follow-up shows training/backprop *in normalized space* itself generalizes better (~16%) even when scored in physical units. *RevIN analysis, 2026, arxiv.org/abs/2603.11869* [CONFIRMED]. N-BEATS's per-instance max-abs scale/descale is in-distribution **accuracy-neutral** yet is the enabler of cross-scale zero-shot transfer (M4→M3 12.44 sMAPE, beating the in-domain competition winner). *N-BEATS meta-learning, 2020, arxiv.org/abs/2002.02887* [CONFIRMED].
+
+**Trajectory / spatial canonicalization (the domain-matched analogues).** Forcing one fixed output frame (scene-centric) consistently underperforms per-query canonicalization (agent-centric) by +12–14% minADE, +14–24% minFDE, +15–53% miss rate — the confused model is the one *denied* the per-query frame. *Distillation paper, 2022, arxiv.org/abs/2206.03970* [CONFIRMED]. HiVT: condition-known geometric canonicalization *eases* learned probabilistic prediction (translation invariance minADE 1.09→0.73; rotation, free, →0.69), worth ~3× model size; the density head is trained directly on canonicalized targets. *HiVT, 2022, CVPR* [CONFIRMED]. QCNet re-anchors a local frame per query and ranks 1st on Argoverse 1&2 — per-query variable anchoring is not inherently confusing. *QCNet, 2023, CVPR* [CONFIRMED]. Faster R-CNN regresses anchor-relative targets (tx=(x−xa)/wa, tw=log(w/wa)) on a per-location normalized canvas, well-conditioned across a 1000× loss-weight range. *Faster R-CNN, 2015, arxiv.org/abs/1506.01497* [CONFIRMED]. Under genuine per-example scale variation, folding scale into the coordinate map halves error (SIM2MNIST 11.73→5.03). *Polar Transformer Networks, 2018, arxiv.org/abs/1709.01889* [CONFIRMED].
+
+**The horizon-conditioned probabilistic case closest to TrackFM.** The PI's exact ablation — one network conditioned on lead time vs horizon-specialized networks — was run: the conditioned net "did not noticeably improve or degrade the predictions overall," i.e. **no skill loss**, and it bought smoother evolution across horizons. *TC-track, 2025, arxiv.org/abs/2503.09840* [CONFIRMED].
+
+---
+
+## 2. Evidence AGAINST / failure modes (adversarial — read this before believing Section 1)
+
+**The one REFUTED "for" claim.** The claim that condition-known rescaling is "the primary source of gain, not a mere convenience" was **REFUTED**. *Non-stationary Transformers, 2022, arxiv.org/abs/2205.14415.* Rescaling-alone drives large gains there, but the review's adversarial checks did not sustain the strong universal framing — treat "normalization is the main lever" as unproven, not established.
+
+**Over-stationarization: the PI's worry, formalized and real.** A network trained on rescaled inputs *without* access to the removed scale produces indistinguishable outputs across queries and loses query-specific signal, because distinct inputs collapse to the same normalized canvas. *Non-stationary Transformers, 2022* [CONFIRMED]. Re-injecting scale helps *only in conjunction with* rescaling; injecting scale without normalizing HURTS (Exchange baseline 0.567 → DeAttn-alone 0.611 → DeFF-alone 0.784). So rescaling and conditioning must be one coupled mechanism, not two independent knobs [unaudited].
+
+**Shape collapse under conditioning.** The single lead-time-conditioned TC-track network's real failure was covariance-shape collapse: ρ driven to ~0, ellipses going circular — it under-expressed horizon-varying anisotropy the specialized nets captured. *TC-track, 2025* [DISPUTED — 1/2, so treat as a live but not-fully-verified risk]. This is the sharpest domain-matched warning: a t-conditioned density head can wash out directional structure even while global calibration looks fine.
+
+**Wrong deterministic geometry is worse than none.** A fixed polar warp with a *mis-placed* center scored 15.46% on SIM2MNIST — worse than a plain CNN (11.73%) — because the warp amplifies error near a wrong origin. *Polar Transformer Networks, 2018* [unaudited]. Analogue: if R(t) mis-tracks the true spread, the cone can underperform doing nothing.
+
+**Scale mis-calibration is the dominant failure mode, ~2× penalty.** The optimal rescale depends on true data dispersion; a fixed rescale mismatched to it degrades ~2× (FID 7.21 vs 3.52). *Noise Scheduling, 2023* [CONFIRMED]. TrackFM's R(t)=r0+v·t is a heuristic bound, not the true predictive std — under-scaled ⇒ targets clip off-canvas; over-scaled ⇒ density concentrates centrally, wasting resolution [EDM caveat, unaudited].
+
+**Off-canvas targets destabilize training.** Faster R-CNN: cross-boundary (out-of-normalized-region) anchors "introduce large, difficult-to-correct error terms" and "training does not converge" unless masked. *Faster R-CNN, 2015* [unaudited]. Direct analogue: future positions beyond R(t) must be masked or v chosen so R(t) reliably contains the target.
+
+**The real R(t) is convex and anisotropic — the cone's functional form is the coarse one the field is abandoning.** Operational NHC radii are superlinear (Atlantic 25→200 nm over 12→120 h, increments accelerating ~13→33 nm/12h), directly contradicting linear r0+v·t [CONFIRMED]; and NHC is moving from an isotropic radius to an along-/cross-track ellipse because one scalar conflates two diverging error scales. *NHC Cone, 2025, nhc.noaa.gov/experimental/cone* [convexity CONFIRMED; anisotropy unaudited]. A single-scalar R(t) squashes the well-constrained cross-track axis and stretches the poorly-constrained along-track axis.
+
+**Distribution-level transfer under a harder output frame is empirically fragile.** Distilling the full predictive distribution (KL between GMMs) *failed* on all three datasets (−1.5% to −8.2%); only discrete set-level supervision helped. *Distillation paper, 2022* [unaudited]. TrackFM predicts a distribution — the one data point on distribution-matching under a transformed frame is discouraging.
+
+**Normalization is not free on easy data.** Preconditioning is FID-neutral on well-conditioned CIFAR *EDM* [CONFIRMED]; the polar warp costs ~0.76 pts on clean SVHN *PTN* [unaudited]; per-instance normalization *hurt* on stationary Traffic (7.27 vs 6.51 MSE), *increasing* train/test distributional distance. *RevIN analysis, 2026* [CONFIRMED]. Rescaling pays off only to the extent physical scale genuinely varies across queries.
+
+**Normalization does not remove the learned-variance pathology.** Even on the normalized canvas the density head still emits a learned σ̂ entering the loss as 1/σ̂²; plain NLL re-incurs inverse-variance undersampling of hard queries. *β-NLL, 2022, arxiv.org/abs/2203.09168* [mechanism CONFIRMED]. The cone does not immunize you here.
+
+---
+
+## 3. Mapping onto TrackFM's cone specifically
+
+**Excluded by construction (the PI's literal worry is largely defused):**
+
+- **Over-stationarization / hidden-scale collapse.** The remedy the *Non-stationary Transformers* paper had to engineer — re-inject the removed scale as an explicit conditioning input — TrackFM satisfies *by construction*: t (hence R(t)) is already an explicit MLP input, so the scale is never hidden [CONFIRMED that this is the correct fix; that TrackFM thereby satisfies it, unaudited]. This is the single most important structural point: the failure mode is *scale withheld from the network*, and TrackFM does not withhold it.
+- **Scale-estimation error / distribution shift.** RevIN, DeepAR, N-BEATS all *estimate* scale from data and inherit its failure modes (RevIN's structural-shift and covariate-shift failures; max-abs outlier sensitivity). TrackFM's R(t) is analytic, deterministic, exogenous, outlier-free — strictly safer on this axis [unaudited].
+- **Diverging-normalizer endpoint blowup.** The flow-matching failure is a normalizer →∞ or →0 at a schedule endpoint. R(t)=r0+v·t is bounded below by r0>0 and finite at max t, so it cannot reproduce this [CONFIRMED].
+- **Self-amplifying learned-variance loop.** β-NLL's "rich-get-richer" pathology is driven by *learned* endogenous variance; R(t) is exogenous and residual-independent and cannot trigger it [CONFIRMED].
+
+**Still live (these are what the study must actually test):**
+
+1. **Scale mis-calibration (highest priority).** σ is treated as roughly constant in *cell units* on the normalized canvas only if the true positional spread grows exactly as r0+v·t. NHC evidence says the true growth is **convex, not linear** [CONFIRMED], so a linear R(t) will under-cover late horizons (off-canvas clipping) and/or over-cover early ones (wasted resolution). This is the dominant ~2× failure mode from *Noise Scheduling* [CONFIRMED]. **Live and likely.**
+2. **Anisotropy loss.** A single isotropic scalar R(t) is exactly what NHC is abandoning; combined with TC-track's observed ρ→0 shape collapse [DISPUTED], the concrete risk is that the normalized-canvas density goes too circular and loses along-/cross-track structure. **Live.**
+3. **Off-canvas targets.** Real futures beyond R(t) must be masked/clamped or expect the Faster R-CNN non-convergence mode [unaudited]. Choice of v (equivalently, a containment percentile like NHC's 67% vs 90%) is a real, consequential lever. **Live, but mitigable by construction (masking + conservative v).**
+4. **Density Jacobian.** Un-scaling a *density* (not a point) onto physical coordinates requires the (1/R(t))² Jacobian to keep NLL comparable across horizons; DeepAR shows un-scaling is parameter-specific, not a uniform multiply [unaudited]. **Live implementation correctness item.**
+5. **Loss weighting across horizons.** R(t)-normalization is itself an *implicit* per-horizon reweighting, not a neutral coordinate change [Min-SNR, CONFIRMED]. Small-t (sharp) horizons are the "easy" analogue that will dominate a flat loss; pair the cone with explicit clamped λ(t) weighting and train the density with β-NLL at β≈0.5 [unaudited]. **Live.**
+
+---
+
+## 4. Verdict — falsifiable expectation for the queued cone-vs-fixed study
+
+The literature's convergent prediction, stated so it can be proven wrong:
+
+**Primary expectation.** The cone will **match or beat** the fixed-canvas baseline on long-horizon (large-t) calibrated NLL / miss-rate, with the gap **widening as horizon grows**, and will be **roughly neutral at short horizons**. This is the horizon-scaling signature seen in RevIN (benefit grows with horizon) [CONFIRMED], EDM (rescue only under large scale variation, neutral when mild) [CONFIRMED], and QCNet (per-frame machinery pays off on long-horizon Argoverse 2, marginal on short Argoverse 1) [unaudited]. **Falsified if** the fixed baseline equals or beats the cone at the *longest* horizons, or if the cone's advantage does *not* grow with t.
+
+**Direction of the PI's worry.** The cone will **not** exhibit degraded overall skill from "changing map scale," because t is an explicit conditioning input (over-stationarization is excluded by construction) [CONFIRMED mechanism]. **Falsified if** the cone shows a global skill drop attributable to conditioning per se rather than to scale mis-calibration.
+
+**The most likely way the cone underperforms** is *not* PI-style confusion but (a) **linear-R(t) mis-calibration** vs the true convex spread [CONFIRMED risk] and/or (b) **anisotropy/shape collapse** from a single isotropic scalar [DISPUTED/CONFIRMED-adjacent]. **Concrete falsifiable sub-prediction:** replacing linear R(t) with a spread-matched (convex, per-horizon-fitted) and/or anisotropic (along-/cross-track) scale will recover measurable NLL, and residual off-canvas target mass at large t will be the leading diagnostic of under-scaling. If a *correctly calibrated, masked* cone still loses to the fixed canvas at long horizons, that is the genuine negative result and it would contradict the entire body of evidence above.
+
+**Do not justify the cone on standalone short-horizon accuracy** — every well-conditioned control (EDM CIFAR, N-BEATS in-distribution, PTN clean SVHN) says the honest expected effect there is **neutral-to-slightly-negative**, and claiming a short-horizon win would be motivated reasoning [CONFIRMED across EDM, N-BEATS].
+
+*No claims drawn from memory; all citations above are from the verified review set. [unverified-from-memory]: none used.*
