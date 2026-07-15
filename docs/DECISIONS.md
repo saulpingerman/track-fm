@@ -3,6 +3,54 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-15 — MATRIX RESULT + flagship decision package on your desk
+
+2x2 {geometry: fixed, cone} x {head: fourier, direct} at small/26mo/50M/F12
+scored on the cross-geometry harness (1x1 km fine grid, k@90-of-all with
+ceilings, test split, 120 batches). Full table (km² to capture 90% of ALL
+vessels; UNREACH = ceiling<0.9):
+
+  cell           15m   30m    1h     2h    ceil@2h
+  cone+fourier   3.6   11.5   36    136    1.00
+  cone+direct    4.2   12.7   41    146    1.00
+  fixed+fourier  4.2   14.5  162    UNREACH  0.80
+  fixed+direct   4.8   16.3  174    UNREACH  0.80
+
+Ranking at every horizon: cone+fourier > cone+direct > fixed+fourier
+> fixed+direct. Fourier beats direct on both geometries by ~7% at long
+horizons. Cone dominates fixed everywhere, with the gap exploding at
+long horizons (1h: cone 36 vs fixed 162 = 4.5x less area; 2h: fixed
+structurally cannot reach 90%).
+
+Combined with C1 (fields explain ~0% of hard-tail difficulty at 2h),
+the flagship-vs-conditioning tradeoff is now:
+- Cone is a proven, model-side geometry improvement independent of any
+  conditioning work. It is not gated on new data or new features.
+- Weather-context conditioning is UNCERTAIN as a headroom source (C1);
+  static Tier-3 geography remains the more promising conditioning axis
+  but requires materialization v3 + new training runs.
+- The scaling curve extrapolation says flagship (xlarge, 116M) at fixed
+  geometry buys ~5% val CE beyond large. At cone geometry, the expected
+  gain compounds: xlarge's capacity + cone's coverage/resolution regime.
+
+RECOMMENDATION for flagship: switch geometry to CONE for the xlarge
+flagship run, keeping Fourier head (parameter efficiency at G=192 +
+continuous density needed for the harness/downstream). Recalibrate
+num_freqs (18 -> 24?) to sharpen long-horizon lobes on the bigger cone
+canvas. This combines the two verified wins (bigger encoder + better
+geometry) rather than only one.
+
+Alternatives on the table (Paul's call):
+A. Flagship AS CONFIGURED (fixed +-0.9°/192/F18, xlarge). Cleanest
+   continuity with pre-registered plan. Leaves the cone advantage
+   unclaimed at the biggest scale.
+B. Flagship as CONE + xlarge (recommended). Combines proven wins.
+   Requires copy-paste cone_r0/v/p into xlarge.yaml; harness already
+   supports scoring.
+C. Skip flagship, pivot to Tier-3 static-geography conditioning at
+   medium scale. Highest information gain per compute if C1 signals
+   generalize to Tier-3; requires materialization v3 rebuild.
+LOOP STOPS HERE. Flagship launch is Paul's call and never autonomous.
 ## 2026-07-14 — Cone-grid study at small scale (pre-registered)
 
 Paul asked for a direct cone-vs-fixed comparison at the small slot (the
