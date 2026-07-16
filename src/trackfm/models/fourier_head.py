@@ -16,6 +16,25 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+def _projector(d_in: int, d_out: int, hidden: int) -> nn.Module:
+    """Linear (hidden=0) or 1-hidden-layer MLP (hidden>0) with matched init."""
+    if hidden <= 0:
+        m = nn.Linear(d_in, d_out)
+        nn.init.normal_(m.weight, std=0.01)
+        nn.init.zeros_(m.bias)
+        return m
+    net = nn.Sequential(
+        nn.Linear(d_in, hidden),
+        nn.GELU(),
+        nn.Linear(hidden, d_out),
+    )
+    nn.init.normal_(net[0].weight, std=0.01)
+    nn.init.zeros_(net[0].bias)
+    nn.init.normal_(net[2].weight, std=0.01)
+    nn.init.zeros_(net[2].bias)
+    return net
+
+
 class DirectGridHead(nn.Module):
     """Ablation head: straight linear map to per-cell logits.
 
@@ -25,16 +44,19 @@ class DirectGridHead(nn.Module):
     F=18) but compute-competitive, and it has NO continuous density — it
     can only be evaluated at its own cells. Exists to answer: is the
     Fourier smoothness prior earning its place, or just compressing params?
+
+    mlp_hidden>0 inserts a hidden layer (d_model -> hidden -> G^2) — tests
+    whether a single linear projection from the encoder embedding is the
+    bottleneck vs the head having more mixing capacity.
     """
 
     def __init__(self, d_model: int, grid_size: int = 64,
-                 num_freqs: int = 0, grid_range: float = 0.1):
+                 num_freqs: int = 0, grid_range: float = 0.1,
+                 mlp_hidden: int = 0):
         super().__init__()
         self.grid_size = grid_size
         self.grid_range = grid_range
-        self.logits = nn.Linear(d_model, grid_size * grid_size)
-        nn.init.normal_(self.logits.weight, std=0.01)
-        nn.init.zeros_(self.logits.bias)
+        self.logits = _projector(d_model, grid_size * grid_size, mlp_hidden)
 
     def forward(self, z: torch.Tensor) -> torch.Tensor:
         log_density = F.log_softmax(self.logits(z), dim=-1)
@@ -45,14 +67,15 @@ class FourierHead2D(nn.Module):
     """2D Fourier density head."""
 
     def __init__(self, d_model: int, grid_size: int = 64,
-                 num_freqs: int = 12, grid_range: float = 0.1):
+                 num_freqs: int = 12, grid_range: float = 0.1,
+                 mlp_hidden: int = 0):
         super().__init__()
         self.grid_size = grid_size
         self.num_freqs = num_freqs
         self.grid_range = grid_range
 
         num_freq_pairs = (2 * num_freqs + 1) ** 2
-        self.coeff_predictor = nn.Linear(d_model, 2 * num_freq_pairs)
+        self.coeff_predictor = _projector(d_model, 2 * num_freq_pairs, mlp_hidden)
 
         # Precompute grid and basis
         x = torch.linspace(-grid_range, grid_range, grid_size)
@@ -74,9 +97,6 @@ class FourierHead2D(nn.Module):
         )
         self.register_buffer('cos_basis', torch.cos(phase).squeeze(0))
         self.register_buffer('sin_basis', torch.sin(phase).squeeze(0))
-
-        nn.init.normal_(self.coeff_predictor.weight, std=0.01)
-        nn.init.zeros_(self.coeff_predictor.bias)
 
     def forward(self, z: torch.Tensor) -> torch.Tensor:
         batch_size = z.shape[0]

@@ -90,7 +90,8 @@ class CausalAISModel(nn.Module):
         # (per-cell logits, no continuous density).
         head_cls = FourierHead2D if model.head_type == "fourier" else DirectGridHead
         self.fourier_head = head_cls(
-            model.d_model, model.grid_size, model.num_freqs, model.grid_range
+            model.d_model, model.grid_size, model.num_freqs, model.grid_range,
+            mlp_hidden=model.head_mlp_hidden,
         )
 
         # Causal mask cache

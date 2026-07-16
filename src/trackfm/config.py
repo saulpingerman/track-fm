@@ -64,6 +64,11 @@ class ModelConfig(BaseModel):
     grid_range: float = 0.3          # degrees
     num_freqs: int = 12
     head_type: Literal["fourier", "direct"] = "fourier"  # 'direct' = ablation
+    # head_mlp_hidden>0 inserts one hidden layer inside the density head
+    # (Linear(d_model, head_mlp_hidden) -> GELU -> Linear(...)). 0 keeps the
+    # historical single-linear projection. Tests whether the encoder->basis
+    # projection is a mixing bottleneck vs a real head-side capacity issue.
+    head_mlp_hidden: int = 0
     # 'cone': origin-centred window whose half-range grows with ELAPSED
     # TIME, R(t) = cone_r0 + cone_v * seconds; loss/eval operate on the
     # normalized canvas (targets / R, sigma scaled by 1/grid_range).
