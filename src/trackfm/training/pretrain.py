@@ -408,18 +408,27 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                                             if "p90rank" in k))
                     last_val_time = time.time()
 
-                    torch.save({"model": model.state_dict(), "step": step,
+                    # strip torch.compile's '_orig_mod.' prefix so eval
+                    # loaders can strict-load compiled-run checkpoints
+                    # (audit F26)
+                    sd = {k.removeprefix("_orig_mod."): v
+                          for k, v in model.state_dict().items()}
+                    torch.save({"model": sd, "step": step,
                                 "config": cfg.model_dump(mode="json")},
                                ckpt_dir / "last.pt")
                     if val_loss < best_val:
                         best_val = val_loss
-                        torch.save({"model": model.state_dict(), "step": step,
+                        torch.save({"model": sd, "step": step,
                                     "val_loss": val_loss,
                                     "config": cfg.model_dump(mode="json")},
                                    ckpt_dir / "best.pt")
                     # saturation: opportunity-cost projection over remaining
                     # budget (power-law-safe; see should_stop_saturation)
-                    val_history.append((step, val_loss))
+                    # NaN guard (audit F30): one NaN in the history makes
+                    # np.median NaN forever and silently disables the
+                    # saturation stop for the rest of the run.
+                    if not math.isnan(val_loss):
+                        val_history.append((step, val_loss))
                     stop, gain = should_stop_saturation(
                         val_history, t.early_stop_min_history,
                         t.early_stop_min_gain_frac)
