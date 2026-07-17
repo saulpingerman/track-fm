@@ -3,6 +3,50 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-17 — C1-TRAFFIC: other vessels are the strongest conditioning signal measured
+
+Same gate design as the weather gates (2h DR residuals, 6 val days,
+sog-partialed), signal = dynamic traffic computed from our own AIS at
+each origin: density (n within 2/5/10km), nearest-vessel distance,
+min CPA/TCPA over approaching neighbors, crossing-course indicator,
+anchored count. Population fix that MATTERS: pooled stats are dominated
+by moored windows (median residual 0.04km, raw density correlations go
+NEGATIVE because dense areas = ports = parked ships). All headline stats
+on UNDERWAY (sog>=2kn) origins: 55k windows, median residual 13.5km.
+
+Gate scoreboard (all sog-controlled):
+
+| gate                 | best partial r | dR^2 over sog | hard-dec r | indicator (coverage) |
+|----------------------|---------------:|--------------:|-----------:|----------------------|
+| point-C1 weather     |          ~0.04 |        +0.006 |         ~0 | —                    |
+| tube-C1 weather      |          +0.18 |        +0.045 |      +0.08 | 3.8x on 0.2%         |
+| traffic (underway)   |      **+0.42** |    **+0.097** |  **+0.13** | 1.35x on 39%         |
+
+Traffic is a BROAD moderate signal (39% of underway windows have a
+<1km-CPA approach, each 1.35x likelier hard at matched speed) vs
+weather's rare strong one. Decile profile is monotone: density, CPA
+rate, anchored count all rise through difficulty deciles 0-8 (dip at 9
+— extreme tail may be destination changes, see Type-5 below).
+
+Caveat kept honest: traffic partially proxies port/anchorage proximity
+(arrival maneuvers happen where ships cluster). The gate can't separate
+"maneuvered for traffic" from "maneuvering near port"; both are
+conditioning signal, one dynamic (traffic crops) one static (port
+geometry) — the architecture carries both.
+
+ALSO: Type-5 check — raw DMA CSVs carry Destination/ETA/Draught/
+NavStatus/ROT/dims ON EVERY ROW; the clean pipeline dropped them.
+Destination+draught are route-determining at long horizons. Recoverable
+via slim per-vessel change-log side table without a full re-clean.
+
+Priority order for Tier-3 conditioning (updated):
+1. Static geography crops (land/bathy/dist-to-coast/port geometry) +
+   traffic-prior raster — unchanged.
+2. DYNAMIC TRAFFIC crops + nearest-neighbor scalars — promoted by this
+   gate.
+3. Type-5 intent side-table (destination/draught/nav-status).
+4. Weather movie-crops (K-slice) — real but rare-event; last.
+
 ## 2026-07-17 — C1-TUBE: storm-crossing is real but RARE; speed is the master variable
 
 Paul's critique of C1: a storm crossing the vessel's path mid-window is
