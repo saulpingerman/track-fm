@@ -42,9 +42,10 @@ def gaussian_density_loss_per_sample(
     sig = torch.clamp(sigma, min=1e-4)
     zx = (xx - pred[..., 0:1, None]) / sig[..., 0:1, None]
     zy = (yy - pred[..., 1:2, None]) / sig[..., 1:2, None]
-    density = torch.exp(-0.5 * (zx ** 2 + zy ** 2))
-    density = density / (density.sum(dim=(-2, -1), keepdim=True) + 1e-10)
-    log_density = torch.log(density + 1e-10)
+    # Analytic log-density (metrics v2, audit F2): no exp-log floor.
+    logit = -0.5 * (zx ** 2 + zy ** 2)
+    log_density = logit - torch.logsumexp(
+        logit.reshape(*logit.shape[:-2], -1), dim=-1)[..., None, None]
     return compute_soft_target_loss(log_density, targets, grid_range,
                                     grid_size, target_sigma)
 

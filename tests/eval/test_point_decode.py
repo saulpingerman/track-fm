@@ -55,3 +55,35 @@ def test_displacement_error_units():
     p2 = torch.tensor([[0.0, 0.1]])             # lon shrinks by cos(lat0)
     e2 = displacement_error_m(p2, t)
     assert e2.item() < e.item()
+
+
+def test_gaussian_log_density_has_no_floor():
+    """metrics v2 (audit F2): a badly-missed Gaussian baseline must keep
+    losing log-density with distance — the old exp-log floor capped the
+    penalty at ~23 nats, flattering misses."""
+    from trackfm.eval.search import gaussian_grid_log_density
+    pred = torch.zeros(1, 1, 2)
+    sig = torch.full((1, 1, 2), 0.003)
+    ld = gaussian_grid_log_density(pred, sig, grid_range=0.3, grid_size=64)
+    corner = ld[0, 0, 0, 0].item()          # ~140 sigma away
+    assert corner < -1000                    # far below any epsilon floor
+    # still a valid distribution
+    assert abs(ld.exp().sum().item() - 1.0) < 1e-4
+
+
+def test_search_ranks_nearest_node():
+    """metrics v2 (audit F7): truth must map to the NEAREST density node
+    (pitch 2R/(G-1)), not the old edge-tiled floor index."""
+    from trackfm.eval.search import search_ranks
+    G, R = 64, 0.3
+    node = 40
+    x = -R + node * 2 * R / (G - 1)          # exactly node 40
+    ld = torch.full((1, 1, G, G), -20.0)
+    ld[0, 0, node, node] = 5.0
+    ld = torch.log_softmax(ld.reshape(1, 1, -1), -1).reshape(1, 1, G, G)
+    r = search_ranks(ld, torch.tensor([[[x, x]]]), R)
+    assert r.item() == 1
+    # halfway toward node 41 minus epsilon still rounds to node 40
+    x2 = x + 0.49 * 2 * R / (G - 1)
+    r2 = search_ranks(ld, torch.tensor([[[x2, x2]]]), R)
+    assert r2.item() == 1

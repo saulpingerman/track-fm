@@ -32,18 +32,23 @@ def search_ranks(
     footprint_cells: int = 1,
 ) -> torch.Tensor:
     """Rank (1-based) of the footprint containing the truth; -1 if off-grid."""
-    B, H, G, _ = log_density.shape
+    B, H, G0, _ = log_density.shape
     probs = log_density.float().exp()
+    G = G0
     if footprint_cells > 1:
         probs = F.avg_pool2d(
-            probs.reshape(B * H, 1, G, G), footprint_cells).reshape(
-            B, H, G // footprint_cells, G // footprint_cells)
+            probs.reshape(B * H, 1, G0, G0), footprint_cells).reshape(
+            B, H, G0 // footprint_cells, G0 // footprint_cells)
         probs = probs * footprint_cells ** 2      # sum-pool: block probability
-        G = G // footprint_cells
-    cell = 2 * grid_range / G
+        G = G0 // footprint_cells
 
-    # truth -> block index; off-grid -> censored
-    idx = ((targets + grid_range) / cell).floor().long()          # (B, H, 2)
+    # truth -> NEAREST density node, then block. Density values live at
+    # lattice nodes linspace(-R, R, G0) with pitch 2R/(G0-1); the old
+    # floor-index with width 2R/G0 assigned 24.6% of targets (measured,
+    # G=64) to a non-nearest node, biased away from canvas center
+    # (metrics v2, audit F7).
+    node = ((targets + grid_range) / (2 * grid_range / (G0 - 1))).round().long()
+    idx = (node // footprint_cells) if footprint_cells > 1 else node  # (B, H, 2)
     inside = ((targets > -grid_range) & (targets < grid_range)).all(dim=-1)
     idx = idx.clamp(0, G - 1)
 
@@ -116,6 +121,9 @@ def gaussian_grid_log_density(pred: torch.Tensor, sigma: torch.Tensor,
     sig = torch.clamp(sigma, min=1e-4)
     zx = (xx - pred[..., 0:1, None]) / sig[..., 0:1, None]
     zy = (yy - pred[..., 1:2, None]) / sig[..., 1:2, None]
-    d = torch.exp(-0.5 * (zx ** 2 + zy ** 2))
-    d = d / (d.sum(dim=(-2, -1), keepdim=True) + 1e-10)
-    return torch.log(d + 1e-10)
+    # Analytic log-density (metrics v2, audit F2): exp-then-log(+1e-10)
+    # floored bad misses at ~23 nats and created rank-tie plateaus that
+    # flattered badly-missed baselines; log-space has no floor.
+    logit = -0.5 * (zx ** 2 + zy ** 2)
+    return logit - torch.logsumexp(logit.reshape(*logit.shape[:-2], -1),
+                                   dim=-1)[..., None, None]

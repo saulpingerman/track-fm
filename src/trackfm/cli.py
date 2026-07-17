@@ -154,7 +154,7 @@ def finetune(
 def evaluate(
     checkpoint: Path = typer.Option(..., help="Model checkpoint"),
     config: Path = typer.Option(Path("configs/pretrain/xlarge.yaml")),
-    split: str = typer.Option("test"),
+    split: str = typer.Option("val"),  # test retired from selection (audit F1)
     out: Optional[Path] = typer.Option(None, help="Write results JSON here"),
 ):
     """Per-horizon evaluation vs dead-reckoning / last-position baselines."""

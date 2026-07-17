@@ -222,12 +222,20 @@ def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
         col = torch.where(bucket_ok[:, k], ranks[:, k], torch.full_like(ranks[:, k], -1))
         n_avail = bucket_ok[:, k].sum().clamp(min=1).float()
         search[f"val_ceiling_{name}"] = float((col > 0).sum() / n_avail)
-        # fine 1×1 km grid — operational km²@90
+        # fine 1×1 km grid — operational km²@90. Ceiling-aware (metrics
+        # v2, audit F6): censored targets count in the denominator, so a
+        # geometry that clips >10% of a bucket reads UNREACHABLE (metric
+        # omitted) exactly like score_geometry — previously this was the
+        # 0.9-quantile over captured-only, silently flattering clipping
+        # geometries and inconsistent with the harness's same-named metric.
         fine = torch.cat(model._fine_bucket_chunks[name])[:len(bucket_ok)]
         fine_ok = torch.where(bucket_ok[:, k], fine, torch.full_like(fine, -1))
         fine_valid = fine_ok[fine_ok > 0].float()
-        if len(fine_valid):
-            search[f"val_km2_at_capture90_{name}"] = float(fine_valid.quantile(0.9))
+        n_bucket = float(bucket_ok[:, k].sum().clamp(min=1))
+        need = 0.9 * n_bucket
+        if len(fine_valid) >= need > 0:
+            q = need / len(fine_valid)             # quantile WITHIN captured
+            search[f"val_km2_at_capture90_{name}"] = float(fine_valid.quantile(q))
         # fixed-native cell size (0.009375°) — SAME cell as fixed but ALL
         # cone-capturable vessels (~100%). Compares cone's density resolution
         # to fixed's without population-matching.

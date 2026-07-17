@@ -67,9 +67,12 @@ def gaussian_log_density_loss(pred_displacement: torch.Tensor, targets: torch.Te
     px = pred[..., 0:1, None]
     py = pred[..., 1:2, None]
     dist_sq = (xx - px) ** 2 + (yy - py) ** 2
-    density = torch.exp(-dist_sq / (2 * dr_sigma ** 2))
-    density = density / (density.sum(dim=(-2, -1), keepdim=True) + 1e-10)
-    log_density = torch.log(density + 1e-10)
+    # Analytic log-density (metrics v2, audit F2): the previous
+    # exp -> normalize -> log(+1e-10) floored the penalty for bad misses
+    # at ~23 nats, flattering baselines and corrupting sigma tuning.
+    logit = -dist_sq / (2 * dr_sigma ** 2)
+    log_density = logit - torch.logsumexp(
+        logit.reshape(*logit.shape[:-2], -1), dim=-1)[..., None, None]
 
     return compute_soft_target_loss(
         log_density.unsqueeze(0) if log_density.dim() == 3 else log_density,

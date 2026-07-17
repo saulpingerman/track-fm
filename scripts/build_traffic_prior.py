@@ -21,7 +21,8 @@ import time
 import numpy as np
 import polars as pl
 
-TRAIN_END = "2024-09-21"
+import sys
+TRAIN_END = sys.argv[1] if len(sys.argv) > 1 else "2024-09-21"   # v1 split boundary; MUST match the split of the dataset the prior will condition (audit F4)
 LAT0, LAT1, LON0, LON1 = 54.0, 58.5, 7.0, 16.0
 DLAT, DLON = 0.005, 0.01
 NLAT = int(round((LAT1 - LAT0) / DLAT))         # 900

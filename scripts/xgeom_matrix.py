@@ -17,7 +17,7 @@ CELLS = [
     ("cone", "fourier", "scaling_small_cone_50M", "scaling-small-cone-50M"),
     ("cone", "direct", "scaling_small_cone_direct_50M", "scaling-small-cone-direct-50M"),
 ]
-SPLIT = sys.argv[1] if len(sys.argv) > 1 else "test"
+SPLIT = sys.argv[1] if len(sys.argv) > 1 else "val"   # test retired from selection (audit F1)
 
 results = []
 for geom, head, cfg_name, run in CELLS:

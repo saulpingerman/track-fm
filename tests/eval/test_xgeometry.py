@@ -123,13 +123,14 @@ def test_truth_cell_is_argmax_when_density_is_peaked_there():
     """Place a strong peak at a known physical location; the truth cell
     (that location) must get rank 1 whether restricted or not — semantics
     of the restricted fine grid preserve peak-follows-truth."""
-    # peaked density at native cell (10, 40) on a 64×64 canvas [-1,1]²
+    # peaked density at native NODE (10, 40) on a 64×64 canvas [-1,1]².
+    # metrics v2: density values live at lattice nodes linspace(-1,1,64)
+    # (pitch 2/63), not edge-tiled cell centers.
     ld = torch.full((1, 64, 64), -20.0)
     ld[0, 10, 40] = 5.0
     ld = torch.log_softmax(ld.reshape(1, -1), -1).reshape(1, 64, 64)
-    # native cell 10 has canvas y-center = -1 + (10+0.5)/64 * 2 = -0.672
-    # native cell 40 has canvas x-center = -1 + (40+0.5)/64 * 2 = +0.266
-    tgt = torch.tensor([[-0.672, 0.266]])
+    # node 10 canvas y = -1 + 10*2/63 = -0.6825; node 40 x = +0.2698
+    tgt = torch.tensor([[-0.6825, 0.2698]])
     # R=1.0 for canvas. physical target = canvas here.
     r_full, _, _ = ranks_on_fine_grid(ld, tgt, R_deg=1.0, cell_deg=0.02)
     assert r_full.item() == 1                                     # peak == truth

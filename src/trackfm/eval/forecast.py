@@ -32,7 +32,7 @@ DEFAULT_HORIZONS = [1, 50, 100, 200, 400, 800]
 def evaluate_forecasting(
     checkpoint: Path,
     cfg: PretrainConfig,
-    split: str = "test",
+    split: str = "val",  # test retired from selection (audit F1)
     horizons: list[int] | None = None,
     max_batches: int = 200,
 ) -> dict:

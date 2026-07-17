@@ -97,7 +97,11 @@ def ranks_on_fine_grid(log_density: torch.Tensor, targets_canvas: torch.Tensor,
 
     fine = torch.nn.functional.grid_sample(
         log_density.unsqueeze(1).float(), grid.float(),
-        mode="bilinear", padding_mode="border", align_corners=False,
+        # align_corners=True matches the density lattice convention
+        # (values at linspace(-R,R,G) nodes — first/last node ON the
+        # canvas edge). False compressed the field by (G-1)/G and
+        # misregistered up to a native cell near edges (metrics v2, F3).
+        mode="bilinear", padding_mode="border", align_corners=True,
     ).squeeze(1)                                          # (B, N_lat, N_lon)
 
     # inside the RESTRICTED box (targets in [-scan, +scan] canvas units)
@@ -134,6 +138,7 @@ def score_geometry(checkpoint: Path, cfg: PretrainConfig, split: str = "test",
     rank_chunks = {b: [] for b in buckets}
     fine_rank_chunks = {b: [] for b in buckets}          # 1×1 km
     fixcell_rank_chunks = {b: [] for b in buckets}       # fixed-native cell
+    fixgrid_rank_chunks = {b: [] for b in buckets}       # + ±0.3° population
     fine_ncells = {b: 0 for b in buckets}
     for i, batch in enumerate(loader):
         if i >= max_batches:
@@ -170,6 +175,13 @@ def score_geometry(checkpoint: Path, cfg: PretrainConfig, split: str = "test",
             frF, _, _ = ranks_on_fine_grid(ld[:, k], tgt_canvas, R_deg,
                                             cell_deg=FIXED_NATIVE_CELL_DEG)
             fixcell_rank_chunks[b].append(frF[keep].cpu())
+            # (metrics v2, audit F5) fixgrid = same cell AND same vessel
+            # population as a ±0.3° fixed grid — the only column that is
+            # honestly apples-to-apples with fixed-grid p90 numbers.
+            frG, _, _ = ranks_on_fine_grid(ld[:, k], tgt_canvas, R_deg,
+                                            cell_deg=FIXED_NATIVE_CELL_DEG,
+                                            restrict_deg=0.3)
+            fixgrid_rank_chunks[b].append(frG[keep].cpu())
 
     n_cells = m.grid_size * m.grid_size
     out = {"checkpoint": str(checkpoint), "geometry": m.grid_mode,
@@ -215,6 +227,11 @@ def score_geometry(checkpoint: Path, cfg: PretrainConfig, split: str = "test",
             "fixcell_km2_to_capture90": round(k90_fx * fx_cell_km2, 1) if k90_fx else None,
             "fixcell_p90_rank": fx_summ.get("p90_rank"),
             "fixcell_median_rank": fx_summ.get("median_rank"),
+            # (C) fixgrid — same 0.6 km² cell AND ±0.3° population
+            #     (metrics v2): the honest fixed-vs-cone column.
+            "fixgrid_p90_rank": summarize_ranks(
+                torch.cat(fixgrid_rank_chunks[b]) if fixgrid_rank_chunks[b]
+                else torch.zeros(0)).get("p90_rank"),
             # (B) 1×1 km fine grid — operational unit; km² == cell count.
             "km2_at_capture_90": k90_fine,
             "fine_median_rank_km2": fine_summ.get("median_rank"),
