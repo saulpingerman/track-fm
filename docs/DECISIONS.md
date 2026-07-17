@@ -3,6 +3,34 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-17 — C1-TUBE: storm-crossing is real but RARE; speed is the master variable
+
+Paul's critique of C1: a storm crossing the vessel's path mid-window is
+invisible to endpoint snapshots — the field must be sampled where/when the
+vessel would encounter it. Rerun with DR space-time-tube sampling
+(field(DR_pos(f·tau), t0+f·tau), f∈{0,.25,.5,.75,1}), 33k val windows @2h,
+sog-partialed correlations + speed-matched lifts (raw 'worsen' features
+mechanically scale with tube length = sog·tau — half the raw signal was
+that confound).
+
+Results (scripts/c1_tube.py, c1_tube.json):
+- sog alone: R² 0.30 overall / 0.59 hard-decile. Speed is the master
+  variable of DR difficulty.
+- Origin-only fields on top of sog: +0.006 R². Point-C1's null stands.
+- TUBE fields on top of sog: +0.045 R² overall, +0.005 hard-decile.
+  Real overall signal (mostly wave/current gradients along path), ~nothing
+  extra in the bulk hard tail.
+- STORM-CROSSING (wave tube-max exceeds origin by >1m): 3.8x hard-decile
+  lift at matched speed — Paul's scenario is REAL — but only 74/32,823
+  windows (0.2%). A rare-event feature, not a bulk-difficulty feature.
+
+Verdict: dynamic fields enter the architecture as cheap K-slice movie
+crops on the canvas (they pay for themselves on the 0.2% storm windows
+and the overall wave/current gradient signal), but they stay BEHIND
+static geography + traffic priors in priority. The bulk of the hard tail
+is still decisions, and the biggest untested decision-driver is OTHER
+VESSELS (dynamic traffic fields from AIS itself) — neither C1 tested it.
+
 ## 2026-07-17 — AUDIT: the xlarge-cone kill was WRONG (schedule-position artifact)
 
 Full audit of the 07-15..07-16 session (xlarge-cone launch, kill decision,
