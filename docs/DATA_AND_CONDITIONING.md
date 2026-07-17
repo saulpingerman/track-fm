@@ -53,7 +53,7 @@ concatenated static attributes actively hurt until gated (DualSTMA
 | declared destination | aux change-log + `normalize_destination()` (registry match + confidence; junk kept, it's signal) | matched-port embedding + match confidence; unmatched strings via hashed/top-K embedding |
 | declared ETA | aux change-log + `parse_eta()` (year-roll + staleness flags) | time-to-ETA scalar + staleness flag |
 
-This tier is Paul's "classification may not exist at inference" case —
+This tier is the "classification may not exist at inference" case —
 exactly what the null-embedding + dropout contract is for. Experiment
 D1 (first GPU experiment: cheapest, fully own data).
 
@@ -70,7 +70,7 @@ D1 (first GPU experiment: cheapest, fully own data).
 
 Rationale: encode places by WHAT they are, not where they are — behavior
 learned around a feature type pools across all its instances and
-transfers to feature-similar places with little local data (Paul's
+transfers to feature-similar places with little local data (the
 generalization hypothesis; deepSSF + fairway-fusion precedents). The
 egocentric formulation already prevents memorizing absolute position.
 Killer test: **D5 spatial-holdout transfer** (train without Bornholm

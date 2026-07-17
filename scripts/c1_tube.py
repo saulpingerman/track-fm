@@ -1,7 +1,7 @@
 """C1-tube: upgrade of the C1 headroom gate that samples fields over the
 DR SPACE-TIME TUBE instead of a single origin snapshot.
 
-Paul's storm scenario: a front crossing the vessel's path mid-window causes
+The storm scenario: a front crossing the vessel's path mid-window causes
 the deviation, but is invisible in both the t0 snapshot and the T snapshot.
 Point-C1 (c1_headroom.py) regressed difficulty on origin-time point samples
 and found ~0% — this rerun tests whether that null survives when the field

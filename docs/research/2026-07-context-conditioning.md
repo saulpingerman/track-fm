@@ -1,6 +1,6 @@
 # Context conditioning: weather & exogenous spatiotemporal fields
 
-**Status: next-major-project** — Paul's direction after the scale-up
+**Status: next-major-project** — chosen direction after the scale-up
 campaign. Goal: condition the model on weather over the FULL region and
 FULL time span of the track, through the forecast horizon (forecast
 weather at inference is operationally legitimate). Verified literature
@@ -195,7 +195,7 @@ Storage: bbox subsets are GB-scale vs 1.4TB free — not a constraint.
 - D4 Forecast adaptation: evaluate reanalysis-trained conditioning under
   archived real forecasts (paired ECMWF vs ERA5); adapt conditioning
   pathway on paired data before any operational claim.
-- D5 **Spatial-holdout transfer** (Paul's feature-generalization
+- D5 **Spatial-holdout transfer** (the feature-generalization
   hypothesis, 2026-07-13): places should be encoded by WHAT they are
   (distance-to-lane, lane bearing, anchorage/restricted/wind-farm masks,
   depth), not where they are — behavior learned around a feature type
@@ -212,7 +212,7 @@ Storage: bbox subsets are GB-scale vs 1.4TB free — not a constraint.
   deepSSF (raw covariate rasters generalized where curated local
   features overfit), inland-waterway fairway fusion (+19-22%).
 
-Paul's actions: CDS + Copernicus Marine registrations (free, minutes);
+Owner actions: CDS + Copernicus Marine registrations (free, minutes);
 AISFormer full text via PSU library (requested 2026-07-13).
 
 ## Implied layer stack for the context grid

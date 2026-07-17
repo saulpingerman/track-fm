@@ -4,7 +4,7 @@ For each val-range window at wall-clock ~2h horizon, compute the DR-residual
 difficulty (how far constant-velocity extrapolation missed) and sample the
 local wind/current magnitudes at the ORIGIN position/time via the FieldStore.
 Report Pearson correlations, per-decile means, and OLS R^2 -- overall and
-restricted to the hard decile (Paul's real target).
+restricted to the hard decile (the real target).
 
 If fields don't explain measurable variance in the hard tail here, the
 conditioning program's headroom is small and the flagship-vs-conditioning

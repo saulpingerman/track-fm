@@ -38,7 +38,7 @@ def test_concave_powerlaw_holds_fill_ratio():
 
 
 def test_straight_line_vessel_contained_at_all_horizons():
-    """Paul's requirement: a constant-speed straight-line vessel must stay
+    """Containment requirement: a constant-speed straight-line vessel must stay
     inside the box at ANY reasonable horizon. With the production LINEAR
     bound (cone_p=1, v=37kn), displacement v_ship*t <= R(t) for all
     realistic v_ship <= the containment speed, at every horizon — a
@@ -57,7 +57,7 @@ def test_straight_line_vessel_contained_at_all_horizons():
 
 def test_growth_is_per_time_not_per_step():
     """Two vessels at the same STEP horizon but different report cadence
-    must get different windows — Paul's correction: AIS deltas are
+    must get different windows — key correction: AIS deltas are
     irregular, so the reachable set grows with wall-clock time."""
     seq, h = 4, torch.tensor([3])
     fast = torch.zeros(1, 8, 6); fast[..., 5] = 2.0 / 300.0    # 2 s cadence

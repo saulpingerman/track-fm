@@ -1,6 +1,6 @@
 """Score the 2x2 {geometry} x {head} matrix on ONE physical basis.
 
-Containment in km^2-to-capture-90% per time bucket (Paul's metric), with
+Containment in km^2-to-capture-90% per time bucket (the pinned metric), with
 ceilings reported separately so a geometry that clips long-horizon targets
 reads as "unreachable", not as a good number. Long horizons are the point.
 """

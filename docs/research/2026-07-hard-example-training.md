@@ -4,7 +4,7 @@
 flagship run. All claims 3-vote adversarially verified against primary
 sources (9 findings, 1 refuted). Motivation: straight transits dominate
 the 200M-window corpus; maneuvers/port approaches are rare but carry the
-operational value (Paul's framing; measurement via the new
+operational value (project framing; measurement via the new
 difficulty-stratified eval).
 
 ## Verified findings

@@ -203,7 +203,7 @@ def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
     ranks = torch.cat(rank_chunks)
     bucket_ok = torch.cat(valid_chunks)
     search = {}
-    # Slimmed metric set (Paul, 2026-07-14): keep only the metrics that
+    # Slimmed metric set (2026-07-14): keep only the metrics that
     # actually drive the flagship decision. Removed: val_p90rank/medrank
     # (native cell size drifts by geometry — incomparable), val_capture10
     # (same), val_avail (nearly-flat sanity), val_fine_medrank_km2 &
@@ -386,7 +386,7 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                         torch.cuda.empty_cache()
                     ratio = dr_loss / val_loss if val_loss and not math.isnan(val_loss) else float("nan")
                     # dr_loss/dr_ratio computed but not logged — geometry-locked
-                    # (Paul, 2026-07-14). Kept in console for the log line.
+                    # (2026-07-14). Kept in console for the log line.
                     _mlflow_log({"val_loss": val_loss, **search}, step=step)
                     logger.info(f"step {step}: val {val_loss:.4f}, DR-ratio {ratio:.2f}x, "
                                 + ", ".join(f"{k}={v:.3g}" for k, v in search.items()

@@ -40,7 +40,7 @@ Destination+draught are route-determining at long horizons. Recoverable
 via slim per-vessel change-log side table without a full re-clean.
 
 Priority order for Tier-3 conditioning (updated; revised same day per
-Paul's transferability requirement — see below):
+the transferability requirement — see below):
 1. Static geography crops (land/bathy/dist-to-coast/port geometry) +
    traffic-prior raster — unchanged.
 2. DYNAMIC TRAFFIC crops + nearest-neighbor scalars — promoted by this
@@ -48,9 +48,9 @@ Paul's transferability requirement — see below):
 3. Weather movie-crops (K-slice) — real but rare-event.
 4. Type-5 intent (destination/ETA/draught) — DEPRIORITIZED, see below.
 
-## 2026-07-17 — Transferability constraint: no dependence on AIS-luxury posit fields (Paul)
+## 2026-07-17 — Transferability constraint: no dependence on AIS-luxury posit fields
 
-Paul's requirement: the model (and successors trained on other data) must
+Requirement: the model (and successors trained on other data) must
 work on positional data that does NOT carry rich AIS metadata. Don't hand
 the model a feature so powerful (destination especially) that it stops
 working — or stops being honest research — on bare posits.
@@ -60,7 +60,7 @@ Field taxonomy this induces:
   The model's backbone input. Never conditioned away.
 - LOCATION/TIME-DERIVED FIELDS (geography, bathymetry, weather, traffic
   rasters computed from the dataset itself): always obtainable for any
-  data — "fields are fine, I can always get those" (Paul). Full speed
+  data — "fields are fine, those are always obtainable". Full speed
   ahead (priorities 1-3 above). Note traffic crops qualify: they are
   derived from the other posits in the dataset, not from AIS metadata.
 - AIS-LUXURY POSIT FIELDS (destination, ETA, draught, nav status, ship
@@ -76,7 +76,7 @@ falls under the same dropout rule if used at all.
 
 ## 2026-07-17 — C1-TUBE: storm-crossing is real but RARE; speed is the master variable
 
-Paul's critique of C1: a storm crossing the vessel's path mid-window is
+The critique of C1: a storm crossing the vessel's path mid-window is
 invisible to endpoint snapshots — the field must be sampled where/when the
 vessel would encounter it. Rerun with DR space-time-tube sampling
 (field(DR_pos(f·tau), t0+f·tau), f∈{0,.25,.5,.75,1}), 33k val windows @2h,
@@ -92,7 +92,7 @@ Results (scripts/c1_tube.py, c1_tube.json):
   Real overall signal (mostly wave/current gradients along path), ~nothing
   extra in the bulk hard tail.
 - STORM-CROSSING (wave tube-max exceeds origin by >1m): 3.8x hard-decile
-  lift at matched speed — Paul's scenario is REAL — but only 74/32,823
+  lift at matched speed — the storm scenario is REAL — but only 74/32,823
   windows (0.2%). A rare-event feature, not a bulk-difficulty feature.
 
 Verdict: dynamic fields enter the architecture as cheap K-slice movie
@@ -105,7 +105,7 @@ VESSELS (dynamic traffic fields from AIS itself) — neither C1 tested it.
 ## 2026-07-17 — AUDIT: the xlarge-cone kill was WRONG (schedule-position artifact)
 
 Full audit of the 07-15..07-16 session (xlarge-cone launch, kill decision,
-ablation chain), prompted by Paul: the ablations didn't explain WHY xlarge
+ablation chain), prompted by the observation that the ablations didn't explain WHY xlarge
 "failed," which contradicted both the pre-registered research prediction
 and the small-scale result.
 
@@ -189,7 +189,7 @@ num_freqs (18 -> 24?) to sharpen long-horizon lobes on the bigger cone
 canvas. This combines the two verified wins (bigger encoder + better
 geometry) rather than only one.
 
-Alternatives on the table (Paul's call):
+Alternatives on the table (PI decision):
 A. Flagship AS CONFIGURED (fixed +-0.9°/192/F18, xlarge). Cleanest
    continuity with pre-registered plan. Leaves the cone advantage
    unclaimed at the biggest scale.
@@ -199,15 +199,15 @@ B. Flagship as CONE + xlarge (recommended). Combines proven wins.
 C. Skip flagship, pivot to Tier-3 static-geography conditioning at
    medium scale. Highest information gain per compute if C1 signals
    generalize to Tier-3; requires materialization v3 rebuild.
-LOOP STOPS HERE. Flagship launch is Paul's call and never autonomous.
+LOOP STOPS HERE. Flagship launch is a PI decision and never autonomous.
 ## 2026-07-14 — Cone-grid study at small scale (pre-registered)
 
-Paul asked for a direct cone-vs-fixed comparison at the small slot (the
+Requested: a direct cone-vs-fixed comparison at the small slot (the
 comparison workhorse). Setup: scaling-small-cone-50M — identical to
 scaling-small-50M except grid_mode=cone: origin-centred canvas with
 R(t) = 0.05 + 1.5e-4 deg/s * ELAPSED SECONDS (light-cone reachable-set
 bound: maneuvers are contained by construction; only sustained speed
-outliers ~>32 kn escape). AMENDED same day per Paul: growth is per TIME
+outliers ~>32 kn escape). AMENDED same day: growth is per TIME
 DELTA, never per step — AIS report intervals are irregular, so a
 per-step cone would hand a 2s-cadence vessel a 10x smaller window than
 a 20s-cadence vessel at the same step (the identical bug class as
@@ -292,7 +292,7 @@ which samples. Actionable: revisit batch size for the scaling runs (the
 recover a few % everywhere). Data-axis claims must stay scale-qualified
 and modest.
 
-## 2026-07-14 — Head x Geometry matrix, judged on containment km^2 (Paul: h1 was silly)
+## 2026-07-14 — Head x Geometry matrix, judged on containment km^2 (h1 retired)
 
 Old head ablation judged h1 (a ~2s forecast) on raw CE — wrong question,
 wrong metric. Replaced by a 2x2 {geometry: fixed, cone} x {head: fourier,
@@ -320,7 +320,7 @@ Success = cone reaches 90% at 1h/2h where fixed can't, without inflating
 km^2@90 at short horizons; the direct head is the control for whether the
 continuous Fourier density costs long-horizon sharpness.
 
-## 2026-07-14 — Rotation + anisotropy = the cone's phase 2 (Paul's Q on translation/rotation)
+## 2026-07-14 — Rotation + anisotropy = the cone's phase 2 (translation/rotation question)
 
 Motion forecasting canonicalizes per-query by translation AND rotation
 (agent-centric, +12-24%). TrackFM already has translation (egocentric
@@ -337,7 +337,7 @@ efficient — the reachable set of a moving vessel IS a thin course-aligned
 ellipse, not a disc. Caveat: COG is undefined at SOG~0 (stopped) — rotate
 only above a speed threshold, fall back to axis-aligned; stopped vessels
 have tiny boxes anyway. COG must stay a conditioning input (it is) so
-absolute direction is not hidden. CORRECTION (Paul, 2026-07-14): rotation is NOT a standalone phase 2 —
+absolute direction is not hidden. CORRECTION (2026-07-14): rotation is NOT a standalone phase 2 —
 it BREAKS geography. A course-aligned frame makes "where is land / where
 do lanes run" heading-dependent: the same coast maps to a different
 canvas location per vessel, so the model must learn geography in absolute
@@ -354,9 +354,9 @@ DECISION: cone stays SCALE-ONLY. Rotation+anisotropy is GATED on
 co-rotated Tier-3 context grids (bathymetry/lanes/land-mask cropped and
 rotated with the output) — revisit only in that package, never before.
 
-## 2026-07-14 — Cone R(t): LINEAR containment bound (Paul's requirement overrides resolution fit)
+## 2026-07-14 — Cone R(t): LINEAR containment bound (containment requirement overrides resolution fit)
 
-CORRECTION to the concave recalibration earlier today. Paul: "capture ALL
+CORRECTION to the concave recalibration earlier today. Requirement: "capture ALL
 movement as a forecast at any reasonable horizon." A constant-speed
 straight-line vessel has displacement v_ship*t (LINEAR); a concave box
 (p<1) eventually falls beneath any straight line, so the fast straight-
@@ -381,7 +381,7 @@ retained as a generalization but defaults to 1.0.
 ## 2026-07-14 — Cone R(t) recalibrated CONCAVE from measured envelope + review verdict
 
 Verified mini-review (docs/research/2026-07-scale-normalized-outputs.md,
-35 works) on scale-normalized outputs answered Paul's "changing-scale map
+35 works) on scale-normalized outputs answered the "changing-scale map
 would confuse the model" worry: that failure (over-stationarization,
 Non-stationary Transformers 2022 [CONFIRMED]) occurs ONLY when scale is
 HIDDEN from the network; TrackFM feeds horizon t to the conditioning MLP,
@@ -403,7 +403,7 @@ R(t) = 0.015 + 1.55e-3 * t^0.67 (p99 * 1.25 margin), holding fill ratio
 recovers the linear bound. Legitimate pre-registration (calibration data,
 not model-outcome data). Full suite 86 green.
 
-OBJECTIVE CLARIFIED (Paul, 2026-07-14): the cone does NOT need to BEAT
+OBJECTIVE CLARIFIED (2026-07-14): the cone does NOT need to BEAT
 the fixed grid. Its job is to ENABLE very-long-horizon forecasts (6-8h)
 WITHOUT hurting quality at the horizons we already do. The alternative
 way to reach 6-8h — one FIXED box sized for 8h (~±2.8deg) used for every
@@ -437,7 +437,7 @@ weighting, beta-NLL beta~0.5.
 
 Family (±0.3/64) and flagship (±0.9/192) share CELL PITCH (0.009375°),
 so rank/containment metrics compare in physical units. Raw CE does NOT
-compare: bigger-grid normalization, and — Paul's catch — the CLAMP BIAS:
+compare: bigger-grid normalization, and — a caught confound — the CLAMP BIAS:
 small-grid training clamps ~25% of long-horizon targets to the boundary,
 teaching family models an "edge exit bucket". Scoring a shared window
 with clamped targets rewards that artifact on exactly the samples the
@@ -485,7 +485,7 @@ floor ~1.25 on kinematics-only inputs.** The remaining headroom argument
 shifts to the INFORMATION axis (context conditioning — C2 already shows
 the physical coupling is real).
 
-**2x2 data-vs-capacity — CONTAMINATION CAUGHT (Paul), one cell retracted:**
+**2x2 data-vs-capacity — CONTAMINATION CAUGHT, one cell retracted:**
 The headline cross-eval cell "small@69d on 26mo test = 1.184, beats
 1.282" is INVALID: golden69 TRAIN = 2025-01-01..02-14 sits inside v1
 TEST = 2024-12-09..2025-02-26 — the model was scored partly on days it
@@ -514,7 +514,7 @@ At full corpus density (1.46M dwells vs the 165k it was tuned on), DBSCAN
 eps=3.0 CHAINS: one 201k-dwell cluster spanned the whole Oresund and
 swallowed Copenhagen; Fredericia merged into Middelfart; Ronne into a
 west-Bornholm blob. The binned-DBSCAN memory fix was verified faithful —
-this is pure density-dependent chaining. Selection criterion (Paul's
+this is pure density-dependent chaining. Selection criterion (the
 cross-referencing methodology turned into a validation set): eps must
 recover the 22 independently-verified major commercial ports. Sweep:
 0.75 km -> 22/22 recovered (970 clusters, 456 ports); 1.0 -> 21/22;
@@ -525,9 +525,9 @@ parameter — revalidate against the known-port set if the dwell corpus
 changes materially. v2 table: 970 clusters = 456 ports / 514 anchorages;
 Copenhagen = "Lynettehavnen" (nearest registry basin), 82,317 dwells.
 
-## 2026-07-13 — FLOPs accounting for the scaling ladder (Paul's challenge)
+## 2026-07-13 — FLOPs accounting for the scaling ladder (the FLOPs challenge)
 
-Paul asked whether medium's win over small is just MORE FLOPS. Analytic
+Challenge: is medium's win over small is just MORE FLOPS. Analytic
 accounting (training/flops.py, paper geometry): the Fourier head + loss
 dominate — 96% of small's per-sample FLOPs, 82% of medium's — so 5.2x
 params cost only **1.24x training FLOPs** (854 vs 1062 PF @50M samples).
@@ -542,9 +542,9 @@ FLOPs confound is real, all same-samples comparisons must be redone
 compute-matched. Report scaling BOTH ways (vs params at fixed samples,
 vs total FLOPs) in the paper.
 
-## 2026-07-12 — Flagship GATED on scaling evidence (Paul's call)
+## 2026-07-12 — Flagship GATED on scaling evidence (PI decision)
 
-Paul predicts small@26mo ~= medium@26mo — i.e. capacity is NOT the binding
+Prediction: small@26mo ~= medium@26mo — i.e. capacity is NOT the binding
 constraint at 50M samples, and a week of XLarge compute would buy nothing.
 The campaign's auto-launch of the flagship was therefore REMOVED
 (campaign.sh killed after medium started; replaced by campaign_gated.sh).
@@ -564,7 +564,7 @@ scale-up compute shifts to feature/context experiments at Medium.
 Related doctrine (flagship exclusivity) unchanged: whenever a flagship
 DOES run, it runs solo.
 
-## 2026-07-12 — Data-vs-capacity at the small end (Paul's challenge)
+## 2026-07-12 — Data-vs-capacity at the small end (the FLOPs challenge)
 
 Claim "data volume is doing enormous work" from small@26mo ~= golden-
 medium@69d was CONFOUNDED (varied model and data together). Decisive
@@ -575,7 +575,7 @@ medium@26mo vs golden-medium@69d pair this gives a 2x2 mini scaling grid
 {small,medium} x {69d,26mo}.
 
 Outcome interpretation:
-- small@69d ~= small@26mo -> Paul right: Small saturates; capacity binds
+- small@69d ~= small@26mo -> prediction right: Small saturates; capacity binds
   at the small end; the 26-month corpus pays only at scale (watch the
   medium/large/xlarge points for where diversity starts mattering).
   Data-scaling claims must then be made per-scale, never pooled.
@@ -587,7 +587,7 @@ Outcome interpretation:
 
 ## 2026-07-12 — Saturation stop v2: median-block halves (noise-robust)
 
-Iterated twice under Paul's challenges: (1) a rate-floor stop kills
+Iterated twice under review challenges: (1) a rate-floor stop kills
 healthy power-law runs (relative gains decay below any floor); (2) a
 window-local slope projection has SNR < 1 under realistic +-1% val noise
 (measured 26 consecutive false positives). Final criterion: compare
@@ -598,7 +598,7 @@ healthy power laws show ~1.5% half-over-half. Seeded sims: 10/10 noisy
 power laws survive full budget, 10/10 flat runs stop within ~24h of
 eligibility. Doctrine: loss selects, medians thrift, ranking monitors.
 
-## 2026-07-12 — Campaign plan: hybrid geometries (Paul's pick)
+## 2026-07-12 — Campaign plan: hybrid geometries (chosen plan)
 
 Measured at ±0.9/192/F18: head+loss dominates at EVERY scale (~300-400
 samples/s, 41% MFU) -> single-geometry campaign = ~12 GPU-days. Chosen

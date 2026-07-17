@@ -7,7 +7,7 @@ cell at 2h is physically ~17x a fixed cell, and the fixed grid clamps
 targets its window can't reach. This scorer reports what is comparable:
 
   * containment in PHYSICAL km^2 to capture 90% of vessels, per time
-    bucket (15m/30m/1h/2h) — Paul's search-effort metric in real units;
+    bucket (15m/30m/1h/2h) — the pinned search-effort metric in real units;
   * the ceiling (on-canvas fraction) per bucket, reported separately —
     a geometry that clips 25% of 2h targets simply CANNOT reach 90%, and
     that shows up here as "unreachable", not as a silently-good number.
