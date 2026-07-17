@@ -50,11 +50,14 @@ for i, p in enumerate(days):
     sog = df["sog"].to_numpy(); cog = np.radians(df["cog"].to_numpy())
     iy = ((lat - LAT0) / DLAT).astype(np.int64)
     ix = ((lon - LON0) / DLON).astype(np.int64)
+    # AIS cog/sog can be NaN (course unavailable) — one NaN posit poisons
+    # its cell's flow sums permanently. Keep such posits for counts but
+    # exclude them from the flow accumulation below.
     ok = (iy >= 0) & (iy < NLAT) & (ix >= 0) & (ix < NLON)
     iy, ix, sog, cog = iy[ok], ix[ok], sog[ok], cog[ok]
     flat = iy * NLON + ix
     np.add.at(count_all.ravel(), flat, 1)
-    mov = sog >= 2.0
+    mov = (sog >= 2.0) & np.isfinite(sog) & np.isfinite(cog)
     fm = flat[mov]
     np.add.at(count_mov.ravel(), fm, 1)
     np.add.at(sum_u.ravel(), fm, (sog[mov] * np.sin(cog[mov])))

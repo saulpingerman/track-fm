@@ -58,7 +58,11 @@ class StaticContext:
                       self._regrid(tp["flow_u"] / 30.0, tp, lat, lon),
                       self._regrid(tp["flow_v"] / 30.0, tp, lat, lon)]
             self.channel_names += ["traffic", "flow_u", "flow_v"]
-        self.stack = torch.from_numpy(np.stack(chans).astype(np.float32))
+        # Defensive: a single NaN cell in any raster silently poisons every
+        # crop that touches it (bilinear spreads NaN) and the CNN output.
+        stack = np.nan_to_num(np.stack(chans).astype(np.float32),
+                              nan=0.0, posinf=0.0, neginf=0.0)
+        self.stack = torch.from_numpy(stack)
         self.lat0, self.lat1 = float(lat[0]), float(lat[-1])
         self.lon0, self.lon1 = float(lon[0]), float(lon[-1])
 

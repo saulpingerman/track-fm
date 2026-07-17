@@ -106,3 +106,14 @@ def test_real_static_stack_loads():
     land = crops[0, 0]
     assert 0.05 < land.mean().item() < 0.95    # mixed land/water
     assert torch.isfinite(crops).all()
+
+
+def test_real_traffic_stack_finite():
+    """geo_traffic stack must be NaN-free even if a raster file carries
+    NaN cells (AIS cog can be NaN; load-time nan_to_num is the guard)."""
+    import pathlib
+    d = pathlib.Path.home() / "data/trackfm/context_static"
+    if not (d / "traffic_prior.npz").exists():
+        pytest.skip("traffic_prior.npz not built")
+    ctx = StaticContext(with_traffic=True)
+    assert torch.isfinite(ctx.stack).all()
