@@ -3,7 +3,57 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
-## 2026-07-15 — MATRIX RESULT + flagship decision package on your desk
+## 2026-07-17 — AUDIT: the xlarge-cone kill was WRONG (schedule-position artifact)
+
+Full audit of the 07-15..07-16 session (xlarge-cone launch, kill decision,
+ablation chain), prompted by Paul: the ablations didn't explain WHY xlarge
+"failed," which contradicted both the pre-registered research prediction
+and the small-scale result.
+
+**Finding: xlarge-cone never failed. It was killed at 14.5M samples (29%
+of the 50M budget every comparison run got) with lr still at 2.96e-4 — 99%
+of peak — because max_epochs=1 stretched its cosine over a full 189M-sample
+epoch (bs=128 placeholder was never budget-matched). Every run it was
+compared against had trained on 50M samples with cosine fully annealed
+to 0.**
+
+At MATCHED samples (~14.5M), on val_fixgrid_p90rank_2h (0.6 km² cells,
+±0.3° population):
+
+| samples | small-cone | medium-cone | xlarge-cone |
+|---|---|---|---|
+| ~14.5M | 153 | 113 | **96** — best cone ever, un-annealed, still falling |
+| 50M + anneal | 118 | 86 | (killed) |
+
+The "saturation" read was mid-cosine noise; the "15m regression 6→10" was
+1 km²-cell quantization + high-LR fluctuation (fixgrid 15m was stable 7-8).
+The resampling-bias hypothesis was tested directly (bilinear vs area-avg
+on the xlarge ckpt): no bias, metric is sound. 95/95 tests pass. The
+research doc's prediction (cone matches/beats at long horizons, gap grows
+with t) was tracking correctly when the run was killed.
+
+**Ablation chain results (all 50M, annealed, G=64/F=12 unless noted) —
+still valid, they answer the confounder questions:**
+- F18/F24 ≈ F12 (2h: 114/114 vs 118): num_freqs exonerated.
+- medium-cone (18.3M): 86@2h — cone DOES scale with encoder.
+- small-cone-mlp (head MLP 128): val_loss 1.044 (beats 18.3M medium's
+  1.089!), 15m fixgrid 7→5; long horizons unchanged. Head mixing is real
+  but short-horizon-only at this scale.
+- direct-mlp: still behind fourier-mlp. Direct stays retired.
+- G128: OOM'd (bs=1638 kept at G=128 — config error), G confound untested.
+
+**Lessons (append to metrics doctrine):**
+1. NEVER compare runs at different points of their LR schedule; anneal
+   state dominates val metrics.
+2. Sample budget must be part of the run name / comparison key.
+3. A "flat" val curve mid-cosine at constant LR is not saturation.
+
+**Decision: relaunch xlarge-cone budget-matched (50M samples, cosine
+annealed over exactly that), at G=64/F=12 to stay on the series' axes —
+the killed run's G=192/F=18 was an unablated double-change; at G=64 the
+head is ~9x cheaper and bs can rise to ~512-1024, cutting wall time from
+~12 days to well under a day. Optionally the same at fixed geometry for
+the 117M fixed point.**
 
 2x2 {geometry: fixed, cone} x {head: fourier, direct} at small/26mo/50M/F12
 scored on the cross-geometry harness (1x1 km fine grid, k@90-of-all with
