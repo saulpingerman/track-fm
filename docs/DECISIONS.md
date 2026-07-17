@@ -3,6 +3,40 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-17 — XLARGE-CONE@50M RESULT: cone capacity saturates at ~18M under the 50M-sample budget
+
+The budget-matched rerun completed cleanly (78,125 steps, cosine fully
+annealed, validation OOM fixed by the no_grad patch). Trainer-metric
+comparison (all cone runs pre-v2 metrics — internally consistent;
+uniform v2 rescoring runs when the chain drains):
+
+| model | params | fixgrid p90 15m/30m/1h/2h | ceil@2h | best val_loss |
+|---|---|---|---|---|
+| small-cone | 4.5M | 7/19/59/118 | 1.00 | 1.262 |
+| medium-cone | 18.3M | 7/15/41/86 | 1.00 | 1.089 |
+| xlarge-cone | 117M | 7/14/39/82 | 1.00 | 1.077 |
+| large-fixed | 18.3M | 5/14/38/64 | 0.81 | n/c |
+
+Findings:
+1. Cone capacity scaling DECELERATES hard at this data budget: -27%
+   (2h) for 4.5->18.3M, then only -5% for 18.3->117M. 6.4x params
+   bought 5%. The 50M-sample budget is the binding constraint at 117M
+   (data-limited regime), consistent with motion-model scaling laws
+   (N_opt ~ C^0.63). The kill-was-wrong audit stands (the run was
+   healthy and improving), but the fair result shows the extra capacity
+   pays little AT 50M SAMPLES.
+2. On the shared +-0.3 deg population, large-fixed still beats
+   xlarge-cone at 2h (64 vs 82) with 6.4x fewer params — fixed remains
+   more parameter-efficient inside its box; cone remains the only
+   full-coverage geometry (ceiling 1.00 vs 0.81).
+3. Flagship implication: full-26mo (~4x data) is exactly the move that
+   should reactivate capacity scaling at 117M. The 50M-budget curve
+   cannot justify >18M params; the full-data run can.
+4. Queue decision: medium-cone-mlp@50M appended (NOT xlarge-cone-mlp) —
+   the MLP-head effect is cleanly measurable at 18M where data does not
+   bind, directly comparable to medium-cone's 86; at 117M it would be
+   confounded by data starvation. One run, ~6h, pre-authorized budget.
+
 ## 2026-07-17 — Session infrastructure consolidation (metrics v2 era)
 
 Everything below landed in one overnight autonomous session and defines
