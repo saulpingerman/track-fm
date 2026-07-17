@@ -5,7 +5,9 @@ checkpoint_dir: ~/data/trackfm/checkpoints
 # annealed over exactly that (max_steps = 50e6/768). Replaces the killed
 # xlarge-cone-flagship (G=192/F=18, bs=128, cosine stretched over a full
 # epoch — uninterpretable against the 50M-annealed series; see DECISIONS
-# 2026-07-17). bs=768 = max that fits at 83.7GB peak (probed).
+# 2026-07-17). bs=640: bs=768 trained at 83.7GB peak but OOMed at the
+# first 30-min validation (train allocator cache + val forwards > 96GB);
+# 640 leaves ~14GB val headroom. 640 x 78125 = 50M exactly.
 model:
   d_model: 768
   nhead: 16
@@ -30,7 +32,7 @@ normalization:
 train:
   learning_rate: 0.0003
   weight_decay: 1.0e-05
-  batch_size: 768
+  batch_size: 640
   max_horizon: 800
   num_horizon_samples: 4
   warmup_steps: 500
@@ -43,7 +45,7 @@ train:
   early_stop_patience: 10
   num_workers: 8
   seed: 17
-  max_steps: 65104
+  max_steps: 78125
 mlflow:
   tracking_uri: http://127.0.0.1:5000
   experiment: trackfm/scaling
