@@ -58,8 +58,12 @@ class DirectGridHead(nn.Module):
         self.grid_range = grid_range
         self.logits = _projector(d_model, grid_size * grid_size, mlp_hidden)
 
-    def forward(self, z: torch.Tensor) -> torch.Tensor:
-        log_density = F.log_softmax(self.logits(z), dim=-1)
+    def forward(self, z: torch.Tensor,
+                bias: torch.Tensor | None = None) -> torch.Tensor:
+        logits = self.logits(z)
+        if bias is not None:
+            logits = logits + bias.reshape(z.shape[0], -1)
+        log_density = F.log_softmax(logits, dim=-1)
         return log_density.view(z.shape[0], self.grid_size, self.grid_size)
 
 
@@ -98,7 +102,8 @@ class FourierHead2D(nn.Module):
         self.register_buffer('cos_basis', torch.cos(phase).squeeze(0))
         self.register_buffer('sin_basis', torch.sin(phase).squeeze(0))
 
-    def forward(self, z: torch.Tensor) -> torch.Tensor:
+    def forward(self, z: torch.Tensor,
+                bias: torch.Tensor | None = None) -> torch.Tensor:
         batch_size = z.shape[0]
         coeffs = self.coeff_predictor(z)
 
@@ -107,6 +112,10 @@ class FourierHead2D(nn.Module):
         sin_coeffs = coeffs[:, num_freq_pairs:]
 
         logits = cos_coeffs @ self.cos_basis.T + sin_coeffs @ self.sin_basis.T
+        # Context bias enters PRE-softmax, in cell space — it can carve
+        # hard edges (coastlines) the band-limited basis cannot express.
+        if bias is not None:
+            logits = logits + bias.reshape(batch_size, -1)
         log_density = F.log_softmax(logits, dim=-1)
 
         return log_density.view(batch_size, self.grid_size, self.grid_size)

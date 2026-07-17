@@ -85,6 +85,15 @@ class ModelConfig(BaseModel):
     cone_r0: float = 0.02
     cone_v: float = 0.000171
     cone_p: float = 1.0
+    # Static-context conditioning (canvas-registered additive logit bias
+    # from a fully-convolutional field over geography rasters — see
+    # trackfm.context.crops.GlobalContextBias). 'geo' = land/depth/coast
+    # distance; 'geo_traffic' adds the train-period traffic prior + flow.
+    # Zero-init: 'none' and a fresh conditioned model produce IDENTICAL
+    # outputs at step 0.
+    context_mode: Literal["none", "geo", "geo_traffic"] = "none"
+    context_hidden: int = 16
+    context_static_dir: str = "~/data/trackfm/context_static"
 
 
 class NormalizationConfig(BaseModel):

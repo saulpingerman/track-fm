@@ -105,6 +105,74 @@ class StaticContext:
                              padding_mode="border", align_corners=True)
 
 
+class GlobalContextBias(nn.Module):
+    """Fully-convolutional context bias, computed ONCE on the global raster.
+
+    Causal training scores B x num_pairs canvases per step (pair origins
+    at every sequence position, per-pair R for cone) — cropping raster
+    stacks per pair and running a CNN on each is computationally
+    impossible. But the CNN is fully convolutional, so it COMMUTES with
+    cropping: run it once over the global raster to get a global bias
+    FIELD (1, H, W), then grid_sample per-pair crops of that field.
+    ~1000x cheaper, same function class.
+
+    The final 1x1 conv is zero-init: at step 0 the bias field is
+    identically zero and the conditioned model equals its baseline.
+
+    The raster is a non-persistent buffer (reloaded from static_dir at
+    init) so checkpoints stay small; the CNN weights live in state_dict.
+    """
+
+    def __init__(self, static_dir: str | Path = STATIC_DIR,
+                 with_traffic: bool = False, hidden: int = 16):
+        super().__init__()
+        ctx = StaticContext(static_dir, with_traffic=with_traffic)
+        self.register_buffer("raster", ctx.stack.unsqueeze(0),
+                             persistent=False)                 # (1, C, H, W)
+        self.lat0, self.lat1 = ctx.lat0, ctx.lat1
+        self.lon0, self.lon1 = ctx.lon0, ctx.lon1
+        self.channel_names = ctx.channel_names
+        c = ctx.num_channels
+        self.cnn = nn.Sequential(
+            nn.Conv2d(c, hidden, 3, padding=1), nn.GELU(),
+            nn.Conv2d(hidden, hidden, 3, padding=1), nn.GELU(),
+            nn.Conv2d(hidden, 1, 1),
+        )
+        nn.init.zeros_(self.cnn[-1].weight)
+        nn.init.zeros_(self.cnn[-1].bias)
+
+    def field(self) -> torch.Tensor:
+        """Global bias field (1, 1, H, W). Cheap; recompute per forward."""
+        return self.cnn(self.raster)
+
+    def crop_bias(self, field: torch.Tensor, origin_lat: torch.Tensor,
+                  origin_lon: torch.Tensor, R_deg: torch.Tensor, G: int,
+                  chunk: int = 65536) -> torch.Tensor:
+        """Per-pair canvas crops of the bias field.
+
+        origin_lat/lon, R_deg: (N,) flat over all pairs. Returns (N, G, G)
+        with dim -2 = lat offset ascending (density convention). Chunked
+        to cap peak memory at chunk*G*G.
+        """
+        N = origin_lat.shape[0]
+        device = field.device
+        off = torch.linspace(-1.0, 1.0, G, device=device)
+        out = torch.empty(N, G, G, device=device, dtype=field.dtype)
+        for s in range(0, N, chunk):
+            e = min(s + chunk, N)
+            lat_c = origin_lat[s:e].view(-1, 1) + R_deg[s:e].view(-1, 1) * off
+            lon_c = origin_lon[s:e].view(-1, 1) + R_deg[s:e].view(-1, 1) * off
+            y = (lat_c - self.lat0) / (self.lat1 - self.lat0) * 2 - 1
+            x = (lon_c - self.lon0) / (self.lon1 - self.lon0) * 2 - 1
+            n = e - s
+            grid = torch.stack([x.view(n, 1, G).expand(n, G, G),
+                                y.view(n, G, 1).expand(n, G, G)], dim=-1)
+            out[s:e] = F.grid_sample(field.expand(n, -1, -1, -1), grid,
+                                     mode="bilinear", padding_mode="border",
+                                     align_corners=True).squeeze(1)
+        return out
+
+
 class ContextBias(nn.Module):
     """CNN over canvas crops -> per-cell logit bias + pooled FiLM vector.
 

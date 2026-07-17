@@ -94,6 +94,18 @@ class CausalAISModel(nn.Module):
             mlp_hidden=model.head_mlp_hidden,
         )
 
+        # Static-context conditioning (optional): global bias field over
+        # geography rasters, cropped per pair onto the output canvas and
+        # added to head logits. Zero-init -> exact baseline at step 0.
+        self.context_bias = None
+        if model.context_mode != "none":
+            from trackfm.context.crops import GlobalContextBias
+            self.context_bias = GlobalContextBias(
+                static_dir=model.context_static_dir,
+                with_traffic=model.context_mode == "geo_traffic",
+                hidden=model.context_hidden,
+            )
+
         # Causal mask cache
         self._causal_masks = {}
 
@@ -120,6 +132,27 @@ class CausalAISModel(nn.Module):
         x = self.pos_encoder(x)
         mask = self._get_causal_mask(input_seq.shape[1], input_seq.device)
         return self.transformer(x, mask=mask)
+
+    def _pair_bias(self, origins: torch.Tensor,
+                   elapsed_s: torch.Tensor) -> Optional[torch.Tensor]:
+        """Per-pair context logit bias, or None when unconditioned.
+
+        origins: (B, P, 2) absolute [lat, lon] degrees of each pair's
+        source position. elapsed_s: (B, P) seconds to each pair's target
+        (defines the cone canvas half-range; ignored for fixed).
+        Returns (B*P, G, G) aligned with head logits.
+        """
+        if self.context_bias is None:
+            return None
+        m = self.model_cfg
+        if m.grid_mode == "cone":
+            R = m.cone_r0 + m.cone_v * elapsed_s.clamp(min=0.0) ** m.cone_p
+        else:
+            R = torch.full_like(elapsed_s, m.grid_range)
+        field = self.context_bias.field()
+        return self.context_bias.crop_bias(
+            field, origins[..., 0].reshape(-1), origins[..., 1].reshape(-1),
+            R.reshape(-1), m.grid_size)
 
     # ------------------------------------------------------------- training
     def forward_train(
@@ -178,6 +211,7 @@ class CausalAISModel(nn.Module):
             all_targets = []
             future_mask_list = []
 
+            all_origins = []
             for h in horizon_indices:
                 h_val = h.item()
 
@@ -191,6 +225,7 @@ class CausalAISModel(nn.Module):
                 all_embeddings.append(embeddings)
                 all_cum_dt.append(cum_dt_h)
                 all_targets.append(tgt_rel)
+                all_origins.append(positions)
 
                 if h_val >= seq_len:
                     future_mask_list.extend([True] * seq_len)
@@ -213,7 +248,8 @@ class CausalAISModel(nn.Module):
             conditioned = self.horizon_proj(combined)
 
             cond_flat = conditioned.view(batch_size * num_pairs, -1)
-            log_dens_flat = self.fourier_head(cond_flat)
+            bias = self._pair_bias(torch.cat(all_origins, dim=1), all_cum_dt)
+            log_dens_flat = self.fourier_head(cond_flat, bias=bias)
             log_densities = log_dens_flat.view(batch_size, num_pairs, grid_size, grid_size)
 
             return log_densities, all_targets, horizon_indices, future_mask
@@ -247,7 +283,9 @@ class CausalAISModel(nn.Module):
             conditioned = self.horizon_proj(combined)
 
             cond_flat = conditioned.view(batch_size * num_samples, -1)
-            log_dens_flat = self.fourier_head(cond_flat)
+            origins = src_pos.unsqueeze(1).expand(-1, num_samples, -1)
+            bias = self._pair_bias(origins, cum_times)
+            log_dens_flat = self.fourier_head(cond_flat, bias=bias)
             log_densities = log_dens_flat.view(batch_size, num_samples, grid_size, grid_size)
 
             future_mask = torch.ones(num_samples, dtype=torch.bool, device=device)
@@ -285,7 +323,9 @@ class CausalAISModel(nn.Module):
         conditioned = self.horizon_proj(torch.cat([last_exp, time_enc], dim=-1))
         cond_flat = conditioned.reshape(-1, self.d_model)
         gs = self.model_cfg.grid_size
-        log_densities = self.fourier_head(cond_flat).view(
+        origins = src_pos.unsqueeze(1).expand(-1, num_samples, -1)
+        bias = self._pair_bias(origins, cum_time)
+        log_densities = self.fourier_head(cond_flat, bias=bias).view(
             features.shape[0], num_samples, gs, gs)
         return log_densities, targets
 
