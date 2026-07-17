@@ -374,8 +374,16 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
 
                 if time.time() - last_val_time > t.val_interval_minutes * 60 \
                         or step >= max_steps:
+                    # At xlarge scale the training allocator cache sits near
+                    # the VRAM ceiling; validation's differently-shaped
+                    # forwards then OOM even though the cache is mostly free
+                    # blocks. Release it — costs one re-warm per val cycle.
+                    if device.type == "cuda":
+                        torch.cuda.empty_cache()
                     val_loss, dr_loss, search = validate(model, val_loader, cfg,
                                                          device, autocast_dtype)
+                    if device.type == "cuda":
+                        torch.cuda.empty_cache()
                     ratio = dr_loss / val_loss if val_loss and not math.isnan(val_loss) else float("nan")
                     # dr_loss/dr_ratio computed but not logged — geometry-locked
                     # (Paul, 2026-07-14). Kept in console for the log line.
