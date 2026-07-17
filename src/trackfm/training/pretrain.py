@@ -323,6 +323,15 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                                   "n_params_h": f"{n_params/1e6:.1f}M",
                                   "gflops_per_sample": f"{flops_per_sample/1e9:.1f}"})
     ckpt_dir = cfg.checkpoint_dir / (cfg.mlflow.run_name or run.info.run_id)
+    # Rerun collision guard (audit F10): a relaunch under the same
+    # run_name would silently mix old and new best.pt/last.pt (fresh
+    # in-memory best_val vs stale on-disk best). Archive leftovers so
+    # every run starts with an empty checkpoint dir.
+    if ckpt_dir.exists() and any(ckpt_dir.glob("*.pt")):
+        stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+        archived = ckpt_dir.with_name(f"{ckpt_dir.name}-stale-{stamp}")
+        ckpt_dir.rename(archived)
+        logger.warning(f"checkpoint dir had leftovers; archived to {archived}")
     ckpt_dir.mkdir(parents=True, exist_ok=True)
 
 

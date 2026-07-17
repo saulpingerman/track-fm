@@ -3,6 +3,40 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-17 — Session infrastructure consolidation (metrics v2 era)
+
+Everything below landed in one overnight autonomous session and defines
+the current evaluation regime:
+
+1. **Metrics v2** (audit F1-F7 fixes): analytic baseline log-densities,
+   node-lattice truth indexing, align_corners consistency, ceiling-aware
+   km2@90, fixgrid population matching, test split retired from
+   selection. RULE: pre-v2 and v2 numbers never share a table;
+   scripts/rescore_v2.py re-scores every checkpoint on val in one
+   command (run it whenever the chain drains).
+2. **Split-conformal HDR calibration** (eval/conformal.py): calibrated
+   area@90 with coverage guarantees; a standing eval column from now on
+   (architecture review's highest-leverage upgrade).
+3. **DR null gate** (scripts/dr_null_gate.py): fixgrid bars
+   26/166/1545/UNREACHABLE at 15m/30m/1h/2h. Trained small-cone
+   (~8/18/65/107 under v2 smoke) clears them 3-24x at every horizon —
+   the learned model earns its compute even at 15m, refuting the
+   constant-velocity-saturation risk.
+4. **Aliasing finding + queued sigma ablation** (see entry below);
+   sig10/sig05 + bs1024 control queued behind the conditioning runs.
+5. **Audit outcomes** (docs/audit/2026-07-audit.md): 7 confirmed
+   findings all fixed; F24 quantified minor (documented); F27/F30/F26/
+   F20/F21/F10 hardened; gate effect sizes downgraded to upper bounds
+   pending block-bootstrap replication.
+6. **Conditioning readiness**: v3sub200 (58.3M windows, t0+mmsi+heading
+   meta) verified; matched traffic prior built at TRAIN_END=2023-06-09;
+   static prior for v1 unchanged. S1/S2 run on v1 and are unaffected.
+7. **Architecture review** (docs/research/2026-07-architecture-review.md,
+   109-agent verified study): keep transformer+cone+CE; adopt
+   continuous-time RoPE ablation, single-pass multi-horizon anchors
+   (gated), conformal calibration, head bake-off; skip Mamba/ODE/
+   diffusion-primary/1B-scaling. Ordered 8-day ablation plan pinned.
+
 ## 2026-07-17 — Soft-target ALIASING quantified: 27% of val_loss is sub-cell jitter
 
 scripts/aliasing_analysis.py: with canvas sigma 0.01 = 0.32 cells at
