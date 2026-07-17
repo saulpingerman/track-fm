@@ -1,0 +1,86 @@
+"""One-command v2 rescoring: every checkpoint, one metric version, val split.
+
+Metrics v2 changed rank/area semantics (audit F2/F3/F5/F6/F7), so any
+cross-run table must come from ONE harness pass — never from mixing
+MLflow curves logged by different code versions. This script batch-runs
+score_geometry (v2) over all named checkpoints on VAL (test is retired
+from selection, audit F1) and adds split-conformal calibrated area@90
+per bucket (alpha=0.1; calibration on even batches, evaluation on odd).
+
+Usage: python scripts/rescore_v2.py [max_batches]   (GPU required)
+Writes ~/data/trackfm/rescore_v2.json + prints the ranked table with the
+DR null gate rows for reference.
+"""
+from __future__ import annotations
+
+import json
+import sys
+
+import torch
+
+sys.path.insert(0, "/home/paul/projects/trackfm-v2/src")
+from trackfm.config import PretrainConfig, load_config
+from trackfm.eval.xgeometry import score_geometry
+
+CKPT = "/home/paul/data/trackfm/checkpoints"
+RUNS = [
+    # (config, checkpoint dir) — extend as the chain drains
+    ("scaling_small_cone_50M", "scaling-small-cone-50M"),
+    ("scaling_small_cone_F18_50M", "scaling-small-cone-F18-50M"),
+    ("scaling_small_cone_F24_50M", "scaling-small-cone-F24-50M"),
+    ("scaling_small_cone_mlp_50M", "scaling-small-cone-mlp-50M"),
+    ("scaling_small_cone_direct_mlp_50M", "scaling-small-cone-direct-mlp-50M"),
+    ("scaling_medium_cone_50M", "scaling-medium-cone-50M"),
+    ("scaling_large_50M", "scaling-large-50M"),
+    ("scaling_small_50M", "scaling-small-50M"),
+    ("scaling_small_direct_50M", "scaling-small-direct-50M"),
+    ("scaling_small_cone_direct_50M", "scaling-small-cone-direct-50M"),
+    ("scaling_xlarge_cone_50M", "scaling-xlarge-cone-50M"),
+    ("scaling_xlarge_50M", "scaling-xlarge-50M"),
+    ("scaling_small_cone_ctx_geo_50M", "scaling-small-cone-ctx-geo-50M"),
+    ("scaling_small_cone_ctx_geotraffic_50M", "scaling-small-cone-ctx-geotraffic-50M"),
+    ("scaling_small_cone_sig10_50M", "scaling-small-cone-sig10-50M"),
+    ("scaling_small_cone_sig05_50M", "scaling-small-cone-sig05-50M"),
+    ("scaling_small_cone_bs1024_50M", "scaling-small-cone-bs1024-control"),
+]
+
+MAXB = int(sys.argv[1]) if len(sys.argv) > 1 else 120
+
+
+def main():
+    results = []
+    for cfg_name, run in RUNS:
+        ckpt = f"{CKPT}/{run}/best.pt"
+        try:
+            cfg = load_config(f"configs/pretrain/{cfg_name}.yaml", PretrainConfig)
+            r = score_geometry(ckpt, cfg, split="val", max_batches=MAXB)
+            r["run"] = run
+            results.append(r)
+            print(f"scored {run}")
+        except FileNotFoundError:
+            print(f"skip {run}: no checkpoint yet")
+        except Exception as e:
+            print(f"SKIP {run}: {e!r}")
+
+    out_path = "/home/paul/data/trackfm/rescore_v2.json"
+    json.dump(results, open(out_path, "w"), indent=2)
+
+    try:
+        null = json.load(open("/home/paul/data/trackfm/dr_null_gate.json"))
+    except FileNotFoundError:
+        null = {}
+    print(f"\n=== METRICS V2, val, {MAXB} batches | fixgrid p90 (0.6km2, ±0.3°) ===")
+    print(f"{'run':<38} {'15m':>7} {'30m':>7} {'1h':>7} {'2h':>7}")
+    if null:
+        bar = [null[b].get('fixgrid_p90') for b in ('15m', '30m', '1h', '2h')]
+        print(f"{'DR NULL GATE (must beat)':<38} " +
+              " ".join(f"{v if v else 'UNRCH':>7}" for v in bar))
+    for r in results:
+        row = [r["buckets"][b].get("fixgrid_p90_rank") for b in ("15m", "30m", "1h", "2h")]
+        print(f"{r['run']:<38} " +
+              " ".join(f"{v:>7.1f}" if v else f"{'UNRCH':>7}" for v in row))
+    print(f"\nwritten {out_path}")
+
+
+if __name__ == "__main__":
+    main()
