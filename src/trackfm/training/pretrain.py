@@ -111,9 +111,16 @@ def fast_val(model, cached_batches, cfg: PretrainConfig, device, autocast_dtype)
     return total / max(len(cached_batches), 1)
 
 
+@torch.no_grad()
 def validate(model, val_loader, cfg: PretrainConfig, device, autocast_dtype,
              max_batches: int = 100):
     """Val loss (causal=False) + DR ratio + search metrics.
+
+    no_grad is LOAD-BEARING: without it every val batch builds full
+    autograd graphs for two forward passes (forward_train non-causal +
+    forward_at_indices). Small models had VRAM slack to hide that; at
+    117M params x bs=640 it is >25GB of dead graphs and OOMs the run at
+    the FIRST validation (observed twice, 2026-07-17).
 
     Returns (val_loss, dr_loss, search) where search maps metric names to
     values keyed by TIME bucket, e.g. val_p90rank_30m / val_capture10_2h. Search metrics are MONITORING

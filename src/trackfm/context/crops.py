@@ -102,11 +102,15 @@ class StaticContext:
         # normalize to raster [-1, 1]
         y = (lat_c - self.lat0) / (self.lat1 - self.lat0) * 2 - 1
         x = (lon_c - self.lon0) / (self.lon1 - self.lon0) * 2 - 1
-        grid = torch.stack([x.view(B, 1, G).expand(B, G, G),        # x varies along dim -1
-                            y.view(B, G, 1).expand(B, G, G)], dim=-1)
-        src = self.stack.unsqueeze(0).expand(B, -1, -1, -1)
-        return F.grid_sample(src, grid, mode="bilinear",
+        # fold crops into one batch item's height dim — grid_sample
+        # materializes batch-expanded inputs (see crop_bias).
+        grid = torch.stack(
+            [x.view(B, 1, G).expand(B, G, G).reshape(1, B * G, G),
+             y.view(B, G, 1).expand(B, G, G).reshape(1, B * G, G)], dim=-1)
+        samp = F.grid_sample(self.stack.unsqueeze(0), grid, mode="bilinear",
                              padding_mode="border", align_corners=True)
+        C = self.stack.shape[0]
+        return samp.view(C, B, G, G).permute(1, 0, 2, 3).contiguous()
 
 
 class GlobalContextBias(nn.Module):
@@ -169,11 +173,18 @@ class GlobalContextBias(nn.Module):
             y = (lat_c - self.lat0) / (self.lat1 - self.lat0) * 2 - 1
             x = (lon_c - self.lon0) / (self.lon1 - self.lon0) * 2 - 1
             n = e - s
-            grid = torch.stack([x.view(n, 1, G).expand(n, G, G),
-                                y.view(n, G, 1).expand(n, G, G)], dim=-1)
-            out[s:e] = F.grid_sample(field.expand(n, -1, -1, -1), grid,
-                                     mode="bilinear", padding_mode="border",
-                                     align_corners=True).squeeze(1)
+            # ONE batch item, crops folded into the output-height dim:
+            # grid_sample MATERIALIZES a batch-expanded input (observed:
+            # a 570 GiB allocation for a 65k-pair chunk against the
+            # 1081x2161 raster). Input (1,1,H,W) + grid (1, n*G, G, 2)
+            # allocates only the (n*G, G) output.
+            grid = torch.stack(
+                [x.view(n, 1, G).expand(n, G, G).reshape(1, n * G, G),
+                 y.view(n, G, 1).expand(n, G, G).reshape(1, n * G, G)],
+                dim=-1)
+            samp = F.grid_sample(field, grid, mode="bilinear",
+                                 padding_mode="border", align_corners=True)
+            out[s:e] = samp.view(n, G, G)
         return out
 
 
