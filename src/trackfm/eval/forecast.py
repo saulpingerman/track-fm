@@ -65,12 +65,18 @@ def evaluate_forecasting(
     from trackfm.eval.baselines import (fit_sigma_per_horizon,
                                         gaussian_density_loss_per_sample,
                                         kalman_cv_forecast, tune_kalman)
+    # Tuning batches spread across the val stream instead of the first 8
+    # (audit F27: the head of val is a fixed, non-representative slice —
+    # early shards over-represent particular days/regions). Stride-spaced
+    # sampling keeps determinism without a shuffle dependency.
     val_ds = ShardedWindowDataset(cfg.data_dir / "val", batch_size=t.batch_size,
                                   shuffle_shards=False)
+    TUNE_BATCHES, TUNE_STRIDE = 8, 5
     val_batches = []
     for i, b in enumerate(DataLoader(val_ds, batch_size=None, num_workers=2)):
-        val_batches.append(b.to(device))
-        if i >= 7:
+        if i % TUNE_STRIDE == 0:
+            val_batches.append(b.to(device))
+        if len(val_batches) >= TUNE_BATCHES:
             break
     vf = torch.cat(val_batches)
     with torch.autocast(device_type=device.type, dtype=torch.bfloat16,
