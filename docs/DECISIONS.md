@@ -39,13 +39,40 @@ NavStatus/ROT/dims ON EVERY ROW; the clean pipeline dropped them.
 Destination+draught are route-determining at long horizons. Recoverable
 via slim per-vessel change-log side table without a full re-clean.
 
-Priority order for Tier-3 conditioning (updated):
+Priority order for Tier-3 conditioning (updated; revised same day per
+Paul's transferability requirement — see below):
 1. Static geography crops (land/bathy/dist-to-coast/port geometry) +
    traffic-prior raster — unchanged.
 2. DYNAMIC TRAFFIC crops + nearest-neighbor scalars — promoted by this
    gate.
-3. Type-5 intent side-table (destination/draught/nav-status).
-4. Weather movie-crops (K-slice) — real but rare-event; last.
+3. Weather movie-crops (K-slice) — real but rare-event.
+4. Type-5 intent (destination/ETA/draught) — DEPRIORITIZED, see below.
+
+## 2026-07-17 — Transferability constraint: no dependence on AIS-luxury posit fields (Paul)
+
+Paul's requirement: the model (and successors trained on other data) must
+work on positional data that does NOT carry rich AIS metadata. Don't hand
+the model a feature so powerful (destination especially) that it stops
+working — or stops being honest research — on bare posits.
+
+Field taxonomy this induces:
+- KINEMATIC CORE (lat/lon/sog/cog/dt): universal, any positional dataset.
+  The model's backbone input. Never conditioned away.
+- LOCATION/TIME-DERIVED FIELDS (geography, bathymetry, weather, traffic
+  rasters computed from the dataset itself): always obtainable for any
+  data — "fields are fine, I can always get those" (Paul). Full speed
+  ahead (priorities 1-3 above). Note traffic crops qualify: they are
+  derived from the other posits in the dataset, not from AIS metadata.
+- AIS-LUXURY POSIT FIELDS (destination, ETA, draught, nav status, ship
+  type, dims): dataset-specific. DEPRIORITIZED as conditioning inputs.
+  If ever added, ONLY with feature-dropout training (each luxury group
+  masked to a learned null embedding with prob p during training) so a
+  single checkpoint serves any subset at inference, and the marginal
+  value of each group is measurable by toggling at eval. Never as
+  always-present inputs.
+
+Implication: the ship_type embedding idea from the Tier-3 design memo
+falls under the same dropout rule if used at all.
 
 ## 2026-07-17 — C1-TUBE: storm-crossing is real but RARE; speed is the master variable
 
