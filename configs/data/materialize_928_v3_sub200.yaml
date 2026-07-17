@@ -1,0 +1,17 @@
+# v3-format subset materialization for conditioning experiments.
+# v3 rows carry [t0, mmsi] meta + heading — required for DYNAMIC
+# conditioning (weather/traffic sampled at wall-clock time). 200 days
+# ≈ 49M samples ≈ the standard 50M experiment budget; ~400GB (full-26mo
+# v3 will not fit next to v1's 1.3TB — revisit after the v1-dependent
+# runs conclude).
+clean_dir: ~/data/ais/clean
+out_dir: ~/data/trackfm/materialized/v3sub200
+window_size: 928
+input_len: 128
+stride: 32
+num_output_shards: 128
+train_frac: 0.8
+val_frac: 0.1
+seed: 17
+num_workers: 24
+format_version: 3
