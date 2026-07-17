@@ -3,6 +3,34 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-17 — Soft-target ALIASING quantified: 27% of val_loss is sub-cell jitter
+
+scripts/aliasing_analysis.py: with canvas sigma 0.01 = 0.32 cells at
+G=64, the discretized Gaussian target's shape depends on where the true
+position falls WITHIN its cell. The model cannot see sub-cell position,
+so this is irreducible loss noise:
+
+| sigma (cells) | aliasing penalty (nats) | per-sample CE noise | supervision blur |
+|---|---|---|---|
+| 0.32 (current) | 0.341 | +-0.492 | 0.53 cells |
+| 0.50 | 0.271 | +-0.202 | 0.81 |
+| 1.00 | 0.080 | +-0.049 | 1.47 |
+
+Aliasing = 27% of small-cone's trained val_loss (1.26); the noise term
+is 39%. KEY: at sigma=1 cell the supervision blur (1.47 cells) is STILL
+sharper than the F=12 Fourier band limit (2.7-cell finest lobe) — the
+head cannot express what the sharper target demands anyway. Widening
+sigma removes ~85% of aliasing noise at zero expressible-supervision
+cost.
+
+Consequences: (a) cross-run val_loss comparisons at different sigma are
+meaningless (different target entropy) — judge the ablation on
+containment metrics ONLY; (b) part of every training signal to date has
+been sub-cell jitter; (c) queued ablation: sig10 (1.0 cell) and sig05
+(0.5 cell) at small-cone scale, sigma_chain.sh armed behind the
+conditioning chain. Falsifiable expectation: sig10 improves
+val_fixgrid_p90rank at all horizons or the aliasing account is wrong.
+
 ## 2026-07-17 — C1-TRAFFIC: other vessels are the strongest conditioning signal measured
 
 Same gate design as the weather gates (2h DR residuals, 6 val days,
