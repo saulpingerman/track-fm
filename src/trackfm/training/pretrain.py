@@ -436,7 +436,7 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                     # NaN guard (audit F30): one NaN in the history makes
                     # np.median NaN forever and silently disables the
                     # saturation stop for the rest of the run.
-                    if not math.isnan(val_loss):
+                    if math.isfinite(val_loss):
                         val_history.append((step, val_loss))
                     stop, gain = should_stop_saturation(
                         val_history, t.early_stop_min_history,
