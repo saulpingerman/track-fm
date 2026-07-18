@@ -3,6 +3,44 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-19 — Drain-order plan: PROVISIONAL, revise on each result
+
+Deliberately not a fixed schedule (user directive: adapt tests to
+results, don't be rigid). Current queue ahead of drain: sig05 ->
+bs1024-control -> chain4 medium-cone-mlp -> chain5 medium-fixed_R125 ->
+conditioning-v2. Drain candidates and the results that should reorder
+them:
+
+1. muP tier1 (~45m) + tier2 (~3h) first at drain, UNCONDITIONALLY —
+   they validate transfer machinery, are geometry-light, and gate both
+   the base sweep and the flagship LR. Nothing upstream changes this.
+2. LR+wd base sweep at d=128/L=16 AFTER the chain5 geometry verdict:
+   the sweep should run in the geometry the flagship will use. If
+   medium-fixed_R125 wins the coverage-adjusted comparison, sweep in
+   wide-fixed; if cone holds, sweep in cone. Include wd axis
+   {0, 0.01, 0.03, 0.1, 0.3} log-spaced with decay_bias_norm=false.
+3. sigma: if sig05 lands BETWEEN baseline and sig10 (expected), close
+   the question — keep sigma=0.32 cells; a sharper-sigma probe is
+   low-priority. If sig05 BEATS baseline, the optimum is interior:
+   queue a refinement point (~0.4-0.7 cells) before the flagship.
+4. time-rope: after the sweep by default. Priority RISES if
+   conditioning-v2 shows temporal pathologies or if cone results keep
+   implicating irregular-dt handling. NOTE: muP+time_rope is
+   validator-blocked until the custom layers get a muP audit — if
+   time-rope wins at small scale AND the flagship wants it, that audit
+   becomes critical-path before the sweep transfers.
+5. zero-shot anomaly NLL eval: eval-only, co-run beside anything.
+   Its result gates the whole LP-FT-on-anomaly workstream (if
+   zero-shot + per-cell normalization beats exp-12, skip fine-tuning
+   for anomaly entirely).
+6. conditioning-v2 reading MUST use bs1024-control as its baseline
+   (audit F11 — S1/S2 run bs=1024; the bs=1638 series baseline is not
+   comparable). If ctx-geo-v2 shows zero containment gain over the
+   control, cancel stage-2/3 fusion (the information isn't there); if
+   it gains, stage-2 head fusion becomes a queue candidate.
+7. Flagship package assembles when (geometry verdict) + (sweep LR/wd)
+   exist; launch is ALWAYS the user's call.
+
 ## 2026-07-19 — decay_bias_norm flag (wd-sweep prerequisite)
 
 Historical optimizer decays EVERY param (biases/LayerNorm included) —
