@@ -62,6 +62,10 @@ val_loss is irreducible sub-cell jitter; sigma=1.0 cell removes ~85%.
 - TBD(sig05): monotonicity check (0.5 cells, running).
 - TBD(conformal pass at drain): broader may be better calibrated —
   calibrated area@90 gives the final verdict.
+- STAGED(sig015, config ready, not armed): 0.16-cell target — tests
+  the other side of 0.32. Expected flat-to-worse (the F=12 band limit
+  ~2.7 cells already exceeds target sharpness), but if containment
+  IMPROVES the flagship sigma should shrink further.
 Outcome unless conformal reverses: flagship keeps sigma=0.003
 (0.32 cells).
 
