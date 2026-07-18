@@ -114,6 +114,11 @@ class ModelConfig(BaseModel):
     context_mode: Literal["none", "geo", "geo_traffic"] = "none"
     context_hidden: int = 16
     context_static_dir: str = "~/data/trackfm/context_static"
+    # Bound on the context logit bias: field = cap * tanh(centered / cap).
+    # The softmax-null mean direction is projected out and the signal is
+    # bounded (unbounded bias drifted to +1300 logits and destabilized
+    # training — see GlobalContextBias.field).
+    context_bias_cap: float = 8.0
     # muP: pydantic default keeps every existing YAML loading unchanged
     # with mup.enabled == False (SP path, bit-for-bit preserved).
     mup: MupConfig = Field(default_factory=MupConfig)

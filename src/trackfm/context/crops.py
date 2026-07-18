@@ -132,8 +132,10 @@ class GlobalContextBias(nn.Module):
     """
 
     def __init__(self, static_dir: str | Path = STATIC_DIR,
-                 with_traffic: bool = False, hidden: int = 16):
+                 with_traffic: bool = False, hidden: int = 16,
+                 bias_cap: float = 8.0):
         super().__init__()
+        self.bias_cap = bias_cap
         ctx = StaticContext(static_dir, with_traffic=with_traffic)
         self.register_buffer("raster", ctx.stack.unsqueeze(0),
                              persistent=False)                 # (1, C, H, W)
@@ -150,8 +152,23 @@ class GlobalContextBias(nn.Module):
         nn.init.zeros_(self.cnn[-1].bias)
 
     def field(self) -> torch.Tensor:
-        """Global bias field (1, 1, H, W). Cheap; recompute per forward."""
-        return self.cnn(self.raster)
+        """Global bias field (1, 1, H, W). Cheap; recompute per forward.
+
+        Centered and bounded. The per-canvas softmax is invariant to a
+        constant shift, so the field's mean is a zero-gradient null
+        direction — Adam random-walks it unboundedly (observed: mean
+        drift to +1300 logits by step 29k, where bf16 ulp ~4-8 logits
+        quantizes away the head's own signal, and cells hundreds of
+        logits below the mean become density holes with catastrophic
+        NLL). Mean-centering projects the null direction out of the
+        parameterization; cap*tanh(x/cap) bounds the useful signal to
+        +/- bias_cap (a +/-8-logit pre-softmax bias already spans
+        exp(16) ~ 9e6:1 odds — enough to carve land hard). Both
+        transforms fix 0 -> 0, preserving the zero-init identity.
+        """
+        raw = self.cnn(self.raster)
+        raw = raw - raw.mean()
+        return self.bias_cap * torch.tanh(raw / self.bias_cap)
 
     def crop_bias(self, field: torch.Tensor, origin_lat: torch.Tensor,
                   origin_lon: torch.Tensor, R_deg: torch.Tensor, G: int,

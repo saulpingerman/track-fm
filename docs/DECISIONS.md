@@ -100,6 +100,44 @@ sig05 (aliasing), bs1024 control, medium-cone-mlp, medium-fixed_R125,
 then muP smoke tiers, then the unified v2+conformal rescoring and the
 flagship recommendation package.
 
+## 2026-07-18 — CTX-GEO v1 KILLED: unbounded bias-field DC drift (root-caused, fixed, relaunch queued)
+
+First conditioning run (small-cone-ctx-geo-50M) killed at step 31.5k/48.8k
+by the pre-registered rule (fixgrid_2h 98 -> 177 > 170; val_loss 2.52 ->
+3.77; train spikes to ~5.0 recurring). Unlike the xlarge kill this is a
+pathology, not a schedule-position artifact: the loss was DIVERGING at
+matched LR while the unconditioned baseline trained smoothly.
+
+Root cause (from best.pt step 5.7k vs last.pt step 29k): the global bias
+field's MEAN drifted +33 -> +1300 logits. The per-canvas softmax is
+invariant to a constant shift, so the field mean is a zero-gradient null
+direction; Adam normalizes the residual noise gradient in that direction
+into full-LR steps — an unconstrained random walk (wd=1e-5 far too weak
+to pin it). Two failure modes follow: (1) bf16 ulp at magnitude 1300 is
+~4-8 logits, so adding the head's own +/-10-logit signal to the bias
+QUANTIZED the transformer's output — the erratic train loss; (2) field
+holes hundreds of logits below the mean (p0.1 was -434 rel. mean) are
+exp(-huge) density zeros — truth landing there gives catastrophic NLL,
+which is why val_loss (mean NLL) diverged long before p90-rank (robust
+quantile) regressed.
+
+Fix (crops.py GlobalContextBias.field): field = cap * tanh((raw -
+raw.mean()) / cap), cap = context_bias_cap = 8.0. Centering projects the
+null direction out of the parameterization (the output conv's pure-DC
+bias now gets exactly zero gradient); tanh bounds the signal (+/-8
+pre-softmax logits spans ~9e6:1 odds — enough to carve land hard).
+Both fix 0 -> 0, so the zero-init identity is untouched (20/20 context
+tests pass incl. a new drift regression test). Same lesson class as the
+earlier readout-std width bug: leaving a loss-invariant direction in the
+parameterization means Adam WILL walk it.
+
+Consequences: v1 metrics are polluted (uninterpretable as a conditioning
+effect) — its 98-at-trough hint is encouraging but non-evidence. S2 was
+NOT started (would inherit the defect). conditioning_chain_v2.sh is
+armed behind sigma/chain4/chain5 and reruns both ablations with the fix;
+sigma chain took the GPU immediately, so zero idle time. The bs1024
+control in the sigma chain remains the correct comparison for v2.
+
 ## 2026-07-18 — muP retrofit: hyperparameter transfer by construction
 
 Retrofitted Maximal Update Parameterization (Yang & Hu 2022, Tensor

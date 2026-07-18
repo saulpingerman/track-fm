@@ -114,3 +114,25 @@ def test_checkpoint_roundtrip_excludes_raster(static_dir):
     assert not any("raster" in k for k in sd)
     cond2 = _mk("geo", static_dir, "cone", seed=99)
     cond2.load_state_dict(sd)                            # strict ok
+
+
+def test_field_is_centered_and_bounded(static_dir):
+    """The softmax-null mean direction is projected out of the field and
+    the signal is bounded by bias_cap — regression for the DC drift that
+    reached +1300 logits and destabilized the first ctx-geo run."""
+    from trackfm.context.crops import GlobalContextBias
+    torch.manual_seed(3)
+    gcb = GlobalContextBias(static_dir, with_traffic=False, hidden=8,
+                            bias_cap=8.0)
+    with torch.no_grad():
+        # simulate a drifted CNN: large output-layer weights + huge bias
+        gcb.cnn[-1].weight.normal_(std=5.0)
+        gcb.cnn[-1].bias.fill_(1300.0)
+        f = gcb.field()
+    assert abs(f.mean().item()) < 1.0          # constant offset removed
+    assert f.abs().max().item() <= 8.0 + 1e-5  # hard cap
+    # zero-init identity still holds through center + tanh
+    with torch.no_grad():
+        gcb.cnn[-1].weight.zero_()
+        gcb.cnn[-1].bias.zero_()
+        assert gcb.field().abs().max().item() == 0.0

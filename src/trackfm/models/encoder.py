@@ -114,6 +114,7 @@ class CausalAISModel(nn.Module):
                 static_dir=model.context_static_dir,
                 with_traffic=model.context_mode == "geo_traffic",
                 hidden=model.context_hidden,
+                bias_cap=model.context_bias_cap,
             )
 
         # Causal mask cache
