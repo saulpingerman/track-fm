@@ -3,6 +3,48 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-18 — Fine-tune wiring: LP-FT scheduling + muP grouped optimizer
+
+Implements the decisions from docs/research/2026-07-finetuning-review.md
+in the shared finetune loop (design -> implement -> adversarial verify ->
+mutation-check, same protocol as the muP retrofit).
+
+1. `FinetuneTrainConfig.strategy: full | lp | lp-ft`. lp-ft = freeze ->
+   linear-probe the head to EARLY-STOP (convergence, not a fixed warm-up:
+   the protection mechanism is the converged head norm, not gradient
+   timing) -> reload the BEST probe head -> unfreeze -> full FT at
+   `ft_learning_rate` (default learning_rate/10). Early stopping is
+   phase-LOCAL (verify finding: benchmarking FT's patience against the
+   probe's converged best would kill a monotonically improving FT phase);
+   checkpointing is GLOBAL, so if full FT never beats the probe on val,
+   the probe model ships. lp_*/ft_* fields govern ONLY the lp-ft phases;
+   strategy=lp === freeze_encoder=True (historical behavior preserved).
+2. Optimizer routed through `mup.build_finetune_optimizer`: muP off
+   reproduces the VERBATIM historical call (AdamW over requires_grad-
+   filtered params — note the pretrain off-path does NOT filter; the
+   distinction is deliberate and tested). muP on: the 3-group split now
+   classifies downstream wrappers — 'encoder.' prefix stripped so
+   backbone params reuse the pretraining rules; fresh MLPHead roles:
+   net.0 (d->d/2) hidden eta/m, net.3 (d/2->128, fan_in scales) output
+   eta/m, net.6 (128->out, width-free) full eta. LR-only treatment for
+   the fresh head is sufficient under Adam (update-scale argument);
+   default kaiming init already gives width-invariant activations at
+   init. Frozen backbone (probe phase) yields head-only groups for free
+   since build_param_groups skips non-trainable params.
+3. Mean pooling stays the pinned default for pretrained backbones.
+4. Verification: 48-agent workflow (3 lenses + mutation testing in a
+   worktree, 2 refuters per finding) -> 9 confirmed findings, all fixed:
+   falsy-or LR sentinel (0.0 silently replaced), phase-local early stop,
+   lp_* scoping docs, and 6 test-coverage holes now closed by
+   mutation-killing tests (scripted-score loop test pins the
+   overall-val-winner contract, cross-phase mlflow step monotonicity,
+   distinct lp/ft budgets, both LR overrides; strategy=lp is exercised
+   through run_finetune end-to-end).
+
+Next: the four <2 GPU-h ablations after the queue drains (zero-shot
+anomaly NLL w/ per-cell normalization, LP-FT vs full FT on ports w/ OOD
+split, same on ETA, FT-LR transfer spot-check at 117M).
+
 ## 2026-07-18 — muP retrofit: hyperparameter transfer by construction
 
 Retrofitted Maximal Update Parameterization (Yang & Hu 2022, Tensor

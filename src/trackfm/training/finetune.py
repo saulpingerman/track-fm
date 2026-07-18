@@ -18,7 +18,7 @@ import mlflow
 import numpy as np
 import torch
 import torch.nn.functional as F
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 from torch.utils.data import DataLoader, Dataset
 
 from trackfm.config import MLflowConfig, ModelConfig, NormalizationConfig
@@ -26,6 +26,7 @@ from trackfm.datasets.windowing import NUM_FEATURES, normalize_features
 from trackfm.models.factory import build_model
 from trackfm.models.heads import EtaRegressor, PortClassifier
 from trackfm.training.mlflow_utils import start_run
+from trackfm.training.mup import build_finetune_optimizer
 
 logger = logging.getLogger(__name__)
 
@@ -37,13 +38,36 @@ class FinetuneTrainConfig(BaseModel):
     max_epochs: int = 50
     warmup_epochs: int = 3
     early_stopping_patience: int = 10
+    # pretrained backbones want mean pooling, random-init wants last
+    # (exp 12/13; pinned by docs/research/2026-07-finetuning-review.md)
     pooling: Literal["mean", "last"] = "mean"
     head_dropout: float = 0.3
-    freeze_encoder: bool = False
+    freeze_encoder: bool = False               # frozen for the ENTIRE run
+    # strategy="lp-ft" (Kumar et al. 2022): freeze -> linear-probe the head
+    # to early-stop -> reload BEST head -> unfreeze -> full FT. The
+    # protection is the CONVERGED head suppressing feature drift, so the
+    # probe phase runs to convergence, not a fixed warm-up epoch count.
+    # The lp_*/ft_* fields govern ONLY the two lp-ft phases: a plain
+    # strategy="lp" run uses learning_rate/max_epochs/
+    # early_stopping_patience, identical to freeze_encoder=True.
+    strategy: Literal["full", "lp", "lp-ft"] = "full"
+    lp_max_epochs: int = 30
+    lp_patience: int = 5
+    lp_learning_rate: Optional[float] = None   # None -> learning_rate
+    ft_learning_rate: Optional[float] = None   # None -> learning_rate / 10
     precision: Literal["bf16", "fp32"] = "bf16"
     num_workers: int = 4
     seed: int = 17
     max_train_windows: Optional[int] = None   # subsample cap for quick runs
+
+    @model_validator(mode="after")
+    def _validate_strategy(self):
+        if self.strategy == "lp-ft" and self.freeze_encoder:
+            raise ValueError(
+                "freeze_encoder pins the backbone for the entire run, but "
+                "lp-ft must unfreeze it after the probe phase — use "
+                "strategy='lp' for a fully frozen run.")
+        return self
 
 
 class FinetuneConfig(BaseModel):
@@ -134,7 +158,16 @@ def regression_metrics(pred_log: np.ndarray, y_seconds: np.ndarray) -> dict[str,
 # --------------------------------------------------------------------- loop
 def run_finetune(cfg: FinetuneConfig, datasets: dict[str, Dataset],
                  num_classes: int | None = None) -> dict[str, float]:
-    """Train head(+encoder) on `datasets` {'train','val','test'}; returns test metrics."""
+    """Train head(+encoder) on `datasets` {'train','val','test'}; returns test metrics.
+
+    strategy="lp-ft" runs two phases through the same epoch loop: probe
+    (frozen backbone, head to early-stop), then full FT from the BEST
+    probe head at ft_learning_rate. Early stopping is phase-LOCAL (FT
+    keeps its patience budget while improving even from below the probe's
+    score), but checkpointing is GLOBAL: best.pt — and the final test
+    evaluation — is the overall val winner, so if full FT never beats the
+    probe, the probe model ships.
+    """
     t = cfg.train
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     autocast_dtype = torch.bfloat16 if (t.precision == "bf16" and device.type == "cuda") else None
@@ -147,15 +180,16 @@ def run_finetune(cfg: FinetuneConfig, datasets: dict[str, Dataset],
         missing, unexpected = encoder.load_state_dict(state["model"], strict=False)
         logger.info(f"backbone loaded ({len(missing)} missing, {len(unexpected)} unexpected keys)")
 
+    frozen = t.freeze_encoder or t.strategy in ("lp", "lp-ft")
     if cfg.task == "classification":
         assert num_classes, "num_classes required for classification"
         model = PortClassifier(encoder, num_classes, t.pooling, t.head_dropout,
-                               t.freeze_encoder).to(device)
+                               frozen).to(device)
         loss_fn = F.cross_entropy
         primary, mode = "f1_macro", "max"
     else:
         model = EtaRegressor(encoder, t.pooling, t.head_dropout,
-                             t.freeze_encoder).to(device)
+                             frozen).to(device)
         loss_fn = lambda out, y: F.huber_loss(out, EtaRegressor.target(y))
         primary, mode = "mae_minutes", "min"
 
@@ -164,13 +198,25 @@ def run_finetune(cfg: FinetuneConfig, datasets: dict[str, Dataset],
                       num_workers=t.num_workers, pin_memory=device.type == "cuda")
         for k, ds in datasets.items()
     }
-
-    opt = torch.optim.AdamW(filter(lambda p: p.requires_grad, model.parameters()),
-                            lr=t.learning_rate, weight_decay=t.weight_decay)
     steps_per_epoch = max(1, len(loaders["train"]))
-    sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: min(
-        (s + 1) / max(t.warmup_epochs * steps_per_epoch, 1),
-        0.5 * (1 + np.cos(np.pi * min(1.0, s / max(t.max_epochs * steps_per_epoch, 1))))))
+
+    def make_opt(lr: float, max_epochs: int):
+        opt = build_finetune_optimizer(model, t, cfg.model, lr=lr)
+        sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: min(
+            (s + 1) / max(t.warmup_epochs * steps_per_epoch, 1),
+            0.5 * (1 + np.cos(np.pi * min(1.0, s / max(max_epochs * steps_per_epoch, 1))))))
+        return opt, sched
+
+    if t.strategy == "lp-ft":
+        lp_lr = (t.lp_learning_rate if t.lp_learning_rate is not None
+                 else t.learning_rate)
+        ft_lr = (t.ft_learning_rate if t.ft_learning_rate is not None
+                 else t.learning_rate / 10)
+        phases = [("lp", lp_lr, t.lp_max_epochs, t.lp_patience),
+                  ("ft", ft_lr, t.max_epochs, t.early_stopping_patience)]
+    else:
+        phases = [(t.strategy, t.learning_rate, t.max_epochs,
+                   t.early_stopping_patience)]
 
     run = start_run(cfg.mlflow, cfg, data_dir=cfg.data_dir)
     ckpt_dir = Path(cfg.checkpoint_dir).expanduser() / (cfg.mlflow.run_name or run.info.run_id)
@@ -192,38 +238,63 @@ def run_finetune(cfg: FinetuneConfig, datasets: dict[str, Dataset],
                 else regression_metrics(outs, ys))
 
     best = -np.inf if mode == "max" else np.inf
-    bad = 0
+    epoch = 0                                   # global step across phases
     try:
-        for epoch in range(t.max_epochs):
-            t0 = time.time()
-            for x, y in loaders["train"]:
-                x = x.to(device, non_blocking=True)
-                y = y.to(device, non_blocking=True)
-                with torch.autocast(device_type=device.type, dtype=autocast_dtype,
-                                    enabled=autocast_dtype is not None):
-                    loss = loss_fn(model(x), y)
-                opt.zero_grad(set_to_none=True)
-                loss.backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-                opt.step()
-                sched.step()
+        for pi, (tag, lr, max_epochs, patience) in enumerate(phases):
+            if tag == "ft" and pi > 0:
+                # LP-FT boundary: the converged head is the protection —
+                # take the BEST probe head, not the last epoch's, then
+                # unfreeze the backbone.
+                if (ckpt_dir / "best.pt").exists():
+                    model.load_state_dict(torch.load(
+                        ckpt_dir / "best.pt", weights_only=False)["model"])
+                for p in model.encoder.parameters():
+                    p.requires_grad = True
+            opt, sched = make_opt(lr, max_epochs)
+            # early stopping is PHASE-local: full FT starting below the
+            # converged probe's val score must get its patience budget as
+            # long as it keeps improving, not race the probe's best.
+            # best.pt (and the final test model) still track the GLOBAL
+            # best. In a single-phase run the two are provably identical
+            # to the historical single-`best` loop.
+            phase_best = -np.inf if mode == "max" else np.inf
+            bad = 0
+            for _ in range(max_epochs):
+                t0 = time.time()
+                for x, y in loaders["train"]:
+                    x = x.to(device, non_blocking=True)
+                    y = y.to(device, non_blocking=True)
+                    with torch.autocast(device_type=device.type, dtype=autocast_dtype,
+                                        enabled=autocast_dtype is not None):
+                        loss = loss_fn(model(x), y)
+                    opt.zero_grad(set_to_none=True)
+                    loss.backward()
+                    torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                    opt.step()
+                    sched.step()
 
-            vm = evaluate("val")
-            mlflow.log_metrics({f"val_{k}": v for k, v in vm.items()}
-                               | {"train_loss": loss.item(),
-                                  "epoch_seconds": time.time() - t0}, step=epoch)
-            score = vm[primary]
-            improved = score > best if mode == "max" else score < best
-            logger.info(f"epoch {epoch}: val {primary}={score:.4f}"
-                        f"{' *' if improved else ''}")
-            if improved:
-                best, bad = score, 0
-                torch.save({"model": model.state_dict(),
-                            "config": cfg.model_dump(mode="json")}, ckpt_dir / "best.pt")
-            else:
-                bad += 1
-                if bad >= t.early_stopping_patience:
-                    break
+                vm = evaluate("val")
+                mlflow.log_metrics({f"val_{k}": v for k, v in vm.items()}
+                                   | {"train_loss": loss.item(),
+                                      "epoch_seconds": time.time() - t0,
+                                      "phase": float(pi)}, step=epoch)
+                score = vm[primary]
+                improved = score > best if mode == "max" else score < best
+                phase_improved = (score > phase_best if mode == "max"
+                                  else score < phase_best)
+                logger.info(f"[{tag}] epoch {epoch}: val {primary}={score:.4f}"
+                            f"{' *' if improved else ''}")
+                epoch += 1
+                if improved:
+                    best = score
+                    torch.save({"model": model.state_dict(),
+                                "config": cfg.model_dump(mode="json")}, ckpt_dir / "best.pt")
+                if phase_improved:
+                    phase_best, bad = score, 0
+                else:
+                    bad += 1
+                    if bad >= patience:
+                        break
     finally:
         if (ckpt_dir / "best.pt").exists():
             model.load_state_dict(torch.load(ckpt_dir / "best.pt",

@@ -33,3 +33,4 @@ paper/*.synctex.gz
 .DS_Store
 *.log
 !tests/**/*.log
+.claude/
