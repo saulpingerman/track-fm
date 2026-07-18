@@ -53,14 +53,17 @@ conditional on Sec. 1's reactivation argument.
 ## 4. Soft-target sigma
 
 Aliasing analysis (DECISIONS 2026-07-17): at sigma=0.32 cells, 27% of
-val_loss is irreducible sub-cell jitter; sigma=1.0 cell removes ~85% of
-it and its 1.47-cell blur stays inside the F=12 band limit (2.7 cells).
-- TBD(sig10): containment metrics vs baseline small-cone (val_loss NOT
-  comparable across sigmas). Mid-run trajectory is ahead of baseline
-  at matched samples (fixgrid_2h 142 at ~60% vs baseline final 118).
-- TBD(sig05): the intermediate point.
-Expected outcome: sigma=1.0 cell for the flagship unless sig10's
-containment regresses.
+val_loss is irreducible sub-cell jitter; sigma=1.0 cell removes ~85%.
+- RESULT(sig10, schedule-identical): sigma=1.0 cell LOSES on
+  containment at every horizon (fixgrid p90 8/21/66/138 vs baseline
+  7/19/59/118, +11-17%). The jitter is a val_loss floor, not a
+  learning handicap; the wide target trains a broader density whose
+  blur inflates search area (DECISIONS 2026-07-18).
+- TBD(sig05): monotonicity check (0.5 cells, running).
+- TBD(conformal pass at drain): broader may be better calibrated —
+  calibrated area@90 gives the final verdict.
+Outcome unless conformal reverses: flagship keeps sigma=0.003
+(0.32 cells).
 
 ## 5. Head
 
@@ -118,7 +121,7 @@ window (leakage rule).
 | geometry | cone (R(t)=0.02+1.71e-4 t) | pending chain5 R125 check |
 | capacity | 117M (d=768) | firm at current evidence |
 | LR | muP-transferred from d_base sweep | pending smokes + sweep |
-| sigma | 1.0 cell | pending sig10 |
+| sigma | 0.003 (0.32 cells) | sig10 lost on containment; conformal check pending |
 | head | Fourier F=12 + MLP projector | pending chain4 |
 | conditioning | geo_traffic w/ capped bias | pending ctx-v2 |
 | pos encoding | index PE | trope is post-flagship ablation |

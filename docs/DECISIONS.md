@@ -100,6 +100,31 @@ sig05 (aliasing), bs1024 control, medium-cone-mlp, medium-fixed_R125,
 then muP smoke tiers, then the unified v2+conformal rescoring and the
 flagship recommendation package.
 
+## 2026-07-18 — SIG10 RESULT: sigma=1.0 cell LOSES on containment at every horizon
+
+small-cone-sig10 (sigma=0.009375 = 1.0 cell; bs1638/30525 — schedule-
+identical to baseline small-cone, only sigma changed) vs baseline,
+final annealed fixgrid p90 ranks:
+
+| | 15m | 30m | 1h | 2h |
+|---|---|---|---|---|
+| baseline (0.32 cells) | 7 | 19 | 59 | 118 |
+| sig10 (1.0 cells) | 8 | 21 | 66 | 138 |
+
+Containment degrades +11-17% across horizons. Reading: the aliasing
+analysis correctly diagnosed the VAL_LOSS floor (27% sub-cell jitter)
+but the implied learning benefit did not materialize — the sub-cell
+jitter in the narrow target averages out over samples (unbiased
+gradients), while the wide target trains a genuinely broader density
+whose blur inflates p90 rank directly. val_loss comparability across
+sigmas remains meaningless (never compare it).
+
+OPEN until the drain conformal pass: a broader density may be better
+CALIBRATED (needing less conformal inflation); the calibrated area@90
+columns decide the final sigma verdict. Unless conformal reverses it,
+the flagship keeps sigma=0.003 (0.32 cells). sig05 (0.5 cells, running)
+gives the monotonicity check.
+
 ## 2026-07-18 — Land-leakage diagnostic built; baseline numbers reset expectations for ctx-v2
 
 scripts/land_leakage.py compares conditioned vs baseline checkpoints on
