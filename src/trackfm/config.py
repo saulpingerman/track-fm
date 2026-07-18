@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Literal, Optional
 
 import yaml
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 def _expand(p: str | Path) -> Path:
@@ -52,6 +52,26 @@ class MaterializeConfig(BaseModel):
 
 
 # ------------------------------------------------------------------- model
+class MupConfig(BaseModel):
+    """muP (Maximal Update Parameterization, Yang & Hu 2022) settings.
+
+    enabled=False is the SP path and is guaranteed bit-for-bit identical
+    to the pre-muP tree (tests/training/test_sp_equivalence.py). When
+    enabled, hyperparameters (especially peak LR) tuned at d_base
+    transfer to any width unchanged; the mechanism is per-role optimizer
+    LR scaling + one output-init change + a fixed d_head across the
+    width series (nhead = d_model // d_head). No forward-path changes.
+    """
+    enabled: bool = False
+    d_base: int = 128                # width the base LR sweep runs at
+    d_head: int = 16                 # constant head dim across the series
+    ffn_ratio: int = 4               # enforce dim_feedforward == ratio * d_model
+    readout_zero_init: bool = False  # opt-in zero-init readout (Yang&Hu D.2);
+                                     # False preserves muP@d_base == SP@d_base
+    independent_wd: bool = True      # wd*m on down-LR'd groups: keeps AdamW's
+                                     # lr-coupled decay width-invariant
+
+
 class ModelConfig(BaseModel):
     d_model: int = 768
     nhead: int = 16
@@ -94,6 +114,36 @@ class ModelConfig(BaseModel):
     context_mode: Literal["none", "geo", "geo_traffic"] = "none"
     context_hidden: int = 16
     context_static_dir: str = "~/data/trackfm/context_static"
+    # muP: pydantic default keeps every existing YAML loading unchanged
+    # with mup.enabled == False (SP path, bit-for-bit preserved).
+    mup: MupConfig = Field(default_factory=MupConfig)
+
+    @model_validator(mode="after")
+    def _validate_mup_invariants(self):
+        """Active only under mup.enabled — makes the width-series
+        invariants impossible to violate silently."""
+        if not self.mup.enabled:
+            return self
+        if self.d_model % self.nhead != 0 or \
+                self.d_model // self.nhead != self.mup.d_head:
+            raise ValueError(
+                f"muP requires constant d_head={self.mup.d_head} across the "
+                f"width series (nhead = d_model // d_head); got d_model="
+                f"{self.d_model}, nhead={self.nhead} -> d_head="
+                f"{self.d_model // self.nhead}. This constancy is what makes "
+                f"PyTorch's 1/sqrt(d_head) attention scale width-invariant "
+                f"(absorbed by the base sweep) with zero attention-code change.")
+        if self.dim_feedforward != self.mup.ffn_ratio * self.d_model:
+            raise ValueError(
+                f"muP requires dim_feedforward == {self.mup.ffn_ratio} * "
+                f"d_model (single width multiplier m for all hidden layers); "
+                f"got ff={self.dim_feedforward}, d_model={self.d_model}.")
+        if self.mup.d_base % self.mup.d_head != 0 or \
+                self.d_model < self.mup.d_head:
+            raise ValueError(
+                f"muP: d_base={self.mup.d_base} must be divisible by "
+                f"d_head={self.mup.d_head} and d_model >= d_head.")
+        return self
 
 
 class NormalizationConfig(BaseModel):

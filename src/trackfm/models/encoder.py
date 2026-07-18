@@ -89,9 +89,19 @@ class CausalAISModel(nn.Module):
         # compatibility; head_type='direct' swaps in the ablation head
         # (per-cell logits, no continuous density).
         head_cls = FourierHead2D if model.head_type == "fourier" else DirectGridHead
+        # muP recipe (a): readout init variance ~ 1/fan_in^2 (std scales
+        # 1/d), correcting the width-dependent softmax temperature of a
+        # fixed std. SP keeps 0.01 exactly (bit-for-bit; normal_ consumes
+        # identical RNG regardless of std). readout_zero_init draws then
+        # zeroes so the RNG stream stays identical too.
+        if model.mup.enabled:
+            readout_std = (0.0 if model.mup.readout_zero_init
+                           else 0.01 * model.mup.d_base / model.d_model)
+        else:
+            readout_std = 0.01
         self.fourier_head = head_cls(
             model.d_model, model.grid_size, model.num_freqs, model.grid_range,
-            mlp_hidden=model.head_mlp_hidden,
+            mlp_hidden=model.head_mlp_hidden, readout_std=readout_std,
         )
 
         # Static-context conditioning (optional): global bias field over

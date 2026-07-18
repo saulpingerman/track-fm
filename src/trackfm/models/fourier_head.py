@@ -16,11 +16,28 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-def _projector(d_in: int, d_out: int, hidden: int) -> nn.Module:
-    """Linear (hidden=0) or 1-hidden-layer MLP (hidden>0) with matched init."""
+def _projector(d_in: int, d_out: int, hidden: int,
+               in_std: float = 0.01) -> nn.Module:
+    """Linear (hidden=0) or 1-hidden-layer MLP (hidden>0) with matched init.
+
+    in_std applies to the d_in-FACING linear only (the muP output-role
+    tensor: its fan_in scales with d_model). Under muP recipe (a) the
+    caller passes in_std = 0.01 * d_base/d_model so the readout's init
+    variance scales as 1/fan_in^2 — this removes the width bug where a
+    fixed std made initial logit std grow ~sqrt(d) (a width-dependent
+    softmax temperature). The second MLP linear keeps hard-coded 0.01
+    (neither of its dims scales with width).
+
+    Bit-identity note: nn.init.normal_ consumes identical RNG regardless
+    of std, so SP (in_std=0.01 default) is bit-for-bit unchanged, and
+    the readout_zero_init variant zeroes AFTER the draw to keep the RNG
+    stream identical for any modules initialized later.
+    """
     if hidden <= 0:
         m = nn.Linear(d_in, d_out)
-        nn.init.normal_(m.weight, std=0.01)
+        nn.init.normal_(m.weight, std=in_std or 1.0)
+        if not in_std:
+            m.weight.data.zero_()
         nn.init.zeros_(m.bias)
         return m
     net = nn.Sequential(
@@ -28,7 +45,9 @@ def _projector(d_in: int, d_out: int, hidden: int) -> nn.Module:
         nn.GELU(),
         nn.Linear(hidden, d_out),
     )
-    nn.init.normal_(net[0].weight, std=0.01)
+    nn.init.normal_(net[0].weight, std=in_std or 1.0)
+    if not in_std:
+        net[0].weight.data.zero_()
     nn.init.zeros_(net[0].bias)
     nn.init.normal_(net[2].weight, std=0.01)
     nn.init.zeros_(net[2].bias)
@@ -52,11 +71,12 @@ class DirectGridHead(nn.Module):
 
     def __init__(self, d_model: int, grid_size: int = 64,
                  num_freqs: int = 0, grid_range: float = 0.1,
-                 mlp_hidden: int = 0):
+                 mlp_hidden: int = 0, readout_std: float = 0.01):
         super().__init__()
         self.grid_size = grid_size
         self.grid_range = grid_range
-        self.logits = _projector(d_model, grid_size * grid_size, mlp_hidden)
+        self.logits = _projector(d_model, grid_size * grid_size, mlp_hidden,
+                                 in_std=readout_std)
 
     def forward(self, z: torch.Tensor,
                 bias: torch.Tensor | None = None) -> torch.Tensor:
@@ -72,14 +92,15 @@ class FourierHead2D(nn.Module):
 
     def __init__(self, d_model: int, grid_size: int = 64,
                  num_freqs: int = 12, grid_range: float = 0.1,
-                 mlp_hidden: int = 0):
+                 mlp_hidden: int = 0, readout_std: float = 0.01):
         super().__init__()
         self.grid_size = grid_size
         self.num_freqs = num_freqs
         self.grid_range = grid_range
 
         num_freq_pairs = (2 * num_freqs + 1) ** 2
-        self.coeff_predictor = _projector(d_model, 2 * num_freq_pairs, mlp_hidden)
+        self.coeff_predictor = _projector(d_model, 2 * num_freq_pairs, mlp_hidden,
+                                          in_std=readout_std)
 
         # Precompute grid and basis
         x = torch.linspace(-grid_range, grid_range, grid_size)

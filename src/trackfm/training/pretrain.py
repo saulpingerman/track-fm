@@ -313,8 +313,11 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
     logger.info(f"{n_train:,} train samples, {steps_per_epoch:,} steps/epoch, "
                 f"max_steps={max_steps:,}")
 
-    opt = torch.optim.AdamW(model.parameters(), lr=t.learning_rate,
-                            weight_decay=t.weight_decay)
+    # muP-aware: single verbatim group when mup disabled (bit-for-bit SP);
+    # three per-role groups (input eta / hidden eta/m / output eta/m) when
+    # enabled. See trackfm/training/mup.py.
+    from trackfm.training.mup import build_optimizer
+    opt = build_optimizer(model, t, cfg.model)
     sched = torch.optim.lr_scheduler.LambdaLR(
         opt, lambda s: _lr_lambda(s, t.warmup_steps, max_steps, t.lr_schedule))
 
