@@ -249,6 +249,47 @@ def test_wd_wiring_through_build_optimizer():
         [1e-5, 1e-5, 1e-5]
 
 
+def test_decay_bias_norm_exclusion():
+    """decay_bias_norm=False: ndim<=1 params move to a 4th group at full
+    lr and wd=0 (muP path) / a 2-group split (SP path); the default True
+    keeps the historical decay-everything behavior bit-compatible."""
+
+    class _TrainNoBN(_Train):
+        decay_bias_norm = False
+
+    # muP path: 4th group appended, A/B/C indices stable
+    cfg = _cfg(64, mup_enabled=True, d_base=32)
+    model = _model(cfg)
+    opt = build_optimizer(model, _TrainNoBN(), cfg)
+    assert len(opt.param_groups) == 4
+    m = 2.0
+    assert [g["lr"] for g in opt.param_groups] == \
+        [3e-4, 3e-4 / m, 3e-4 / m, 3e-4]
+    assert [g["weight_decay"] for g in opt.param_groups] == \
+        [1e-5, 1e-5 * m, 1e-5 * m, 0.0]
+    assert all(p.ndim <= 1 for p in opt.param_groups[3]["params"])
+    assert all(p.ndim > 1 for g in opt.param_groups[:3] for p in g["params"])
+    ids = [id(p) for g in opt.param_groups for p in g["params"]]
+    assert len(ids) == len(set(ids))
+    assert set(ids) == {id(p) for p in model.parameters()}
+
+    # SP path: two groups, matrices decayed, vectors not
+    cfg_off = _cfg(64)
+    model_off = _model(cfg_off)
+    opt_off = build_optimizer(model_off, _TrainNoBN(), cfg_off)
+    assert len(opt_off.param_groups) == 2
+    assert opt_off.param_groups[0]["weight_decay"] == 1e-5
+    assert opt_off.param_groups[1]["weight_decay"] == 0.0
+    assert all(p.ndim > 1 for p in opt_off.param_groups[0]["params"])
+    assert all(p.ndim <= 1 for p in opt_off.param_groups[1]["params"])
+    ids_off = [id(p) for g in opt_off.param_groups for p in g["params"]]
+    assert set(ids_off) == {id(p) for p in model_off.parameters()}
+
+    # default True: SP path stays the verbatim single group
+    opt_default = build_optimizer(_model(_cfg(64)), _Train(), _cfg(64))
+    assert len(opt_default.param_groups) == 1
+
+
 def test_coord_check_step0_readout_temperature():
     """Step-0 probe (verify hardening): the coordinate check at step 3 has
     no power against the readout-init mutation (eta/m LR washes the

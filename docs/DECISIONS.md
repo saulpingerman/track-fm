@@ -3,6 +3,19 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-19 — decay_bias_norm flag (wd-sweep prerequisite)
+
+Historical optimizer decays EVERY param (biases/LayerNorm included) —
+invisible at wd=1e-5 (decay timescale ~3e8 steps >> any run: provably a
+no-op), but divergent from universal LLM practice once the muP base
+sweep raises wd toward 0.01-0.3. New `decay_bias_norm` (TrainConfig +
+FinetuneTrainConfig, default True = historical, SP off-path stays
+verbatim single-group). False routes ndim<=1 params to wd=0 at full lr
+(4th muP group / 2-group SP split). Flip it for the wd sweep only —
+never mid-series. Provenance note: pretraining wd=1e-5 was never swept
+(hardcoded exp-11 default); the old Ax BO searched wd only for
+downstream FT and found ~0 optimal for the pretrained condition.
+
 ## 2026-07-18 — Fine-tune wiring: LP-FT scheduling + muP grouped optimizer
 
 Implements the decisions from docs/research/2026-07-finetuning-review.md

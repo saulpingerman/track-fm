@@ -34,6 +34,8 @@ logger = logging.getLogger(__name__)
 class FinetuneTrainConfig(BaseModel):
     learning_rate: float = 2e-4
     weight_decay: float = 0.0
+    # see TrainConfig.decay_bias_norm; moot at wd=0.0 but kept symmetric
+    decay_bias_norm: bool = True
     batch_size: int = 256
     max_epochs: int = 50
     warmup_epochs: int = 3

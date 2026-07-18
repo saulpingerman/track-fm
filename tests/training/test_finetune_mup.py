@@ -138,6 +138,31 @@ def test_unclassified_downstream_param_raises():
         build_finetune_optimizer(model, _Train(), cfg)
 
 
+def test_decay_bias_norm_exclusion_finetune():
+    """decay_bias_norm=False composes with the frozen-backbone filter:
+    SP path splits trainable params into [matrices@wd, vectors@0]."""
+
+    class _TrainNoBN(_Train):
+        decay_bias_norm = False
+
+    cfg = _cfg(mup_enabled=False)
+    model = _classifier(cfg, freeze=True)
+    opt = build_finetune_optimizer(model, _TrainNoBN(), cfg)
+    assert len(opt.param_groups) == 2
+    assert opt.param_groups[0]["weight_decay"] == 1e-5
+    assert opt.param_groups[1]["weight_decay"] == 0.0
+    ids = {id(p) for g in opt.param_groups for p in g["params"]}
+    assert ids == {id(p) for p in model.parameters() if p.requires_grad}
+
+    # muP path: 4th no-decay group, head-only when frozen
+    cfg_on = _cfg(d_model=64, d_base=32)
+    model_on = _classifier(cfg_on, freeze=True)
+    opt_on = build_finetune_optimizer(model_on, _TrainNoBN(), cfg_on)
+    assert len(opt_on.param_groups) == 4
+    assert opt_on.param_groups[3]["weight_decay"] == 0.0
+    assert all(p.ndim <= 1 for p in opt_on.param_groups[3]["params"])
+
+
 def test_lp_ft_freeze_encoder_conflict_rejected():
     from trackfm.training.finetune import FinetuneTrainConfig
     with pytest.raises(ValueError, match="freeze_encoder"):

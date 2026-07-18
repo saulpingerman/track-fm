@@ -75,10 +75,16 @@ _DOWNSTREAM_A_EXACT = {"head.net.6.weight"}
 
 def build_param_groups(model: torch.nn.Module, d_model: int, d_base: int,
                        lr: float, weight_decay: float,
-                       independent_wd: bool = True) -> list[dict]:
-    """Split named_parameters into muP groups A/B/C. Raises on unknowns."""
+                       independent_wd: bool = True,
+                       decay_bias_norm: bool = True) -> list[dict]:
+    """Split named_parameters into muP groups A/B/C. Raises on unknowns.
+
+    decay_bias_norm=False routes ndim<=1 params (biases, LayerNorm
+    vectors) into a FOURTH group at full lr and wd=0 — appended last so
+    the A/B/C indices are stable either way.
+    """
     m = d_model / d_base
-    group_a, group_b, group_c = [], [], []
+    group_a, group_b, group_c, group_nd = [], [], [], []
     for name, p in model.named_parameters():
         if not p.requires_grad:
             continue
@@ -86,7 +92,8 @@ def build_param_groups(model: torch.nn.Module, d_model: int, d_base: int,
         # pretraining rules below apply verbatim to encoder.* params
         base = name.removeprefix(_WRAPPER_PREFIX)
         if p.ndim <= 1:
-            group_a.append(p)                       # biases, LayerNorm vectors
+            # biases, LayerNorm vectors
+            (group_a if decay_bias_norm else group_nd).append(p)
         elif base in _INPUT_EXACT or base.startswith("context_bias."):
             group_a.append(p)
         elif base in _HIDDEN_EXACT or _HIDDEN_RE.match(base):
@@ -117,6 +124,8 @@ def build_param_groups(model: torch.nn.Module, d_model: int, d_base: int,
         {"params": group_b, "lr": lr / m, "weight_decay": wd_scaled},
         {"params": group_c, "lr": lr / m, "weight_decay": wd_scaled},
     ]
+    if not decay_bias_norm:
+        groups.append({"params": group_nd, "lr": lr, "weight_decay": 0.0})
 
     # completeness: union of groups == trainable params, no duplicates
     grouped = [id(p) for g in groups for p in g["params"]]
@@ -132,16 +141,36 @@ def build_optimizer(model: torch.nn.Module, train_cfg,
 
     mup disabled -> the VERBATIM historical call (same iterator, one
     group); enabled -> three muP groups per build_param_groups.
+
+    train_cfg.decay_bias_norm=False (default True = historical) excludes
+    ndim<=1 params from decay on BOTH paths; the SP off-path only stays
+    verbatim single-group while the flag is at its default.
     """
+    decay_bn = getattr(train_cfg, "decay_bias_norm", True)
     if not model_cfg.mup.enabled:
-        return torch.optim.AdamW(model.parameters(),
-                                 lr=train_cfg.learning_rate,
-                                 weight_decay=train_cfg.weight_decay)
+        if decay_bn:
+            return torch.optim.AdamW(model.parameters(),
+                                     lr=train_cfg.learning_rate,
+                                     weight_decay=train_cfg.weight_decay)
+        return torch.optim.AdamW(
+            _split_ndim1(model.parameters(), train_cfg.weight_decay),
+            lr=train_cfg.learning_rate)
     groups = build_param_groups(
         model, d_model=model_cfg.d_model, d_base=model_cfg.mup.d_base,
         lr=train_cfg.learning_rate, weight_decay=train_cfg.weight_decay,
-        independent_wd=model_cfg.mup.independent_wd)
+        independent_wd=model_cfg.mup.independent_wd,
+        decay_bias_norm=decay_bn)
     return torch.optim.AdamW(groups)
+
+
+def _split_ndim1(params, weight_decay: float) -> list[dict]:
+    """[matrices at wd, ndim<=1 at wd=0] — the standard LLM exclusion."""
+    params = list(params)
+    return [
+        {"params": [p for p in params if p.ndim > 1],
+         "weight_decay": weight_decay},
+        {"params": [p for p in params if p.ndim <= 1], "weight_decay": 0.0},
+    ]
 
 
 def build_finetune_optimizer(model: torch.nn.Module, train_cfg, model_cfg,
@@ -155,15 +184,21 @@ def build_finetune_optimizer(model: torch.nn.Module, train_cfg, model_cfg,
     (frozen backbone) yields head-only groups with no special casing.
 
     `lr` overrides train_cfg.learning_rate: LP-FT phases run at
-    different LRs off one config.
+    different LRs off one config. decay_bias_norm behaves as in
+    build_optimizer (the off-path keeps its requires_grad filter).
     """
     lr = train_cfg.learning_rate if lr is None else lr
+    decay_bn = getattr(train_cfg, "decay_bias_norm", True)
     if not model_cfg.mup.enabled:
+        trainable = filter(lambda p: p.requires_grad, model.parameters())
+        if decay_bn:
+            return torch.optim.AdamW(trainable, lr=lr,
+                                     weight_decay=train_cfg.weight_decay)
         return torch.optim.AdamW(
-            filter(lambda p: p.requires_grad, model.parameters()),
-            lr=lr, weight_decay=train_cfg.weight_decay)
+            _split_ndim1(trainable, train_cfg.weight_decay), lr=lr)
     groups = build_param_groups(
         model, d_model=model_cfg.d_model, d_base=model_cfg.mup.d_base,
         lr=lr, weight_decay=train_cfg.weight_decay,
-        independent_wd=model_cfg.mup.independent_wd)
+        independent_wd=model_cfg.mup.independent_wd,
+        decay_bias_norm=decay_bn)
     return torch.optim.AdamW(groups)

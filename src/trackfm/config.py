@@ -159,6 +159,11 @@ class NormalizationConfig(BaseModel):
 class TrainConfig(BaseModel):
     learning_rate: float = 3e-4
     weight_decay: float = 1e-5
+    # True (historical) decays EVERY param incl. biases/LayerNorm vectors —
+    # invisible at wd=1e-5 but divergent from LLM practice at wd~0.1.
+    # False excludes ndim<=1 params from decay (standard practice); flip it
+    # for the wd sweep, never mid-series.
+    decay_bias_norm: bool = True
     batch_size: int = 300
     max_horizon: int = 800
     num_horizon_samples: int = 4
