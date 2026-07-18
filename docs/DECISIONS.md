@@ -58,6 +58,42 @@ Next: the four <2 GPU-h ablations after the queue drains (zero-shot
 anomaly NLL w/ per-cell normalization, LP-FT vs full FT on ports w/ OOD
 split, same on ETA, FT-LR transfer spot-check at 117M).
 
+## 2026-07-18 — BOTH SCALING CURVES COMPLETE: fixed still scales at 117M, cone saturates — geometry is now a coverage decision
+
+xlarge-fixed@50M finished cleanly (78,125 steps, full anneal, v2 trainer
+metrics). The complete picture (fixgrid p90, 0.6km2 cells, ±0.3° pop;
+xlarge-fixed logged v2, older runs pre-v2 — cross-check via rescore_v2
+at chain drain, deltas expected small):
+
+| params | CONE 15m/30m/1h/2h (ceil2h) | FIXED 15m/30m/1h/2h (ceil2h) |
+|---|---|---|
+| 4.5M | 7/19/59/118 (1.00) | 8/25/66/113 (0.81) |
+| 18.3M | 7/15/41/86 (1.00) | 5/14/38/64 (0.81) |
+| 117M | 7/14/39/82 (1.00) | 6/14/34/54 (0.81) |
+
+Findings:
+1. FIXED keeps scaling at 117M: 64 -> 54 at 2h (-16%) where cone got
+   only 86 -> 82 (-5%). At the 50M-sample budget, the narrow fixed task
+   (81% of vessels, ±0.3°) is NOT yet data-limited at 117M; the cone's
+   harder full-coverage task IS.
+2. Interpretation: cone spends capacity covering the 19% long tail
+   (dynamic canvas + horizon-scaled resolution); fixed concentrates all
+   capacity on the easy 81%. Neither result is a contradiction — they
+   measure different tasks with the same encoder.
+3. The flagship geometry question is now crisply a COVERAGE decision:
+   fixed-117M = 54 cells on 81% of vessels, permanently blind to 19% at
+   2h; cone-117M = 82 cells on 100%. Wide-fixed (chain5 medium_R125)
+   will test whether a big fixed box buys coverage without cone's
+   dynamic-canvas cost. Full-26mo data is expected to move cone more
+   than fixed (cone is the data-limited one).
+4. Both-curves val_loss NOT comparable across geometries (different
+   targets); containment is the only cross-geometry column.
+
+Queue now rolls into: ctx-geo/ctx-geotraffic (conditioning), sig10/
+sig05 (aliasing), bs1024 control, medium-cone-mlp, medium-fixed_R125,
+then muP smoke tiers, then the unified v2+conformal rescoring and the
+flagship recommendation package.
+
 ## 2026-07-18 — muP retrofit: hyperparameter transfer by construction
 
 Retrofitted Maximal Update Parameterization (Yang & Hu 2022, Tensor
