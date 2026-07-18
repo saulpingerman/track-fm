@@ -25,6 +25,11 @@ from trackfm.eval.xgeometry import score_geometry
 CKPT = "/home/paul/data/trackfm/checkpoints"
 RUNS = [
     # (config, checkpoint dir) — extend as the chain drains
+    ("scaling_nano_50M", "scaling-nano-50M"),
+    ("scaling_micro_50M", "scaling-micro-50M"),
+    ("scaling_mini_50M", "scaling-mini-50M"),
+    ("scaling_tiny_50M", "scaling-tiny-50M"),
+    ("scaling_medium_50M", "scaling-medium-50M"),
     ("scaling_small_cone_50M", "scaling-small-cone-50M"),
     ("scaling_small_cone_F18_50M", "scaling-small-cone-F18-50M"),
     ("scaling_small_cone_F24_50M", "scaling-small-cone-F24-50M"),
@@ -45,11 +50,21 @@ RUNS = [
 ]
 
 MAXB = int(sys.argv[1]) if len(sys.argv) > 1 else 120
+# optional argv[2]: comma-separated run names to (re)score; others keep
+# their existing JSON entries (merge, never clobber)
+ONLY = set(sys.argv[2].split(",")) if len(sys.argv) > 2 else None
 
 
 def main():
+    out_path = "/home/paul/data/trackfm/rescore_v2.json"
+    try:
+        merged = {r["run"]: r for r in json.load(open(out_path))}
+    except FileNotFoundError:
+        merged = {}
     results = []
     for cfg_name, run in RUNS:
+        if ONLY is not None and run not in ONLY:
+            continue
         ckpt = f"{CKPT}/{run}/best.pt"
         try:
             cfg = load_config(f"configs/pretrain/{cfg_name}.yaml", PretrainConfig)
@@ -62,7 +77,9 @@ def main():
         except Exception as e:
             print(f"SKIP {run}: {e!r}")
 
-    out_path = "/home/paul/data/trackfm/rescore_v2.json"
+    merged.update({r["run"]: r for r in results})
+    # table + file in RUNS order, keeping entries scored in prior passes
+    results = [merged[run] for _, run in RUNS if run in merged]
     json.dump(results, open(out_path, "w"), indent=2)
 
     try:
