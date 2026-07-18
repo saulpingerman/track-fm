@@ -119,6 +119,16 @@ class ModelConfig(BaseModel):
     # bounded (unbounded bias drifted to +1300 logits and destabilized
     # training — see GlobalContextBias.field).
     context_bias_cap: float = 8.0
+    # Positional mechanism. 'index_sinusoidal' = historical index-based
+    # PE added at input (default, bit-preserved). 'time_rope' rotates
+    # attention q/k by cumulative ELAPSED SECONDS so attention logits
+    # depend on true time differences — the top-ranked ablation from the
+    # 2026-07 architecture review for irregularly-sampled series.
+    pos_mode: Literal["index_sinusoidal", "time_rope"] = "index_sinusoidal"
+    # Geometric period range (seconds) of the RoPE frequency bank:
+    # fastest AIS reporting cadence up to a full day.
+    rope_p_min: float = 4.0
+    rope_p_max: float = 86400.0
     # muP: pydantic default keeps every existing YAML loading unchanged
     # with mup.enabled == False (SP path, bit-for-bit preserved).
     mup: MupConfig = Field(default_factory=MupConfig)
@@ -129,6 +139,11 @@ class ModelConfig(BaseModel):
         invariants impossible to violate silently."""
         if not self.mup.enabled:
             return self
+        if self.pos_mode != "index_sinusoidal":
+            raise ValueError(
+                "muP + time_rope is untested (custom attention layers are "
+                "outside the audited SP/muP grouping) — run the RoPE "
+                "ablation in SP first.")
         if self.d_model % self.nhead != 0 or \
                 self.d_model // self.nhead != self.mup.d_head:
             raise ValueError(

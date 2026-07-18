@@ -47,6 +47,7 @@ RUNS = [
     ("scaling_small_cone_sig10_50M", "scaling-small-cone-sig10-50M"),
     ("scaling_small_cone_sig05_50M", "scaling-small-cone-sig05-50M"),
     ("scaling_small_cone_bs1024_50M", "scaling-small-cone-bs1024-control"),
+    ("scaling_small_cone_trope_50M", "scaling-small-cone-trope-50M"),
 ]
 
 MAXB = int(sys.argv[1]) if len(sys.argv) > 1 else 120

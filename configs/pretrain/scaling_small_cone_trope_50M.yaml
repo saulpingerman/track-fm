@@ -1,0 +1,45 @@
+data_dir: ~/data/trackfm/materialized/v1
+checkpoint_dir: ~/data/trackfm/checkpoints
+model:
+  d_model: 128
+  nhead: 8
+  num_layers: 4
+  dim_feedforward: 512
+  dropout: 0.1
+  max_seq_len: 128
+  grid_size: 64
+  grid_range: 0.3
+  num_freqs: 12
+  grid_mode: cone
+  pos_mode: time_rope
+  cone_r0: 0.02
+  cone_v: 0.000171
+  cone_p: 1.0
+normalization:
+  lat_center: 56.25
+  lat_scale: 1.0
+  lon_center: 11.5
+  lon_scale: 2.0
+  sog_scale: 30.0
+  dt_scale: 300.0
+train:
+  learning_rate: 0.0003
+  weight_decay: 1.0e-05
+  batch_size: 1638
+  max_horizon: 800
+  num_horizon_samples: 4
+  warmup_steps: 500
+  lr_schedule: cosine
+  sigma: 0.003
+  dr_sigma: 0.05
+  precision: bf16
+  compile: false
+  val_interval_minutes: 30
+  early_stop_patience: 10
+  num_workers: 8
+  seed: 17
+  max_steps: 30525
+mlflow:
+  tracking_uri: http://127.0.0.1:5000
+  experiment: trackfm/scaling
+  run_name: scaling-small-cone-trope-50M

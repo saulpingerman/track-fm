@@ -100,6 +100,26 @@ sig05 (aliasing), bs1024 control, medium-cone-mlp, medium-fixed_R125,
 then muP smoke tiers, then the unified v2+conformal rescoring and the
 flagship recommendation package.
 
+## 2026-07-18 — Continuous-time RoPE implemented (top architecture-review ablation, queued behind drain)
+
+pos_mode='time_rope' (ModelConfig) replaces the index-based sinusoidal
+PE with rotary attention whose angles are proportional to cumulative
+ELAPSED SECONDS — attention logits become functions of true time
+differences, not posit counts, which is the principled treatment of
+irregular sampling flagged by the 2026-07 architecture review as the
+first ablation to run. Frequency bank: 8 geometric periods 4 s - 24 h
+(d_head=16). Custom pre-norm layer stack mirrors
+nn.TransformerEncoderLayer (ReLU FF, same dropout placement, same init
+family, no final norm) so the ablation isolates the positional
+mechanism. Default path is byte-identical (same modules, same RNG
+order; legacy-equivalence test green, 162/162). muP + time_rope is
+rejected by config validator until the custom layers are audited for
+the muP grouping. Config: scaling_small_cone_trope_50M.yaml
+(bs/steps/LR identical to scaling_small_cone_50M; NOT armed — GPU
+queue candidate at drain). Invariants pinned by tests: causality,
+time-shift invariance (relative property), sensitivity to dt warping,
+norm preservation, zero-time identity.
+
 ## 2026-07-18 — CTX-GEO v1 KILLED: unbounded bias-field DC drift (root-caused, fixed, relaunch queued)
 
 First conditioning run (small-cone-ctx-geo-50M) killed at step 31.5k/48.8k

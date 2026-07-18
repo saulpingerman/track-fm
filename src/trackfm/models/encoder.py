@@ -61,8 +61,13 @@ class CausalAISModel(nn.Module):
         # Input projection: 6 features -> d_model
         self.input_proj = nn.Linear(model.input_features, model.d_model)
 
-        # Positional encoding
-        self.pos_encoder = SinusoidalEncoding(model.d_model)
+        # Positional mechanism: historical index PE (default) or
+        # continuous-time RoPE (config pos_mode='time_rope'). The default
+        # branch is byte-identical to the pre-RoPE tree — same modules,
+        # same RNG consumption order.
+        self.pos_mode = model.pos_mode
+        if self.pos_mode == "index_sinusoidal":
+            self.pos_encoder = SinusoidalEncoding(model.d_model)
 
         # Time encoding for horizon conditioning
         self.time_proj = nn.Sequential(
@@ -72,15 +77,22 @@ class CausalAISModel(nn.Module):
         )
 
         # Transformer encoder with causal mask
-        encoder_layer = nn.TransformerEncoderLayer(
-            d_model=model.d_model,
-            nhead=model.nhead,
-            dim_feedforward=model.dim_feedforward,
-            dropout=model.dropout,
-            batch_first=True,
-            norm_first=True  # Pre-norm for stability
-        )
-        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=model.num_layers)
+        if self.pos_mode == "time_rope":
+            from trackfm.models.time_rope import TimeRoPEEncoder
+            self.transformer = TimeRoPEEncoder(
+                model.num_layers, model.d_model, model.nhead,
+                model.dim_feedforward, model.dropout,
+                model.rope_p_min, model.rope_p_max)
+        else:
+            encoder_layer = nn.TransformerEncoderLayer(
+                d_model=model.d_model,
+                nhead=model.nhead,
+                dim_feedforward=model.dim_feedforward,
+                dropout=model.dropout,
+                batch_first=True,
+                norm_first=True  # Pre-norm for stability
+            )
+            self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=model.num_layers)
 
         # Horizon conditioning
         self.horizon_proj = nn.Linear(model.d_model * 2, model.d_model)
@@ -140,6 +152,11 @@ class CausalAISModel(nn.Module):
         This is the reusable representation for downstream tasks.
         """
         x = self.input_proj(input_seq)
+        if self.pos_mode == "time_rope":
+            # Cumulative elapsed seconds within the window; RoPE attention
+            # is invariant to the arbitrary t=0 (relative property).
+            times_s = torch.cumsum(input_seq[..., 5] * self.norm.dt_scale, dim=1)
+            return self.transformer(x, times_s)
         x = self.pos_encoder(x)
         mask = self._get_causal_mask(input_seq.shape[1], input_seq.device)
         return self.transformer(x, mask=mask)
