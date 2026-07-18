@@ -100,6 +100,32 @@ sig05 (aliasing), bs1024 control, medium-cone-mlp, medium-fixed_R125,
 then muP smoke tiers, then the unified v2+conformal rescoring and the
 flagship recommendation package.
 
+## 2026-07-18 — Land-leakage diagnostic built; baseline numbers reset expectations for ctx-v2
+
+scripts/land_leakage.py compares conditioned vs baseline checkpoints on
+per-canvas land mass, truth-on-land rate, and NLL split by the land
+flag (mechanics validated: identical checkpoints give identical rows).
+Baseline smoke (small-cone, val) with the underway (sog>=2kn) split:
+
+| bucket | land mass (underway) | land mass (moored) | truth-on-land (underway) |
+|---|---|---|---|
+| 15m | 3.2% | 46% | 3.2% |
+| 2h  | 9.0% | 53% | 8.5% |
+
+Readings: (1) 24-37% of ALL val truths sit on "land" pixels — those are
+moored vessels in harbors at ~1km raster resolution, and the model is
+MORE confident there (nll 1.55-1.74 vs 2.5-2.7 at sea); harbor mass is
+CORRECT and must not be "fixed". (2) For underway vessels the baseline
+is already roughly calibrated on land mass (mass ~ truth rate), so geo
+conditioning's win, if any, comes from SHAPING density inside the
+reachable disk (channels/coast hugging/depth), not from reclaiming land
+mass — there are only ~3-9 points of it and part is genuine port
+arrivals. (3) Hard land carving would be catastrophic for exactly the
+arrival cases — independent confirmation that the +/-8-logit bias cap
+(exp(-8) ~ 3e-4 leaves harbor cells reachable) is the right bound, and
+a plausible second contributor to v1's val spikes beyond the DC drift.
+Full run vs ctx-v2 at its completion.
+
 ## 2026-07-18 — Window-overlap accounting: 27.8x, and what the 50M-budget runs actually saw
 
 Exact accounting (validated to 0.004%: predicted 45,573,570 windows for
