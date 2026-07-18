@@ -14,8 +14,8 @@ Three parameter groups under muP, one width multiplier m = d_model/d_base:
 
 AdamW column of Yang & Hu Table 3/8: Adam's normalized updates make
 per-entry deltas Theta(lr) regardless of gradient scale, and the
-correlated sum over ~d coordinates forces lr ~ 1/d (LINEAR in width,
-not 1/sqrt — that is the SGD column).
+correlated sum over ~d coordinates forces lr ~ 1/d (LINEAR in width;
+1/sqrt appears in NO muP column — it is the no-alignment heuristic).
 
 wd*m on down-LR'd groups cancels PyTorch AdamW's lr-COUPLED decay
 (p -= lr*wd*p), keeping effective decay width-invariant
@@ -77,10 +77,14 @@ def build_param_groups(model: torch.nn.Module, d_model: int, d_base: int,
         elif name in _HEAD_MLP2_EXACT:
             group_a.append(p)
         else:
+            hint = (" (torch.compile wraps names with _orig_mod. — build "
+                    "the optimizer BEFORE compiling the model)"
+                    if name.startswith("_orig_mod.") else "")
             raise ValueError(
                 f"muP: unclassified parameter {name!r} — every new module "
                 f"must be deliberately assigned a muP role in "
-                f"trackfm/training/mup.py before it can train under muP.")
+                f"trackfm/training/mup.py before it can train under muP."
+                f"{hint}")
 
     wd_scaled = weight_decay * m if independent_wd else weight_decay
     groups = [

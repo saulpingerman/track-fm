@@ -87,17 +87,44 @@ def run_one(d: int, lr: float, seed: int = 17) -> dict:
     ema_loss, clipped, probes = None, 0, {}
     model.train()
     it = iter(loader)
+    # Width-paired horizon schedule (verify-must-fix 3): forward_train's
+    # internal draw uses the global CUDA RNG, which dropout advances by
+    # width-DEPENDENT amounts — horizon sequences would diverge across
+    # widths after step 0 and inject ~1-2% independent EMA noise straight
+    # into the 2% wider-never-worse gate. A dedicated CPU generator keyed
+    # only on (seed, step) gives every width the identical schedule.
+    hgen = torch.Generator().manual_seed(seed * 7919 + 1)
+    horizon_schedule = [
+        torch.sort(torch.randint(1, 801, (4,), generator=hgen))[0]
+        for _ in range(STEPS)]
     for step in range(STEPS):
         batch = next(it).to(device, non_blocking=True)
+        hz_fixed = horizon_schedule[step].to(device)
         with torch.autocast("cuda", dtype=torch.bfloat16):
-            ld, tgt, hz, _ = model.forward_train(batch, causal=True)
+            ld, tgt, hz, _ = model.forward_train(
+                batch, horizon_indices=hz_fixed, causal=True)
             el = cone_elapsed_seconds(batch, hz, m.max_seq_len,
                                       norm.dt_scale, causal=True)
             tgt = tgt / cone_ranges(el, m.cone_r0, m.cone_v, m.cone_p)
             loss = compute_soft_target_loss(ld.float(), tgt.float(), 1.0,
                                             m.grid_size, 0.003 / m.grid_range)
         loss.backward()
+        # grad probes BEFORE clipping/step/zero_grad (verify-must-fix 1:
+        # probing after zero_grad(set_to_none=True) reads None grads and
+        # reports 0.0 at every width — a dead gate).
+        if step == STEPS - 1:
+            with torch.no_grad():
+                for gi, g in enumerate(opt.param_groups):
+                    gs = [p.grad.float().pow(2).mean().sqrt()
+                          for p in g["params"] if p.grad is not None]
+                    probes[f"grad_rms_g{gi}"] = \
+                        float(torch.stack(gs).mean()) if gs else 0.0
         total_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+        # NaN-in-gradients is visible at the clip site one step before it
+        # reaches the loss (verify nice-to-have 2).
+        if not torch.isfinite(total_norm):
+            return {"d": d, "lr": lr, "nan_at": step, "ema": None,
+                    "clipped_frac": clipped / max(step, 1), "probes": probes}
         clipped += int(total_norm.item() > 1.0)
         opt.step()
         opt.zero_grad(set_to_none=True)
@@ -105,19 +132,21 @@ def run_one(d: int, lr: float, seed: int = 17) -> dict:
         li = loss.item()
         ema_loss = li if ema_loss is None else EMA * ema_loss + (1 - EMA) * li
         if not torch.isfinite(loss):
-            return {"d": d, "lr": lr, "nan_at": step, "ema": None}
-        if step == STEPS - 1:
-            with torch.no_grad():
-                x = batch[:, :m.max_seq_len, :]
-                enc = model.encode(x)
-                probes["encoder_rms"] = enc.float().pow(2).mean().sqrt().item()
-                probes["logit_range"] = (ld.max() - ld.min()).item()
-                for gi, g in enumerate(opt.param_groups):
-                    rms = torch.stack([
-                        p.grad.float().pow(2).mean().sqrt()
-                        for p in g["params"] if p.grad is not None]).mean() \
-                        if any(p.grad is not None for p in g["params"]) else 0
-                    probes[f"grad_rms_g{gi}"] = float(rms) if rms is not None else 0.0
+            return {"d": d, "lr": lr, "nan_at": step, "ema": None,
+                    "clipped_frac": clipped / max(step, 1), "probes": probes}
+
+    # activation probes in ONE eval-mode fp32 no-grad re-forward with fixed
+    # horizons (verify nice-to-have 1: train-mode bf16 probes with live
+    # dropout are not comparable across widths).
+    model.eval()
+    with torch.no_grad():
+        x = batch[:, :m.max_seq_len, :]
+        enc = model.encode(x)
+        probes["encoder_rms"] = enc.float().pow(2).mean().sqrt().item()
+        ld_e, _, _, _ = model.forward_train(
+            batch, horizon_indices=torch.tensor([100, 400, 800],
+                                                device=device), causal=False)
+        probes["logit_range"] = (ld_e.max() - ld_e.min()).item()
 
     return {"d": d, "lr": lr, "ema": ema_loss, "nan_at": None,
             "clipped_frac": clipped / STEPS, "probes": probes}
@@ -126,12 +155,19 @@ def run_one(d: int, lr: float, seed: int = 17) -> dict:
 def main():
     tier = sys.argv[1] if len(sys.argv) > 1 else "tier1"
     out = {"tier": tier, "runs": []}
+    path = f"/home/paul/data/trackfm/mup_crosswidth_{tier}.json"
     if tier == "tier1":
         for d in WIDTHS:
             r = run_one(d, 3e-4)
             out["runs"].append(r)
-            print(f"d={d}: ema={r['ema']:.4f} clipped={r.get('clipped_frac', 0):.2%} "
+            # NaN-safe reporting + partial JSON after every run
+            # (verify-must-fix 2: a diverged run must not discard the
+            # completed widths' results).
+            ema_s = f"{r['ema']:.4f}" if r["ema"] is not None else "NaN"
+            print(f"d={d}: ema={ema_s} nan_at={r['nan_at']} "
+                  f"clipped={r.get('clipped_frac', 0):.2%} "
                   f"probes={r.get('probes')}", flush=True)
+            json.dump(out, open(path, "w"), indent=1)
     else:
         for d in WIDTHS:
             for lr in TIER2_LRS:
@@ -139,7 +175,7 @@ def main():
                 out["runs"].append(r)
                 print(f"d={d} lr={lr:.0e}: ema={r['ema']} nan_at={r['nan_at']}",
                       flush=True)
-    path = f"/home/paul/data/trackfm/mup_crosswidth_{tier}.json"
+                json.dump(out, open(path, "w"), indent=1)
     json.dump(out, open(path, "w"), indent=1)
     print(f"written {path}")
 

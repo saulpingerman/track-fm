@@ -129,3 +129,16 @@ def test_fixture_coverage():
     names = {p.stem.replace("sp_baseline_", "") for p in FIXTURES}
     assert names == {"fourier_fixed", "fourier_cone", "direct_fixed",
                      "direct_cone", "fourier_fixed_mlp32"}, names
+
+
+def test_layer2_no_mup_key_vs_disabled_bitwise():
+    """Layer 2 (verify hardening): a config with NO mup key and one with
+    mup explicitly disabled must produce bitwise-equal 5-step
+    trajectories — guards the config plumbing itself."""
+    fx = json.loads(FIXTURES[0].read_text())
+    over = fx["config_overrides"]
+    a = _replay(over, fx)                                    # no mup key
+    b = _replay({**over, "mup": {"enabled": False}}, fx)     # explicit off
+    assert a[1] == b[1], "init diverged between no-key and disabled"
+    assert a[3] == b[3], "step-5 state diverged between no-key and disabled"
+    assert a[4] == b[4], "loss trajectory diverged"

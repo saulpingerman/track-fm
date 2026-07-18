@@ -3,6 +3,56 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-18 — muP retrofit: hyperparameter transfer by construction
+
+Retrofitted Maximal Update Parameterization (Yang & Hu 2022, Tensor
+Programs V) behind `ModelConfig.mup` (default OFF = SP path, bit-for-bit
+preserved and gate-tested). One LR sweep at d_base=128 now transfers to
+every width — this closes the "are our hyperparameters just inherited
+guesses" question for the flagship.
+
+Design decisions (5-agent spec, 4-reviewer adversarial verify):
+1. FIXED d_head=16 across the width series (nhead = d/16: 8/24/48 at
+   128/384/768). With d_head constant, PyTorch's 1/sqrt(d_head)
+   attention scale is a width-CONSTANT absorbed by the base sweep
+   (many-heads limit is muP-valid) — ZERO attention code changes, no
+   forward fork. Config validator makes the invariant unviolable.
+2. Recipe (a): output-layer width correction in init variance
+   (readout std = 0.01 * d_base/d, Var ~ 1/fan_in^2) + optimizer LR.
+   NO forward multipliers anywhere; state_dict keys identical on/off.
+3. 3-group AdamW (trackfm/training/mup.py): input-like at eta, hidden
+   at eta/m, readout at eta/m (LINEAR in width — the Adam column; 1/sqrt
+   appears in no muP column). wd*m on down-LR'd groups keeps AdamW's
+   lr-coupled decay width-invariant. Classifier RAISES on unclassified
+   params: future modules break CI, not the flagship.
+4. Found + fixed a real SP width bug: fixed readout std=0.01 made
+   initial logit std grow ~sqrt(d) — xlarge's softmax started ~2.4x
+   hotter than small's. Width-invariant under muP; SP untouched.
+
+Verification (adversarial workflow, verdict fix-then-ship, all must-fix
+items landed): SP bit-preservation 10/10 fixtures through the production
+optimizer path; eta/m independently re-derived and numerically confirmed
+(eta/sqrt(m) drifts slope +0.23-0.30, eta/m stays <=0.08); mutation
+testing found + closed a wd-wiring test hole and 3 real bugs in the
+cross-width script (dead grad probes, NaN-crash losing partial results,
+width-unpaired horizon draws polluting the 2% gate).
+
+Tests: 141 green. SP gate = golden fixtures (5 head/geometry variants,
+per-tensor sha256, 5 seeded steps) + Layer-2 no-key-vs-disabled A/B.
+Coordinate check: activations width-invariant (|slope|<=0.35 over 4x
+width) under muP with an SP power check + step-0 readout-temperature
+probe.
+
+Next (GPU, after the queue drains — never interleaved):
+scripts/mup_crosswidth_smoke.py tier1 (~45 min bug-catcher: gates on
+finiteness, wider-never-worse 2%, probe RMS ratios in [0.5,2], clip-frac
+divergence <20pp) then tier2 (~3h: LR argmin alignment across widths).
+Then the production base sweep at d=128 DEPTH 16 (muP transfers over
+width, not depth), and the flagship inherits the swept LR unchanged.
+Known-accepted deviations: PyTorch's width-shrinking default bias init
+(decays toward the mu-limit; documented, not fixed — fixing would break
+muP@base == SP@base); LayerNorm gains at full eta (standard practice).
+
 ## 2026-07-17 — XLARGE-CONE@50M RESULT: cone capacity saturates at ~18M under the 50M-sample budget
 
 The budget-matched rerun completed cleanly (78,125 steps, cosine fully

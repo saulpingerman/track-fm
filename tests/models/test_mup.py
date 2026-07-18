@@ -228,3 +228,42 @@ def test_coord_check_width_invariance():
     assert max(sp_slopes.values()) >= 0.30, (
         f"SP shows no width drift anywhere ({sp_slopes}) — "
         f"coordinate check has no discriminating power")
+
+
+def test_wd_wiring_through_build_optimizer():
+    """Mutation testing (verify-must-fix 4) showed hardcoding
+    independent_wd=False inside build_optimizer passes every other test —
+    the wd wiring through the PRODUCTION entry point was never asserted.
+    A regression would train the width series with effective decay ~m x
+    too weak on B/C at d=768 with green CI."""
+    cfg = _cfg(64, mup_enabled=True, d_base=32)
+    opt = build_optimizer(_model(cfg), _Train(), cfg)
+    m = 2.0
+    assert [g["weight_decay"] for g in opt.param_groups] == \
+        [1e-5, 1e-5 * m, 1e-5 * m]
+
+    cfg2 = _cfg(64, mup_enabled=True, d_base=32)
+    cfg2.mup.independent_wd = False
+    opt2 = build_optimizer(_model(cfg2), _Train(), cfg2)
+    assert [g["weight_decay"] for g in opt2.param_groups] == \
+        [1e-5, 1e-5, 1e-5]
+
+
+def test_coord_check_step0_readout_temperature():
+    """Step-0 probe (verify hardening): the coordinate check at step 3 has
+    no power against the readout-init mutation (eta/m LR washes the
+    temperature out within steps). At step 0 the separation is clean:
+    log-density range must NOT grow with width under muP."""
+    widths = [32, 64, 128]
+    ranges = []
+    for w in widths:
+        torch.manual_seed(0)
+        model = _model(_cfg(w, mup_enabled=True, d_base=32))
+        model.eval()
+        with torch.no_grad():
+            ld, _, _, _ = model.forward_train(
+                _batch(), horizon_indices=torch.tensor([4, 16]), causal=False)
+        ranges.append((ld.max() - ld.min()).item())
+    s = _slope(widths, ranges)
+    assert s <= 0.35, f"readout temperature grows with width: slope={s:.3f} " \
+                      f"ranges={ranges} (init variance rule broken?)"
