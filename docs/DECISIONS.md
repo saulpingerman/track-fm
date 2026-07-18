@@ -100,6 +100,39 @@ sig05 (aliasing), bs1024 control, medium-cone-mlp, medium-fixed_R125,
 then muP smoke tiers, then the unified v2+conformal rescoring and the
 flagship recommendation package.
 
+## 2026-07-18 — Window-overlap accounting: 27.8x, and what the 50M-budget runs actually saw
+
+Exact accounting (validated to 0.004%: predicted 45,573,570 windows for
+v3sub200-train from per-track clean lengths vs 45,571,954 actual;
+NOTE track_catalog.parquet is STALE — zero rows for 2023-03-15 — the
+clean day partitions are the only trustworthy source). Stride 32 on
+928-length windows makes consecutive windows share 96.6% of posits:
+
+| dataset | windows | effective (non-overlap equiv) | unique posits |
+|---|---|---|---|
+| v3sub200 train | 45.6M | 1.64M | 1.52G |
+| FULL 26mo (788 days) | 232.0M | 8.36M | 7.76G |
+
+Consequences:
+1. The 50M-sample budget = ~30 EFFECTIVE EPOCHS of v3sub200-train's
+   unique information, not 1.1 epochs. "Cone saturates at 18M params"
+   is therefore consistent with UNIQUE-DATA limitation, not an
+   architectural ceiling — the cleanest mechanistic support yet for
+   the full-26mo flagship argument (5.1x the effective samples).
+   Fixed-grid's continued 117M scaling on the same recycled data reads
+   as the harder per-sample task (finer relative resolution) extracting
+   more from repetition.
+2. Scaling fits and any Chinchilla-style N_opt reasoning must use
+   effective counts. Unique-posit budget of the full set (7.8G) still
+   comfortably supports the 117M flagship; the case for >=300M rests on
+   repetition efficiency (overlapping windows are correlated, not
+   identical — stronger than literal epochs, weaker than fresh data).
+3. Val windows overlap identically: effective val n is ~1/27.8 of
+   nominal, so naive CIs on val metrics are ~5.3x too tight (the audit's
+   overlapping-window autocorrelation caveat, now quantified globally).
+No pipeline change — overlap is fine (phase augmentation) as long as
+the accounting is honest. Numbers feed the flagship package.
+
 ## 2026-07-18 — Continuous-time RoPE implemented (top architecture-review ablation, queued behind drain)
 
 pos_mode='time_rope' (ModelConfig) replaces the index-based sinusoidal
