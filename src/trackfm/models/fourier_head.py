@@ -87,6 +87,56 @@ class DirectGridHead(nn.Module):
         return log_density.view(z.shape[0], self.grid_size, self.grid_size)
 
 
+class MDNHead2D(nn.Module):
+    """Mixture-density head, rendered onto the canvas grid.
+
+    Predicts K axis-aligned Gaussian components (weights, means, sigmas)
+    and evaluates their log-density at the cell centers, normalized over
+    the canvas by log_softmax — so it plugs into the SAME soft-target CE
+    loss, context bias, and containment metrics as the other heads (the
+    bake-off isolates the density FAMILY, nothing else). Param-light:
+    5K projector outputs vs the Fourier head's 2(2F+1)^2.
+
+    Means are tanh-bounded to the canvas; sigmas are softplus-bounded
+    below at 2% of grid_range (a component can sharpen to ~1.3 cells at
+    G=64 but not collapse to a delta, which would spike the rendered CE).
+    """
+
+    def __init__(self, d_model: int, grid_size: int = 64,
+                 num_freqs: int = 0, grid_range: float = 0.1,
+                 mlp_hidden: int = 0, readout_std: float = 0.01,
+                 n_components: int = 8):
+        super().__init__()
+        self.grid_size = grid_size
+        self.grid_range = grid_range
+        self.K = n_components
+        self.params = _projector(d_model, 5 * n_components, mlp_hidden,
+                                 in_std=readout_std)
+        x = torch.linspace(-grid_range, grid_range, grid_size)
+        xx, yy = torch.meshgrid(x, x, indexing='ij')
+        self.register_buffer('cell_x', xx.reshape(1, 1, -1).clone())
+        self.register_buffer('cell_y', yy.reshape(1, 1, -1).clone())
+
+    def forward(self, z: torch.Tensor,
+                bias: torch.Tensor | None = None) -> torch.Tensor:
+        B = z.shape[0]
+        p = self.params(z).view(B, self.K, 5)
+        log_w = F.log_softmax(p[..., 0], dim=-1).unsqueeze(-1)
+        mu_x = (self.grid_range * torch.tanh(p[..., 1])).unsqueeze(-1)
+        mu_y = (self.grid_range * torch.tanh(p[..., 2])).unsqueeze(-1)
+        sig_min = 0.02 * self.grid_range
+        sig_x = (F.softplus(p[..., 3]) * self.grid_range + sig_min).unsqueeze(-1)
+        sig_y = (F.softplus(p[..., 4]) * self.grid_range + sig_min).unsqueeze(-1)
+        logn = (-0.5 * (((self.cell_x - mu_x) / sig_x) ** 2
+                        + ((self.cell_y - mu_y) / sig_y) ** 2)
+                - sig_x.log() - sig_y.log())
+        logits = torch.logsumexp(log_w + logn, dim=1)          # (B, G*G)
+        if bias is not None:
+            logits = logits + bias.reshape(B, -1)
+        log_density = F.log_softmax(logits, dim=-1)
+        return log_density.view(B, self.grid_size, self.grid_size)
+
+
 class FourierHead2D(nn.Module):
     """2D Fourier density head."""
 

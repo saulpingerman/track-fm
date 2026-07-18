@@ -17,7 +17,8 @@ import torch
 import torch.nn as nn
 
 from trackfm.config import ModelConfig, NormalizationConfig
-from trackfm.models.fourier_head import DirectGridHead, FourierHead2D
+from trackfm.models.fourier_head import (DirectGridHead, FourierHead2D,
+                                         MDNHead2D)
 
 
 class SinusoidalEncoding(nn.Module):
@@ -100,7 +101,8 @@ class CausalAISModel(nn.Module):
         # Density head. Attribute keeps its historical name for state-dict
         # compatibility; head_type='direct' swaps in the ablation head
         # (per-cell logits, no continuous density).
-        head_cls = FourierHead2D if model.head_type == "fourier" else DirectGridHead
+        head_cls = {"fourier": FourierHead2D, "direct": DirectGridHead,
+                    "mdn": MDNHead2D}[model.head_type]
         # muP recipe (a): readout init variance ~ 1/fan_in^2 (std scales
         # 1/d), correcting the width-dependent softmax temperature of a
         # fixed std. SP keeps 0.01 exactly (bit-for-bit; normal_ consumes

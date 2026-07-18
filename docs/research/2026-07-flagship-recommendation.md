@@ -80,8 +80,11 @@ Outcome unless conformal reverses: flagship keeps sigma=0.003
 - Direct per-cell head: trains ~2x faster, slightly worse, no
   continuous density (rules out sub-cell conformal refinement); kept
   as ablation, not flagship.
-- TBD(post-drain bake-off, optional): MDN/implicit heads from the
-  architecture review's list if queue time allows.
+- STAGED(mdn, config ready, not armed): grid-rendered mixture-density
+  head (K=8 axis-aligned Gaussians, same loss/metrics/bias mechanism —
+  isolates the density FAMILY). Param-light (40 projector outputs vs
+  Fourier's 1250). Post-drain bake-off candidate alongside trope and
+  sig015.
 
 ## 6. Conditioning
 

@@ -83,7 +83,7 @@ class ModelConfig(BaseModel):
     grid_size: int = 64
     grid_range: float = 0.3          # degrees
     num_freqs: int = 12
-    head_type: Literal["fourier", "direct"] = "fourier"  # 'direct' = ablation
+    head_type: Literal["fourier", "direct", "mdn"] = "fourier"  # non-default = ablations
     # head_mlp_hidden>0 inserts one hidden layer inside the density head
     # (Linear(d_model, head_mlp_hidden) -> GELU -> Linear(...)). 0 keeps the
     # historical single-linear projection. Tests whether the encoder->basis
