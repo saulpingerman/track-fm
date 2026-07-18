@@ -89,6 +89,12 @@ Findings:
 4. Both-curves val_loss NOT comparable across geometries (different
    targets); containment is the only cross-geometry column.
 
+rescore_v2 cross-check (same day, uniform v2 scoring, 120 val batches):
+confirms within 2-3 cells — fixed 117M 2h = 52 (vs 54 trainer-logged),
+cone-117M = 85, large = 64, medium-cone = 87. Conclusions unchanged;
+fixed's 117M gain is if anything slightly stronger (64 -> 52, -19%).
+Full table in ~/data/trackfm/rescore_v2.json.
+
 Queue now rolls into: ctx-geo/ctx-geotraffic (conditioning), sig10/
 sig05 (aliasing), bs1024 control, medium-cone-mlp, medium-fixed_R125,
 then muP smoke tiers, then the unified v2+conformal rescoring and the
