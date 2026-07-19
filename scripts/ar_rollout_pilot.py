@@ -77,22 +77,34 @@ def next_step_density(model, window, norm, device):
 def sample_step(model, window, m, norm, device, gen, chunk, stats):
     G = m.grid_size
     R = m.cone_r0 + m.cone_v * CADENCE_S ** m.cone_p
+    # FINE-GRID step sampling: at short elapsed times the cone floor
+    # (r0=0.02°) makes a native 64-node cell BIGGER than the true
+    # per-step displacement — lattice sampling noise then exceeds the
+    # motion signal (observed: 5.6%% over-speed at 10 s cadence) and the
+    # rollout diffuses regardless of model quality. The Fourier density
+    # is continuous and band-limited (F=12 over 64 nodes = 2.7x
+    # oversampled), so bicubic upsampling to GF is faithful.
+    GF = 256
     new_rows = []
     for s in range(0, window.shape[0], chunk):
         w = window[s:s + chunk]
         ld = next_step_density(model, w, norm, device)
-        probs = ld.reshape(w.shape[0], -1).float().softmax(dim=-1)
+        fine_ld = F.interpolate(ld.unsqueeze(1).float(), size=(GF, GF),
+                                mode="bicubic", align_corners=True).squeeze(1)
+        probs = fine_ld.reshape(w.shape[0], -1).softmax(dim=-1)
         idx = torch.multinomial(probs, 1, generator=gen).squeeze(-1)
         if stats.get("step") == 1:                 # step-1 sanity gate data
-            lp = probs.gather(1, idx.unsqueeze(1)).squeeze(1).log()
+            lp = probs.gather(1, idx.unsqueeze(1)).squeeze(1).log() \
+                + math.log(GF * GF / (m.grid_size * m.grid_size))
             stats["s1_sample_logp"].append(lp)
-            stats["s1_entropy"].append(-(probs * probs.clamp_min(1e-12).log())
+            p_c = ld.reshape(w.shape[0], -1).float().softmax(dim=-1)
+            stats["s1_entropy"].append(-(p_c * p_c.clamp_min(1e-12).log())
                                        .sum(-1))
-        nodes = torch.linspace(-1.0, 1.0, G, device=device)
-        half = 1.0 / (G - 1)
+        nodes = torch.linspace(-1.0, 1.0, GF, device=device)
+        half = 1.0 / (GF - 1)
         jy = (torch.rand(len(idx), generator=gen, device=device) * 2 - 1) * half
         jx = (torch.rand(len(idx), generator=gen, device=device) * 2 - 1) * half
-        oy, ox = nodes[idx // G] + jy, nodes[idx % G] + jx
+        oy, ox = nodes[idx // GF] + jy, nodes[idx % GF] + jx
         stats["edge"] += int(((oy.abs() > 0.98) | (ox.abs() > 0.98)).sum())
         lat_prev, lon_prev = denorm_latlon(w[:, -1], norm)
         dlat, dlon = oy * R, ox * R

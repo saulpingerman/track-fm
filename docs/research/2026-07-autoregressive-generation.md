@@ -68,6 +68,28 @@ Outcome tree:
   direct head vindicated; belief-state (trained feedback) becomes the
   ONLY viable route to generation and inherits priority evidence.
 
+RESULT (2026-07-19): COLLAPSE branch, on clean ground. K=256, n=256,
+verification-hardened protocol (17 findings fixed), direct arm
+validated vs harness at 5k tracks (7/20/57/129.5 vs 7/18/59/120).
+Rollout p90 at sigma=1: 62 at 15m (direct 6.8), tie-ceiling (~2100+)
+at 30m/1h/2h. Robust to cadence (10 s and 60 s) and to sampler
+fidelity (bicubic 256^2 fine sampling; over-speed 5.6%% -> 0.03%%,
+step-1 gate exact). Failure signature: ensembles stay 98-100%% inside
+±0.3° but land compact-and-WRONG — bias, not variance explosion.
+
+Mechanism (named): FEATURE-DERIVATION NOISE AMPLIFICATION, a specific
+exposure-bias channel. Training-time SOG/COG are sensor-clean; rollout
+SOG/COG are finite-differenced from sampled displacements, so each
+step's kinematic features carry noise ~ the model's own per-step
+predictive spread (comparable to the true motion at 60 s for a 10 kn
+vessel). The model trusts kinematics it has only ever seen clean;
+noisy kinematics in, biased prediction out, compounding. Possible
+in-method mitigations (untested, low priority): EMA-smoothed derived
+kinematics; sampling displacement jointly over multi-step segments.
+Belief-state feedback avoids the channel BY CONSTRUCTION — the belief
+token declares "no sensor data here" instead of fabricating it. This
+is the strongest single piece of evidence behind item 8a's priority.
+
 Known caveats: fixed-cadence rollout is slightly off-distribution for
 irregular AIS (time-rope would neutralize this — synergy noted);
 SOG/COG derived from sampled displacements are noisier than sensor
