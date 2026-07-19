@@ -51,6 +51,11 @@ them:
    Its result gates the whole LP-FT-on-anomaly workstream (if
    zero-shot + per-cell normalization beats exp-12, skip fine-tuning
    for anomaly entirely).
+5b. AR rollout pilot (docs/research/2026-07-autoregressive-generation
+   .md): eval-only on existing checkpoints, co-runnable like the
+   rescores — K=256 sample-and-roll ensembles vs direct densities on
+   identical fixgrid censoring. Gates the belief-state feedback
+   architecture work (user-approved order: pilot first).
 6. conditioning-v2 reading MUST use bs1024-control as its baseline
    (audit F11 — S1/S2 run bs=1024; the bs=1638 series baseline is not
    comparable). If ctx-geo-v2 shows zero containment gain over the
