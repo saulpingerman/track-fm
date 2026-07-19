@@ -35,8 +35,8 @@ RUNS = [
     ("scaling_small_cone_F24_50M", "scaling-small-cone-F24-50M"),
     ("scaling_small_cone_mlp_50M", "scaling-small-cone-mlp-50M"),
     ("scaling_small_cone_direct_mlp_50M", "scaling-small-cone-direct-mlp-50M"),
-    ("scaling_medium_cone_50M", "scaling-medium-cone-50M"),
-    ("scaling_medium_cone_mlp_50M", "scaling-medium-cone-mlp-50M"),
+    ("scaling_large_cone_50M", "scaling-large-cone-50M"),
+    ("scaling_large_cone_mlp_50M", "scaling-large-cone-mlp-50M"),
     ("scaling_large_50M", "scaling-large-50M"),
     ("scaling_small_50M", "scaling-small-50M"),
     ("scaling_small_direct_50M", "scaling-small-direct-50M"),
@@ -49,9 +49,9 @@ RUNS = [
     ("scaling_small_cone_sig05_50M", "scaling-small-cone-sig05-50M"),
     ("scaling_small_cone_bs1024_50M", "scaling-small-cone-bs1024-50M"),
     ("scaling_small_cone_trope_50M", "scaling-small-cone-trope-50M"),
-    ("scaling_medium_fixed_R125_50M", "scaling-medium-fixed-R125-50M"),
+    ("scaling_large_fixed_R125_50M", "scaling-large-fixed-R125-50M"),
     ("scaling_small_cone_mdn_50M", "scaling-small-cone-mdn-50M"),
-    ("scaling_medium_fixed_R125_mlp_50M", "scaling-medium-fixed-R125-mlp-50M"),
+    ("scaling_large_fixed_R125_mlp_50M", "scaling-large-fixed-R125-mlp-50M"),
     ("scaling_large_mlp_50M", "scaling-large-mlp-50M"),
 ]
 

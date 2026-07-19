@@ -46,4 +46,4 @@ train:
 mlflow:
   tracking_uri: http://127.0.0.1:5000
   experiment: trackfm/scaling
-  run_name: scaling-medium-cone-mlp-50M
+  run_name: scaling-large-cone-mlp-50M

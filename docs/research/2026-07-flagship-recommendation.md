@@ -28,7 +28,7 @@ Evidence so far (all metrics v2, budget-matched 50M, annealed):
   normalized task extracting less from 30-effective-epoch repetition
   (Sec. 1), NOT with an architectural ceiling.
 
-TBD(chain5 medium-fixed_R125): does widening fixed's canvas to
+TBD(chain5 large-fixed_R125): does widening fixed's canvas to
 R=1.25deg (full 2h coverage) preserve its rank advantage once it must
 carry the whole population? If yes, wide-fixed is a real flagship
 candidate; if its ranks blow up, the cone's per-horizon normalization
@@ -76,7 +76,7 @@ DECIDED (containment grounds): flagship sigma = 0.003 (0.32 cells).
 - RESULT(chain4): the MLP projector win GROWS with scale — neutral at
   4.5M, then 4/8/27/56 vs 7/15/41/86 at 18.3M (-30 to -47% every
   bucket, ~5% wall-clock cost). DECIDED: Fourier F=12 + MLP projector
-  (hidden=d_model). It also reframes cone saturation: medium-cone-mlp
+  (hidden=d_model). It also reframes cone saturation: large-cone-mlp
   (56) beats cone-117M-linear (82-85) and nearly matches
   fixed-117M-linear (52-54) at 6.4x fewer params with full ceiling —
   the "capacity ceiling" was partly the linear head starving the

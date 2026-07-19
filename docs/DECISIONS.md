@@ -61,7 +61,7 @@ Supersedes the drain-order items where they conflict; spine order now:
 2. conditioning-v2 (unchanged; ctx_grad_subsample flag still awaiting
    user sign-off before launch).
 3. muP tiers (unchanged, ~4h, gate flagship LR regardless of recipe).
-4. HEAD-DEPTH PROBE: frozen-encoder head ladder on the medium-cone-mlp
+4. HEAD-DEPTH PROBE: frozen-encoder head ladder on the large-cone-mlp
    encoder (depths 0/1/2/3 at hidden=384, ~1 GPU-h each,
    scripts/head_ladder.py) -> ONE full-training confirmation of the
    chosen rung at medium (~6h). Screening bias noted: frozen features
@@ -83,13 +83,13 @@ floor" narrative is head-limited and must be requalified.
 
 ## 2026-07-19 — CHAIN4 RESULT: the head bottleneck is REAL and scale-emergent — cone+MLP rewrites the geometry table
 
-medium-cone-mlp (identical to medium-cone except head_mlp_hidden=384,
+large-cone-mlp (identical to large-cone except head_mlp_hidden=384,
 verified single-line config diff), uniform v2 rescore:
 
 | run | 15m | 30m | 1h | 2h | coverage |
 |---|---|---|---|---|---|
-| medium-cone | 7 | 14 | 40 | 87 | 1.00 |
-| medium-cone-mlp | 4 | 8 | 27 | 58 | 1.00 |
+| large-cone | 7 | 14 | 40 | 87 | 1.00 |
+| large-cone-mlp | 4 | 8 | 27 | 58 | 1.00 |
 | large-FIXED (18M) | 6 | 16 | 40 | 64 | 0.81 |
 | xlarge-FIXED (117M) | 6 | 14 | 34 | 52 | 0.81 |
 
@@ -104,7 +104,7 @@ verified single-line config diff), uniform v2 rescore:
    ran head-limited (single-linear). Its 85 at 2h could move a lot
    with the MLP head. The both-curves coverage-decision framing
    stands, but cone's curve top is understated.
-4. CHAIN5 (medium-fixed-R125, running) stays valid as a cone-vs-
+4. CHAIN5 (large-fixed-R125, running) stays valid as a cone-vs-
    wide-fixed comparison at MATCHED single-linear heads; its reading
    must now also be compared against cone-mlp's 58.
 5. QUEUE QUESTION FOR THE USER: xlarge-cone-mlp@50M (~18h) would test
@@ -119,7 +119,7 @@ verified single-line config diff), uniform v2 rescore:
 
 Deliberately not a fixed schedule (user directive: adapt tests to
 results, don't be rigid). Current queue ahead of drain: sig05 ->
-bs1024-control -> chain4 medium-cone-mlp -> chain5 medium-fixed_R125 ->
+bs1024-control -> chain4 large-cone-mlp -> chain5 large-fixed_R125 ->
 conditioning-v2. Drain candidates and the results that should reorder
 them:
 
@@ -128,7 +128,7 @@ them:
    the base sweep and the flagship LR. Nothing upstream changes this.
 2. LR+wd base sweep at d=128/L=16 AFTER the chain5 geometry verdict:
    the sweep should run in the geometry the flagship will use. If
-   medium-fixed_R125 wins the coverage-adjusted comparison, sweep in
+   large-fixed_R125 wins the coverage-adjusted comparison, sweep in
    wide-fixed; if cone holds, sweep in cone. Include wd axis
    {0, 0.01, 0.03, 0.1, 0.3} log-spaced with decay_bias_norm=false.
 3. sigma: if sig05 lands BETWEEN baseline and sig10 (expected), close
@@ -254,7 +254,7 @@ Findings:
    measure different tasks with the same encoder.
 3. The flagship geometry question is now crisply a COVERAGE decision:
    fixed-117M = 54 cells on 81% of vessels, permanently blind to 19% at
-   2h; cone-117M = 82 cells on 100%. Wide-fixed (chain5 medium_R125)
+   2h; cone-117M = 82 cells on 100%. Wide-fixed (chain5 large_R125)
    will test whether a big fixed box buys coverage without cone's
    dynamic-canvas cost. Full-26mo data is expected to move cone more
    than fixed (cone is the data-limited one).
@@ -263,24 +263,24 @@ Findings:
 
 rescore_v2 cross-check (same day, uniform v2 scoring, 120 val batches):
 confirms within 2-3 cells — fixed 117M 2h = 52 (vs 54 trainer-logged),
-cone-117M = 85, large = 64, medium-cone = 87. Conclusions unchanged;
+cone-117M = 85, large = 64, large-cone = 87. Conclusions unchanged;
 fixed's 117M gain is if anything slightly stronger (64 -> 52, -19%).
 Full table in ~/data/trackfm/rescore_v2.json.
 
 Queue now rolls into: ctx-geo/ctx-geotraffic (conditioning), sig10/
-sig05 (aliasing), bs1024 control, medium-cone-mlp, medium-fixed_R125,
+sig05 (aliasing), bs1024 control, large-cone-mlp, large-fixed_R125,
 then muP smoke tiers, then the unified v2+conformal rescoring and the
 flagship recommendation package.
 
 ## 2026-07-19 — HEAD RESULT: MLP projector win GROWS with scale; cone "saturation" was partly a HEAD bottleneck
 
-medium-cone-mlp (18.3M, head_mlp_hidden=384) final vs comparators,
+large-cone-mlp (18.3M, head_mlp_hidden=384) final vs comparators,
 fixgrid p90 (schedule-matched, annealed):
 
 | run | 15m | 30m | 1h | 2h | wall |
 |---|---|---|---|---|---|
-| medium-cone-mlp | 4 | 8 | 27 | **56** | 6.7h |
-| medium-cone (linear) | 7 | 15 | 41 | 86 | 6.4h |
+| large-cone-mlp | 4 | 8 | 27 | **56** | 6.7h |
+| large-cone (linear) | 7 | 15 | 41 | 86 | 6.4h |
 | small-cone-mlp | 5 | 18 | 59 | 118 | 3.2h |
 | small-cone (linear) | 7 | 19 | 59 | 118 | 3.2h |
 
@@ -293,14 +293,14 @@ Findings:
    representation is squeezed through the single linear projection and
    the MLP unlocks it. Cost: ~5% wall-clock.
 2. This REFRAMES the cone-saturation result. "Cone saturates at ~18M"
-   was measured with the LINEAR head. medium-cone-mlp (56) beats
+   was measured with the LINEAR head. large-cone-mlp (56) beats
    cone-117M-linear (82-85) AND fixed-medium-linear (64), and nearly
    matches fixed-117M-linear (52-54) at 6.4x fewer params — with full
    2h ceiling (1.00 vs fixed's 0.81). The apparent capacity ceiling
    was at least partly the head starving the encoder's gains.
 3. CAVEAT for the geometry decision: the head effect may be
    geometry-independent — a fixed-medium-mlp could improve similarly.
-   chain5 (medium-fixed-R125) is LINEAR-head, so its result carries
+   chain5 (large-fixed-R125) is LINEAR-head, so its result carries
    this caveat; the clean geometry comparison at drain should be
    cone-mlp vs fixed(-R125)-mlp, a post-drain shelf candidate.
 Flagship head: Fourier F=12 + MLP projector (hidden=d_model), firm.
@@ -542,7 +542,7 @@ uniform v2 rescoring runs when the chain drains):
 | model | params | fixgrid p90 15m/30m/1h/2h | ceil@2h | best val_loss |
 |---|---|---|---|---|
 | small-cone | 4.5M | 7/19/59/118 | 1.00 | 1.262 |
-| medium-cone | 18.3M | 7/15/41/86 | 1.00 | 1.089 |
+| large-cone | 18.3M | 7/15/41/86 | 1.00 | 1.089 |
 | xlarge-cone | 117M | 7/14/39/82 | 1.00 | 1.077 |
 | large-fixed | 18.3M | 5/14/38/64 | 0.81 | n/c |
 
@@ -561,9 +561,9 @@ Findings:
 3. Flagship implication: full-26mo (~4x data) is exactly the move that
    should reactivate capacity scaling at 117M. The 50M-budget curve
    cannot justify >18M params; the full-data run can.
-4. Queue decision: medium-cone-mlp@50M appended (NOT xlarge-cone-mlp) —
+4. Queue decision: large-cone-mlp@50M appended (NOT xlarge-cone-mlp) —
    the MLP-head effect is cleanly measurable at 18M where data does not
-   bind, directly comparable to medium-cone's 86; at 117M it would be
+   bind, directly comparable to large-cone's 86; at 117M it would be
    confounded by data starvation. One run, ~6h, pre-authorized budget.
 
 ## 2026-07-17 — Session infrastructure consolidation (metrics v2 era)
@@ -744,7 +744,7 @@ to 0.**
 At MATCHED samples (~14.5M), on val_fixgrid_p90rank_2h (0.6 km² cells,
 ±0.3° population):
 
-| samples | small-cone | medium-cone | xlarge-cone |
+| samples | small-cone | large-cone | xlarge-cone |
 |---|---|---|---|
 | ~14.5M | 153 | 113 | **96** — best cone ever, un-annealed, still falling |
 | 50M + anneal | 118 | 86 | (killed) |
@@ -759,7 +759,7 @@ with t) was tracking correctly when the run was killed.
 **Ablation chain results (all 50M, annealed, G=64/F=12 unless noted) —
 still valid, they answer the confounder questions:**
 - F18/F24 ≈ F12 (2h: 114/114 vs 118): num_freqs exonerated.
-- medium-cone (18.3M): 86@2h — cone DOES scale with encoder.
+- large-cone (18.3M): 86@2h — cone DOES scale with encoder.
 - small-cone-mlp (head MLP 128): val_loss 1.044 (beats 18.3M medium's
   1.089!), 15m fixgrid 7→5; long horizons unchanged. Head mixing is real
   but short-horizon-only at this scale.

@@ -1,6 +1,6 @@
 """Frozen-encoder head-depth ladder (plan-revision item 4).
 
-Freezes the medium-cone-mlp encoder (the strongest 18M cone checkpoint)
+Freezes the large-cone-mlp encoder (the strongest 18M cone checkpoint)
 and trains FRESH Fourier-coefficient heads of depth 0/1/2/3 (hidden=384)
 on frozen features, then scores each on the fixgrid protocol via the
 pilot's validated eval path. Maps containment-vs-head-depth in ~1 GPU-h
@@ -36,8 +36,8 @@ from trackfm.training.pretrain import _lr_lambda  # noqa: E402
 from ar_rollout_pilot import (BUCKETS, direct_ranks_for,  # noqa: E402
                               pick_truth, p90)
 
-CKPT = "/home/paul/data/trackfm/checkpoints/scaling-medium-cone-mlp-50M/best.pt"
-CFG = "configs/pretrain/scaling_medium_cone_mlp_50M.yaml"
+CKPT = "/home/paul/data/trackfm/checkpoints/scaling-large-cone-mlp-50M/best.pt"
+CFG = "configs/pretrain/scaling_large_cone_mlp_50M.yaml"
 TRAIN_DIR = "/home/paul/data/trackfm/materialized/v1/train"
 VAL_DIR = "/home/paul/data/trackfm/materialized/v1/val"
 DEPTHS = (0, 1, 2, 3)
