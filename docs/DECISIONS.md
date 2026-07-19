@@ -3,6 +3,24 @@
 Running log of design forks: what was chosen, why, and — for experiments —
 what each possible outcome would mean. Newest first.
 
+## 2026-07-19 — bs1024 control: smaller batch BEATS the series baseline at matched samples
+
+small-cone @ bs1024 (48,828 steps) vs the series' bs1638 (30,525
+steps), same 50M samples, same LR: fixgrid p90 7/17/54/112 vs
+7/18/59/120 (uniform rescore) — ~7-8%% better at 1h/2h.
+
+1. PRIMARY PURPOSE (audit F11): conditioning-v2's baseline is 112, NOT
+   120. A ctx-geo result in (112, 120) would be a batch artifact
+   masquerading as a conditioning win — the control just proved the
+   confound is real and favors the ctx runs' batch size.
+2. Batch sensitivity at matched samples is ~7%% at small scale with
+   UNSCALED LR — more optimizer steps + small-batch noise help. This
+   feeds the flagship batch choice: do not inflate batch beyond
+   throughput need; the muP base sweep (which will pin LR at the
+   flagship batch) is the proper venue for the LR x batch resolution.
+3. Caveat: single scale, single seed, LR not rescaled — treat as a
+   directional control, not a batch-size law.
+
 ## 2026-07-19 — Drain-order plan: PROVISIONAL, revise on each result
 
 Deliberately not a fixed schedule (user directive: adapt tests to

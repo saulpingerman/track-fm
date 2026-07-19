@@ -46,7 +46,7 @@ RUNS = [
     ("scaling_small_cone_ctx_geotraffic_50M", "scaling-small-cone-ctx-geotraffic-50M"),
     ("scaling_small_cone_sig10_50M", "scaling-small-cone-sig10-50M"),
     ("scaling_small_cone_sig05_50M", "scaling-small-cone-sig05-50M"),
-    ("scaling_small_cone_bs1024_50M", "scaling-small-cone-bs1024-control"),
+    ("scaling_small_cone_bs1024_50M", "scaling-small-cone-bs1024-50M"),
     ("scaling_small_cone_trope_50M", "scaling-small-cone-trope-50M"),
     ("scaling_medium_fixed_R125_50M", "scaling-medium-fixed-R125-50M"),
     ("scaling_small_cone_mdn_50M", "scaling-small-cone-mdn-50M"),
