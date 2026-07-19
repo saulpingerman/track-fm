@@ -118,7 +118,8 @@ def ranks_on_fine_grid(log_density: torch.Tensor, targets_canvas: torch.Tensor,
 
 @torch.no_grad()
 def score_geometry(checkpoint: Path, cfg: PretrainConfig, split: str = "test",
-                   max_batches: int = 120) -> dict:
+                   max_batches: int = 120,
+                   fixgrid_restrict_deg: float = 0.3) -> dict:
     """Per-bucket containment in km^2, ceiling, ranks — geometry-agnostic."""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     m, t = cfg.model, cfg.train
@@ -180,7 +181,7 @@ def score_geometry(checkpoint: Path, cfg: PretrainConfig, split: str = "test",
             # honestly apples-to-apples with fixed-grid p90 numbers.
             frG, _, _ = ranks_on_fine_grid(ld[:, k], tgt_canvas, R_deg,
                                             cell_deg=FIXED_NATIVE_CELL_DEG,
-                                            restrict_deg=0.3)
+                                            restrict_deg=fixgrid_restrict_deg)
             fixgrid_rank_chunks[b].append(frG[keep].cpu())
 
     n_cells = m.grid_size * m.grid_size
