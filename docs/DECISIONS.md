@@ -63,6 +63,23 @@ them:
    it gains, stage-2 head fusion becomes a queue candidate.
 7. Flagship package assembles when (geometry verdict) + (sweep LR/wd)
    exist; launch is ALWAYS the user's call.
+8. POST-FLAGSHIP-LAUNCH queue (implementation work rides the flagship's
+   multi-day GPU window; small-scale GPU trials fit its gaps):
+   a. Belief-state feedback (user-approved 2026-07-19; design +
+      anti-collapse levers + diagnostics in docs/research/
+      2026-07-autoregressive-generation.md). Gating by pilot outcome:
+      rollouts beat direct at 1-2h => headroom proven, build it;
+      rollouts collapse from drift => belief chain is the ONLY viable
+      generation route (data-anchored objective aims past the rollout
+      teacher's exposure bias), build it with the collapse diagnostics
+      front and center; rollouts merely match direct => deprioritize
+      below (b)/(c). Ensemble's role: diagnostic reference always,
+      annealed regularizer if collapse is stubborn, NEVER sole target.
+   b. LP-FT vs full FT on ports w/ OOD split + FT-LR transfer
+      spot-check (quick, paper-needed).
+   c. Stage-2 ctx head fusion IF conditioning-v2 shows containment
+      gain; hard-example training experiments.
+   d. L(N,D) compute-optimal surface fit once full-data runs exist.
 
 ## 2026-07-19 — decay_bias_norm flag (wd-sweep prerequisite)
 

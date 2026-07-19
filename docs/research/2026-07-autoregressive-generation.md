@@ -1,8 +1,23 @@
 # Autoregressive generation for TrackFM
 
 **Status:** active — rollout pilot (method 1) approved and queued as an
-eval-only drain candidate; belief-state feedback (method 2) gated on the
-pilot's result. 2026-07-19.
+eval-only drain candidate; belief-state feedback (method 2) USER-APPROVED
+2026-07-19, slotted post-flagship-launch (DECISIONS drain plan item 8a),
+final framing gated on the pilot's result. 2026-07-19.
+
+Anti-collapse addendum (from design discussion): the NLL objective is
+mode-COVERING (collapse is not a loss minimum — dropped modes pay
+unbounded log-loss on their continuations). Residual collapse doors +
+levers: (1) belief-token bottleneck -> reconstruction probe, widen to
+multi-token/cross-attention if needed; (2) chain-length distribution
+shift -> curriculum to inference-length chains, supervise EVERY masked
+step; (3) mean-conditioning shortcut -> fork-heavy curriculum segments.
+Detection: K-rollout ensemble as the collapse-free Monte Carlo reference
+(entropy + calibration vs chain depth). Distillation-ceiling note: the
+ensemble is a DIAGNOSTIC (no gradient) or an annealed anti-collapse
+regularizer — never the sole target; the primary loss stays NLL on true
+posits, which aims past the rollout teacher's exposure bias (the student
+can exceed the teacher because the data signal exceeds the teacher).
 
 ## Framing
 
