@@ -131,7 +131,7 @@ window (leakage rule).
 | axis | pick | status |
 |---|---|---|
 | data | full 26mo, temporal split, train-period traffic prior | firm |
-| geometry | cone (R(t)=0.02+1.71e-4 t) | strengthened: cone-mlp 56 ~ fixed-117M at 6.4x fewer params, full ceiling; R125 check pending (linear-head caveat) |
+| geometry | cone (R(t)=0.02+1.71e-4 t) | DECIDED: R125 loses <=1h on band-limit grounds (14/21/47/81 vs cone-mlp 4/8/27/56); chain6 = confirmation only |
 | capacity | 117M (d=768) | firm at current evidence |
 | LR | muP-transferred from d_base sweep | pending smokes + sweep |
 | sigma | 0.003 (0.32 cells) | DECIDED: sigma study complete (plateau <=0.5, worse at 1.0) |

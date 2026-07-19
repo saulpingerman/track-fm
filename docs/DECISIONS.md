@@ -297,6 +297,33 @@ sig05 (aliasing), bs1024 control, large-cone-mlp, large-fixed_R125,
 then muP smoke tiers, then the unified v2+conformal rescoring and the
 flagship recommendation package.
 
+## 2026-07-19 — GEOMETRY RESULT (chain5): wide-fixed R125 buys 2h coverage by selling every shorter horizon
+
+large-fixed-R125 (18.3M, linear head, full ceilings 1.00) final
+fixgrid p90 vs encoder-matched comparators:
+
+| run (18.3M) | 15m | 30m | 1h | 2h |
+|---|---|---|---|---|
+| large-cone (linear) | 7 | 15 | 41 | 86 |
+| large-fixed-R125 (linear) | 14 | 21 | 47 | 81 |
+| large-cone-mlp | 4 | 8 | 27 | 56 |
+
+At matched capacity AND head, R125 wins 2h by 6% and loses 15m by
+2x, 30m by 40%, 1h by 15%. Mechanism: the ±1.25° canvas has 0.039°
+(~10.5 km²) native cells and an F=12 band limit of ~12 km on that
+canvas — short-horizon structure is physically unrepresentable, and
+no head can fix it (the blur is in the basis, not the projector).
+The cone's time-scaled canvas delivers full coverage AND matched-or-
+better resolution at every horizon; its only concession (2h, -6%) is
+smaller than its wins and is dominated anyway by large-cone-mlp (56),
+which beats R125-linear at every bucket by 27-42%.
+
+Flagship geometry: CONE, now on three legs — coverage (1.00 vs fixed
+±0.3's 0.81), short-horizon resolution (this result), and the head
+fix reactivating its scaling (2026-07-19 head entry). chain6
+(large-fixed-R125-mlp) remains as confirmation: even a proportional
+MLP lift leaves R125 behind at <=1h on band-limit grounds.
+
 ## 2026-07-19 — HEAD RESULT: MLP projector win GROWS with scale; cone "saturation" was partly a HEAD bottleneck
 
 large-cone-mlp (18.3M, head_mlp_hidden=384) final vs comparators,
