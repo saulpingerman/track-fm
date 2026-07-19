@@ -21,6 +21,31 @@ steps), same 50M samples, same LR: fixgrid p90 7/17/54/112 vs
 3. Caveat: single scale, single seed, LR not rescaled — treat as a
    directional control, not a batch-size law.
 
+## 2026-07-19 — OLD-PAPER BASELINE under metrics v2: golden replicas rescored (user request)
+
+The original exp-11 checkpoints are unrecoverable (lost with AWS; disk +
+credential search confirmed). The golden replicas — paper configs
+retrained with new code on the original 69-day Jan-Feb 2025 window,
+architecture tied by the legacy-equivalence test — stand in. Uniform v2
+rescore, val (clean: golden window overlaps only the RETIRED test split):
+
+| model | encoder | data | 15m/30m/1h/2h |
+|---|---|---|---|
+| golden-medium | 5.3M | 69d | 7/19/50/100 |
+| scaling-medium | 5.3M | 26mo(50M) | 7/19/47/75 |
+| golden-large | 18.3M | 69d | 6/17/45/86 |
+| scaling-large | 18.3M | 26mo(50M) | 6/16/40/64 |
+| large-cone-mlp | 18.3M | 26mo(50M) | 4/8/27/58 (100%% cov) |
+
+Findings: data improvements alone = ~25%% at 2h at matched everything;
+gains concentrate at 1-2h (short horizons saturated in both eras);
+cone-mlp at the same encoder beats the paper-large replica by 33%% at 2h
+with full coverage. Caveats recorded: replicas not literal weights;
+seasonal gap between 69d window and val is part of the measured deficit
+(by design). OPEN OFFER (user's call, ~1 GPU-day): golden-xlarge would
+complete the story; prediction from the saturation results: lands ~86
+(data-bound at 69d) — a clean data-scaling exhibit if confirmed.
+
 ## 2026-07-19 — GEOMETRY DECISION RULE (user's, supersedes the pre-registered rule in chain6's header)
 
 The battleground is FIXED'S OWN METRIC: the ±0.3° restricted-population

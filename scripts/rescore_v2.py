@@ -25,6 +25,11 @@ from trackfm.eval.xgeometry import score_geometry
 CKPT = "/home/paul/data/trackfm/checkpoints"
 RUNS = [
     # (config, checkpoint dir) — extend as the chain drains
+    # golden-* = paper-configuration replicas (69-day Jan-Feb 2025 slice,
+    # new code) standing in for the lost exp-11 checkpoints; v1 val is
+    # clean for them (their window overlaps the RETIRED test split only)
+    ("golden_medium", "golden-medium"),
+    ("golden_large", "golden-large"),
     ("scaling_nano_50M", "scaling-nano-50M"),
     ("scaling_micro_50M", "scaling-micro-50M"),
     ("scaling_mini_50M", "scaling-mini-50M"),
