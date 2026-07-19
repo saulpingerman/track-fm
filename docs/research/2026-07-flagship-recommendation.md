@@ -59,15 +59,15 @@ val_loss is irreducible sub-cell jitter; sigma=1.0 cell removes ~85%.
   7/19/59/118, +11-17%). The jitter is a val_loss floor, not a
   learning handicap; the wide target trains a broader density whose
   blur inflates search area (DECISIONS 2026-07-18).
-- TBD(sig05): monotonicity check (0.5 cells, running).
-- TBD(conformal pass at drain): broader may be better calibrated —
-  calibrated area@90 gives the final verdict.
-- STAGED(sig015, config ready, not armed): 0.16-cell target — tests
-  the other side of 0.32. Expected flat-to-worse (the F=12 band limit
-  ~2.7 cells already exceeds target sharpness), but if containment
-  IMPROVES the flagship sigma should shrink further.
-Outcome unless conformal reverses: flagship keeps sigma=0.003
-(0.32 cells).
+- RESULT(sig05): 7/18/59/123 — indistinguishable from baseline
+  except a within-CI 2h gap. STUDY COMPLETE: flat plateau for sigma
+  in [0.32, 0.5] cells, clear degradation at 1.0 (DECISIONS
+  2026-07-19).
+- TBD(conformal pass at drain): the only remaining check
+  (calibration quality across sigmas).
+- sig015 (staged) dropped in priority — the plateau makes a
+  below-0.32 gain unlikely.
+DECIDED (containment grounds): flagship sigma = 0.003 (0.32 cells).
 
 ## 5. Head
 
@@ -128,7 +128,7 @@ window (leakage rule).
 | geometry | cone (R(t)=0.02+1.71e-4 t) | pending chain5 R125 check |
 | capacity | 117M (d=768) | firm at current evidence |
 | LR | muP-transferred from d_base sweep | pending smokes + sweep |
-| sigma | 0.003 (0.32 cells) | sig10 lost on containment; conformal check pending |
+| sigma | 0.003 (0.32 cells) | DECIDED: sigma study complete (plateau <=0.5, worse at 1.0) |
 | head | Fourier F=12 + MLP projector | pending chain4 |
 | conditioning | geo_traffic w/ capped bias | pending ctx-v2 |
 | pos encoding | index PE | trope is post-flagship ablation |

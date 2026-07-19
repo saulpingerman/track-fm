@@ -138,6 +138,22 @@ sig05 (aliasing), bs1024 control, medium-cone-mlp, medium-fixed_R125,
 then muP smoke tiers, then the unified v2+conformal rescoring and the
 flagship recommendation package.
 
+## 2026-07-19 — SIGMA STUDY COMPLETE: plateau at <=0.5 cells, degradation at 1.0
+
+sig05 final (schedule-identical): fixgrid p90 7/18/59/123 vs baseline
+7/19/59/118 vs sig10 8/21/66/138. The 15m/30m/1h columns are
+indistinguishable from baseline (30m marginally better); the 2h gap
+(123 vs 118, +4%) is inside the overlap-widened CIs. Response shape:
+FLAT for sigma in [0.32, 0.5] cells, clearly worse by 1.0 cell.
+
+Verdict: flagship sigma = 0.003 (0.32 cells), now on two grounds —
+no containment benefit anywhere in the tested range and a clear cost
+at 1.0. The staged sig015 (0.16 cells) drops in priority: the plateau
+at [0.32, 0.5] makes a below-0.32 gain unlikely (and the F=12 band
+limit argues it cannot express sharper anyway). The drain conformal
+pass remains the only check that could modify this (calibration
+quality across sigmas).
+
 ## 2026-07-18 — SIG10 RESULT: sigma=1.0 cell LOSES on containment at every horizon
 
 small-cone-sig10 (sigma=0.009375 = 1.0 cell; bs1638/30525 — schedule-
