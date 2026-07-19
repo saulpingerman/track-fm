@@ -21,6 +21,40 @@ steps), same 50M samples, same LR: fixgrid p90 7/17/54/112 vs
 3. Caveat: single scale, single seed, LR not rescaled — treat as a
    directional control, not a batch-size law.
 
+## 2026-07-19 — CHAIN4 RESULT: the head bottleneck is REAL and scale-emergent — cone+MLP rewrites the geometry table
+
+medium-cone-mlp (identical to medium-cone except head_mlp_hidden=384,
+verified single-line config diff), uniform v2 rescore:
+
+| run | 15m | 30m | 1h | 2h | coverage |
+|---|---|---|---|---|---|
+| medium-cone | 7 | 14 | 40 | 87 | 1.00 |
+| medium-cone-mlp | 4 | 8 | 27 | 58 | 1.00 |
+| large-FIXED (18M) | 6 | 16 | 40 | 64 | 0.81 |
+| xlarge-FIXED (117M) | 6 | 14 | 34 | 52 | 0.81 |
+
+1. The single-linear encoder->coefficient projection binds when the
+   encoder is STRONG: MLP was flat at small (121 vs 120, weak encoder,
+   nothing to mix) but -33%% at 2h at medium. Classic emergent
+   bottleneck — the small-scale ablation was a false negative.
+2. cone-mlp at 18M (58, FULL coverage) now BEATS large-fixed at 18M
+   (64, 81%% coverage) and closes most of the gap to xlarge-fixed
+   (52, 81%%) on the restricted population — while covering everyone.
+3. The 'cone saturates ~18M' conclusion is now SUSPECT: xlarge-cone
+   ran head-limited (single-linear). Its 85 at 2h could move a lot
+   with the MLP head. The both-curves coverage-decision framing
+   stands, but cone's curve top is understated.
+4. CHAIN5 (medium-fixed-R125, running) stays valid as a cone-vs-
+   wide-fixed comparison at MATCHED single-linear heads; its reading
+   must now also be compared against cone-mlp's 58.
+5. QUEUE QUESTION FOR THE USER: xlarge-cone-mlp@50M (~18h) would test
+   whether the MLP unlocks cone scaling past 18M — now well-motivated
+   (it was rightly deprioritized before this result), but it delays
+   the muP tiers + base sweep by a day. Recommendation: run it AFTER
+   the muP tiers (tiers are 4h and gate the flagship LR regardless of
+   geometry); slot it against the sweep depending on the CHAIN5
+   verdict. Not queued autonomously.
+
 ## 2026-07-19 — Drain-order plan: PROVISIONAL, revise on each result
 
 Deliberately not a fixed schedule (user directive: adapt tests to
