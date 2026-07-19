@@ -195,11 +195,15 @@ class GlobalContextBias(nn.Module):
             # a 570 GiB allocation for a 65k-pair chunk against the
             # 1081x2161 raster). Input (1,1,H,W) + grid (1, n*G, G, 2)
             # allocates only the (n*G, G) output.
-            grid = torch.stack(
-                [x.view(n, 1, G).expand(n, G, G).reshape(1, n * G, G),
-                 y.view(n, G, 1).expand(n, G, G).reshape(1, n * G, G)],
-                dim=-1)
-            samp = F.grid_sample(field, grid, mode="bilinear",
+            # Grid is written with two broadcast assignments into ONE
+            # preallocated buffer — the previous expand->reshape->stack
+            # materialized the coordinate tensor three times and was the
+            # second-largest context cost (~140 ms/step at bs1024).
+            grid = torch.empty(n, G, G, 2, device=device, dtype=field.dtype)
+            grid[..., 0] = x.view(n, 1, G)      # lon varies along width
+            grid[..., 1] = y.view(n, G, 1)      # lat varies along height
+            samp = F.grid_sample(field, grid.view(1, n * G, G, 2),
+                                 mode="bilinear",
                                  padding_mode="border", align_corners=True)
             out[s:e] = samp.view(n, G, G)
         return out
