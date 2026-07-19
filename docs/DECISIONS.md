@@ -154,6 +154,10 @@ limit argues it cannot express sharper anyway). The drain conformal
 pass remains the only check that could modify this (calibration
 quality across sigmas).
 
+rescore_v2 cross-check (uniform harness, 120 stride-spread batches):
+baseline 7/18/59/120, sig05 8/20/61/122, sig10 8/21/67/139 — same
+shape, same verdict; entries in ~/data/trackfm/rescore_v2.json.
+
 ## 2026-07-18 — SIG10 RESULT: sigma=1.0 cell LOSES on containment at every horizon
 
 small-cone-sig10 (sigma=0.009375 = 1.0 cell; bs1638/30525 — schedule-
