@@ -1,0 +1,54 @@
+data_dir: ~/data/trackfm/materialized/v1
+checkpoint_dir: ~/data/trackfm/checkpoints
+# Fixed geometry with the ±1.25° canvas matched to cone's R(2h). Isolates
+# whether cone's 2h penalty is (a) the coverage/resolution burden of a
+# larger canvas or (b) the cone parameterisation itself. Encoder identical
+# to scaling_large_50M (d=384/L=8/G=64/F=12, 18.3M params). At 2h this
+# canvas has the SAME native cell size as xlarge-cone at 2h (2·1.25/64 =
+# 0.039° = 4.4 km); at 15m it has 8× coarser cells than cone at 15m
+# (~4.4 km vs ~0.55 km) — the short-horizon numbers will show exactly
+# what cone's dynamic tight-canvas scaling buys.
+model:
+  d_model: 384
+  nhead: 16
+  num_layers: 8
+  dim_feedforward: 2048
+  dropout: 0.1
+  max_seq_len: 128
+  grid_size: 64
+  # ±1.25° matches R(2h) = 0.02 + 0.000171 · 7200 = 1.25°.
+  grid_range: 1.25
+  head_mlp_hidden: 384
+  num_freqs: 12
+normalization:
+  lat_center: 56.25
+  lat_scale: 1.0
+  lon_center: 11.5
+  lon_scale: 2.0
+  sog_scale: 30.0
+  dt_scale: 300.0
+train:
+  learning_rate: 0.0003
+  weight_decay: 1.0e-05
+  batch_size: 1280
+  max_horizon: 800
+  num_horizon_samples: 4
+  warmup_steps: 500
+  lr_schedule: cosine
+  # sigma and dr_sigma scaled by 1.25/0.3 = 4.167 to preserve
+  # canvas-fraction sigma at 0.32 cells — identical target-shape entropy
+  # to scaling_large_50M so val_loss and containment metrics are
+  # apples-to-apples across grid_range choices.
+  sigma: 0.0125
+  dr_sigma: 0.208
+  precision: bf16
+  compile: false
+  val_interval_minutes: 30
+  early_stop_patience: 10
+  num_workers: 8
+  seed: 17
+  max_steps: 39062
+mlflow:
+  tracking_uri: http://127.0.0.1:5000
+  experiment: trackfm/scaling
+  run_name: scaling-medium-fixed-R125-mlp-50M
