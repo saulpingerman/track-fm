@@ -106,6 +106,39 @@ the compute-frontier bend and 18M knee were measured on single-linear
 heads; if MLP moves the FIXED curve at 18M too, part of the "data
 floor" narrative is head-limited and must be requalified.
 
+## 2026-07-19 — CHAIN5 RESULT: coverage burden, not cone parameterization, explains most of cone's 2h deficit
+
+large-fixed-R125 (wide static box ±1.25°, linear head, 18.3M): fixgrid
+p90 = 14/21/47/82 vs large-cone(linear) 7/14/40/87 vs large-fixed±0.3
+64. At MATCHED coverage and heads:
+1. Cone WINS 15m/30m/1h (7/14/40 vs 14/21/47 — 2x at 15m): the
+   horizon-scaled canvas earns its keep exactly where predicted
+   (the wide static box is 4x coarser at short range).
+2. Wide-fixed edges 2h (82 vs 87, ~6%): the dynamic-canvas cost at max
+   horizon is real but small.
+3. BOTH full-coverage models sit ~30%% behind the narrow ±0.3 box at 2h
+   (82/87 vs 64) -> the user's branch-(a) reading is largely CORRECT:
+   the coverage burden itself, inherent to ANY full-coverage model, is
+   the dominant cost — not cone's moving cells.
+Verdict input: cone remains the better full-coverage geometry on
+horizon balance; the decisive head-matched cells (CHAIN6 R125-mlp,
+CHAIN7 fixed±0.3-mlp vs cone-mlp 58) land next.
+
+## 2026-07-19 — AWS SALVAGE complete (pre-deletion pull, 57/57 verified)
+
+~132G to ~/data/trackfm/recovered_old_models/aws/ in 43 min, every
+best_model/config/zip md5-verified. SAVED: exp-11 complete (incl. the
+paper backbone, 500MB best_model.pt); exp-12/13 fine-tune grids (37
+best models + task data); exp-14 18M runs full + 100M runs curated
+(incl. run_grid1.2_100M — a wide-grid 100M directly relevant to the
+geometry question); exp-9/10/01.5; user bundles; S3 state/backups/
+track_catalog. SKIPPED (overrulable pre-deletion): mds-cache 59G, S3
+raw/cleaned-bulk/materialized/mds/sharded (duplicated/superseded),
+dense periodic 100M checkpoints (~90G; exponential subset kept). No
+fine-tuning datasets existed in S3 (recursive sweep). Unlocked: score
+the real exp-11/exp-14/grid1.2 weights under v2; benchmark old
+fine-tunes vs the new LP-FT machinery.
+
 ## 2026-07-19 — CHAIN4 RESULT: the head bottleneck is REAL and scale-emergent — cone+MLP rewrites the geometry table
 
 large-cone-mlp (identical to large-cone except head_mlp_hidden=384,
