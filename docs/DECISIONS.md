@@ -21,6 +21,37 @@ steps), same 50M samples, same LR: fixgrid p90 7/17/54/112 vs
 3. Caveat: single scale, single seed, LR not rescaled — treat as a
    directional control, not a batch-size law.
 
+## 2026-07-19 — GEOMETRY DECISION RULE (user's, supersedes the pre-registered rule in chain6's header)
+
+The battleground is FIXED'S OWN METRIC: the ±0.3° restricted-population
+fixgrid p90, head-matched. Cone's coverage and long-horizon
+extensibility are the prize, not the test.
+
+1. PRIMARY: cone-mlp vs large-fixed-mlp (CHAIN7, armed) at 18M, and
+   xlarge-cone-mlp vs (if needed) xlarge-fixed-mlp at 117M.
+   - Cone TIES or BEATS on the ±0.3° metric => cone wins outright:
+     performance held, full coverage + long-horizon flexibility free.
+   - Cone LOSES => do NOT abandon; run the diagnosis branch.
+2. DIAGNOSIS (only if cone loses): distinguish (a) capacity spent on
+   far travelers fixed never models — possibly inherent to ANY
+   full-coverage model — from (b) canvas/cell-size effects (fixable).
+   Instruments: CHAIN5/CHAIN6 wide-fixed cells carry the same coverage
+   burden with static cells — if wide-fixed-mlp loses to ±0.3-fixed-mlp
+   by a similar margin, the cost is coverage itself (a), and cone is no
+   worse than any full-coverage option; if wide-fixed-mlp matches
+   ±0.3-fixed-mlp, cone's deficit is parameterization (b). Additional
+   probe if needed: cone-geometry model with loss restricted to ±0.3°
+   targets (relieves far-coverage duty, isolates capacity allocation).
+3. STRATEGIC FLOOR: even a fixed verdict is scoped to <=2h. At 6h+ a
+   fixed grid needs G growing ~linearly with range (quadratic cells) at
+   matched resolution; cone holds G constant. Longer-horizon forecasting
+   (the eventual goal) is untested for BOTH and needs longer windows
+   than the 928-posit materialization — future work either way.
+
+Current standing on the primary metric (head-UNMATCHED, awaiting
+CHAIN7): cone-mlp 4/8/27/58 vs large-fixed(linear) 6/16/40/64 — cone
+currently ahead on fixed's own game at every bucket.
+
 ## 2026-07-19 — PLAN REVISION after CHAIN4 (user-approved): head recipe becomes part of the flagship spine
 
 Supersedes the drain-order items where they conflict; spine order now:
