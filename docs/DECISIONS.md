@@ -138,6 +138,21 @@ sig05 (aliasing), bs1024 control, medium-cone-mlp, medium-fixed_R125,
 then muP smoke tiers, then the unified v2+conformal rescoring and the
 flagship recommendation package.
 
+## 2026-07-19 — BS1024 CONTROL: smaller batch beats bs1638 at matched samples AND matched wall-clock
+
+scaling-small-cone-bs1024 final fixgrid p90: 7/17/54/111 vs bs1638
+baseline 7/19/59/118 (-5 to -8% beyond 15m). Same 50M samples, same
+~3.2h wall-clock (throughput is batch-size-flat at this model size),
+1.6x more optimizer steps — a free win at 4.5M params.
+
+Consequences: (1) ctx-geo/geotraffic v2 are compared against 111, not
+118 — the control exists precisely so the conditioning delta is not
+confounded with the batch-size effect. (2) Flagship note: don't
+maximize batch for throughput's sake; at 117M the memory-forced bs640
+is likely fine or even favorable — the LR/batch interaction folds into
+the muP base sweep. (3) The scaling-series numbers (all bs-matched
+within comparisons) are unaffected.
+
 ## 2026-07-19 — SIGMA STUDY COMPLETE: plateau at <=0.5 cells, degradation at 1.0
 
 sig05 final (schedule-identical): fixgrid p90 7/18/59/123 vs baseline
