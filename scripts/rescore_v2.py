@@ -28,6 +28,8 @@ RUNS = [
     # golden-* = paper-configuration replicas (69-day Jan-Feb 2025 slice,
     # new code) standing in for the lost exp-11 checkpoints; v1 val is
     # clean for them (their window overlaps the RETIRED test split only)
+    ("recovered_exp10_large", "recovered-exp10-large"),
+    ("recovered_exp10_small", "recovered-exp10-small"),
     ("golden_medium", "golden-medium"),
     ("golden_large", "golden-large"),
     ("scaling_nano_50M", "scaling-nano-50M"),
