@@ -106,6 +106,36 @@ the compute-frontier bend and 18M knee were measured on single-linear
 heads; if MLP moves the FIXED curve at 18M too, part of the "data
 floor" narrative is head-limited and must be requalified.
 
+## 2026-07-19 — WIDE-FRAME comparison: cone-mlp beats every exp-14 model ON THEIR OWN frames; the narrow-box wall quantified
+
+Same 0.6 km2 cells, wider evaluation boxes (±0.6° = 128², ±1.2° = 256²)
+admitting the fast-vessel population the ±0.3° metric censors
+(scripts/widegrid_compare.py; full table widegrid_compare.json). 2h
+fixgrid p90:
+
+| model | ±0.3 | ±0.6 | ±1.2 |
+|---|---|---|---|
+| large-cone-mlp 18M | 58 | 92 | 98 |
+| xlarge-cone 116M (linear) | 85 | 166 | 179 |
+| exp14 100M h800 (±0.6 native) | 129 | 265 | 500 |
+| exp14 100M grid12 (±1.2 native) | 142 | 264 | 287 |
+| xlarge-fixed ±0.3 116M | 52 | 326 | 970 |
+
+1. cone-mlp beats every exp-14 model on the exp-14 models' OWN native
+   frames, every bucket (2h: 92 vs 265 home-±0.6; 98 vs 287 home-±1.2)
+   — ~3x better at 18M params vs their 100M.
+2. Cone's coverage is real and cheap: 58 -> 92 -> 98 as the population
+   widens 81% -> ~full; every fixed model cliffs when its box's
+   escapees enter the denominator (h800 models: 265 -> 500/603 on
+   ±1.2; the ±0.3 flagship: 52 -> 326 -> 970).
+3. On the FULL 2h population, large-cone-mlp (98) is the best model in
+   project history by ~2x over the next non-cone entry; the narrow
+   flagship is a <=30m specialist there (6/15 short-horizon holds).
+Caveat: exp-14 val-overlap flatters exp-14; conclusions robust.
+Geometry verdict input: the ±0.3 head-matched battleground (CHAIN7)
+still rules per the user's decision, but the coverage prize is now
+QUANTIFIED, not assumed.
+
 ## 2026-07-19 — REAL old models scored under v2 (salvaged weights; the 64x story)
 
 fixgrid p90 2h progression at matched-or-better coverage: exp-10 18M
