@@ -428,6 +428,19 @@ def run_pretraining(cfg: PretrainConfig) -> Path:
                     torch.save({"model": sd, "step": step,
                                 "config": cfg.model_dump(mode="json")},
                                ckpt_dir / "last.pt")
+                    # conditioned runs: snapshot the bias FIELD (not the
+                    # model) each validation — ~5MB fp16/val gives the
+                    # full field-evolution record that best/last-only
+                    # checkpointing cannot reconstruct
+                    ctx = getattr(model, "context_bias", None) or \
+                        getattr(getattr(model, "_orig_mod", model),
+                                "context_bias", None)
+                    if ctx is not None:
+                        (ckpt_dir / "fields").mkdir(exist_ok=True)
+                        with torch.no_grad():
+                            torch.save(ctx.field().half().cpu(),
+                                       ckpt_dir / "fields" /
+                                       f"field_step{step}.pt")
                     if val_loss < best_val:
                         best_val = val_loss
                         torch.save({"model": sd, "step": step,
