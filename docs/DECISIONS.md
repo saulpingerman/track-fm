@@ -106,6 +106,19 @@ the compute-frontier bend and 18M knee were measured on single-linear
 heads; if MLP moves the FIXED curve at 18M too, part of the "data
 floor" narrative is head-limited and must be requalified.
 
+## 2026-07-19 — REAL old models scored under v2 (salvaged weights; the 64x story)
+
+fixgrid p90 2h progression at matched-or-better coverage: exp-10 18M
+3351 -> exp-11 PAPER 116M 2532 -> exp-14 100M (1yr) 129 -> campaign
+xlarge 52 / cone-mlp 58 (100%% cov). Full rows in rescore_v2.json
+(recovered-*). Findings: (1) the actual paper backbone collapses at
+1-2h (h400 training + old code); the golden replica on the SAME 69d
+scores 45/86 -> most of the old-vs-new gap is RECIPE+CODE, not data;
+(2) old grid1.2 experiments pre-figured CHAIN5: wide ±1.2° beat ±0.6°
+at 18M (133 vs 157) on the restricted metric; (3) old-era capacity
+saturation visible (exp-14 100M ~ its 18M). Caveat: exp-14's 1yr window
+likely overlaps v1 val (flatters OLD models; conclusions survive).
+
 ## 2026-07-19 — CHAIN5 RESULT: coverage burden, not cone parameterization, explains most of cone's 2h deficit
 
 large-fixed-R125 (wide static box ±1.25°, linear head, 18.3M): fixgrid
