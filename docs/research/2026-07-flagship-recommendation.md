@@ -73,10 +73,16 @@ DECIDED (containment grounds): flagship sigma = 0.003 (0.32 cells).
 
 - Fourier F=12 vs F=18/F=24: no containment gain past F=12 at small
   scale (F18/F24 runs); band limit is not the binding constraint.
-- 1-hidden-layer MLP coefficient projector (d=hidden) beat the linear
-  projector significantly at small scale; TBD(chain4
-  medium-cone-mlp): does the MLP win persist at 18M ("vs medium-cone
-  86" is the bar)?
+- RESULT(chain4): the MLP projector win GROWS with scale — neutral at
+  4.5M, then 4/8/27/56 vs 7/15/41/86 at 18.3M (-30 to -47% every
+  bucket, ~5% wall-clock cost). DECIDED: Fourier F=12 + MLP projector
+  (hidden=d_model). It also reframes cone saturation: medium-cone-mlp
+  (56) beats cone-117M-linear (82-85) and nearly matches
+  fixed-117M-linear (52-54) at 6.4x fewer params with full ceiling —
+  the "capacity ceiling" was partly the linear head starving the
+  encoder (DECISIONS 2026-07-19). Caveat: chain5's R125 run is
+  linear-head; the clean geometry race is mlp-vs-mlp (shelf
+  candidate).
 - Direct per-cell head: trains ~2x faster, slightly worse, no
   continuous density (rules out sub-cell conformal refinement); kept
   as ablation, not flagship.
@@ -125,11 +131,11 @@ window (leakage rule).
 | axis | pick | status |
 |---|---|---|
 | data | full 26mo, temporal split, train-period traffic prior | firm |
-| geometry | cone (R(t)=0.02+1.71e-4 t) | pending chain5 R125 check |
+| geometry | cone (R(t)=0.02+1.71e-4 t) | strengthened: cone-mlp 56 ~ fixed-117M at 6.4x fewer params, full ceiling; R125 check pending (linear-head caveat) |
 | capacity | 117M (d=768) | firm at current evidence |
 | LR | muP-transferred from d_base sweep | pending smokes + sweep |
 | sigma | 0.003 (0.32 cells) | DECIDED: sigma study complete (plateau <=0.5, worse at 1.0) |
-| head | Fourier F=12 + MLP projector | pending chain4 |
+| head | Fourier F=12 + MLP projector (hidden=d_model) | DECIDED: win grows with scale (-35% at 2h, 18.3M) |
 | conditioning | geo_traffic w/ capped bias | pending ctx-v2 |
 | pos encoding | index PE | trope is post-flagship ablation |
 

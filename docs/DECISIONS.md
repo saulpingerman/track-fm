@@ -178,6 +178,39 @@ sig05 (aliasing), bs1024 control, medium-cone-mlp, medium-fixed_R125,
 then muP smoke tiers, then the unified v2+conformal rescoring and the
 flagship recommendation package.
 
+## 2026-07-19 — HEAD RESULT: MLP projector win GROWS with scale; cone "saturation" was partly a HEAD bottleneck
+
+medium-cone-mlp (18.3M, head_mlp_hidden=384) final vs comparators,
+fixgrid p90 (schedule-matched, annealed):
+
+| run | 15m | 30m | 1h | 2h | wall |
+|---|---|---|---|---|---|
+| medium-cone-mlp | 4 | 8 | 27 | **56** | 6.7h |
+| medium-cone (linear) | 7 | 15 | 41 | 86 | 6.4h |
+| small-cone-mlp | 5 | 18 | 59 | 118 | 3.2h |
+| small-cone (linear) | 7 | 19 | 59 | 118 | 3.2h |
+
+Findings:
+1. The MLP head win is SCALE-DEPENDENT and growing: ~neutral at 4.5M
+   (118 vs 118 at 2h; the earlier "significant small-scale win" claim
+   was pre-v2/other-metric and is hereby REVISED), -30 to -47% across
+   every bucket at 18.3M. Reading: a weak encoder is itself the
+   bottleneck, so head capacity is wasted; a stronger encoder's
+   representation is squeezed through the single linear projection and
+   the MLP unlocks it. Cost: ~5% wall-clock.
+2. This REFRAMES the cone-saturation result. "Cone saturates at ~18M"
+   was measured with the LINEAR head. medium-cone-mlp (56) beats
+   cone-117M-linear (82-85) AND fixed-medium-linear (64), and nearly
+   matches fixed-117M-linear (52-54) at 6.4x fewer params — with full
+   2h ceiling (1.00 vs fixed's 0.81). The apparent capacity ceiling
+   was at least partly the head starving the encoder's gains.
+3. CAVEAT for the geometry decision: the head effect may be
+   geometry-independent — a fixed-medium-mlp could improve similarly.
+   chain5 (medium-fixed-R125) is LINEAR-head, so its result carries
+   this caveat; the clean geometry comparison at drain should be
+   cone-mlp vs fixed(-R125)-mlp, a post-drain shelf candidate.
+Flagship head: Fourier F=12 + MLP projector (hidden=d_model), firm.
+
 ## 2026-07-19 — BS1024 CONTROL: smaller batch beats bs1638 at matched samples AND matched wall-clock
 
 scaling-small-cone-bs1024 final fixgrid p90: 7/17/54/111 vs bs1638

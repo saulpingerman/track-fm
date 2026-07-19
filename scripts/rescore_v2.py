@@ -36,6 +36,7 @@ RUNS = [
     ("scaling_small_cone_mlp_50M", "scaling-small-cone-mlp-50M"),
     ("scaling_small_cone_direct_mlp_50M", "scaling-small-cone-direct-mlp-50M"),
     ("scaling_medium_cone_50M", "scaling-medium-cone-50M"),
+    ("scaling_medium_cone_mlp_50M", "scaling-medium-cone-mlp-50M"),
     ("scaling_large_50M", "scaling-large-50M"),
     ("scaling_small_50M", "scaling-small-50M"),
     ("scaling_small_direct_50M", "scaling-small-direct-50M"),
