@@ -19,15 +19,15 @@ base = {r["run"]: r["buckets"]["2h"]["fixgrid_p90_rank"]
         for r in json.load(open("/home/paul/data/trackfm/rescore_v2.json"))}
 
 MODELS = [  # (run, label, color)
-    ("scaling-large-cone-mlp-50M", "cone-mlp 18M (full coverage)", "#d4762f"),
+    ("scaling-large-cone-mlp-50M", "cone-mlp 18M (adaptive canvas: at home on every frame)", "#d4762f"),
     ("scaling-xlarge-cone-50M", "cone 116M, linear head", "#e3a76f"),
     ("recovered-exp14-100M-grid12", "exp-14 100M, ±1.2° box", "#8899aa"),
     ("recovered-exp14-100M-h800", "exp-14 100M, ±0.6° box", "#5f7a99"),
     ("scaling-xlarge-50M", "xlarge-fixed 116M, ±0.3° box", "#2f7fd4"),
 ]
 FRAMES = [("0.3", "±0.3° frame\n(81% of vessels)"),
-          ("0.6", "±0.6° frame\n(wider population)"),
-          ("1.2", "±1.2° frame\n(~all vessels)")]
+          ("0.6", "±0.6° frame\n(96% of vessels)"),
+          ("1.2", "±1.2° frame\n(100% of vessels)")]
 
 fig, ax = plt.subplots(figsize=(11.5, 7))
 x = np.arange(len(FRAMES))
@@ -55,14 +55,25 @@ ax.set_facecolor("#fafafa")
 
 # narrative callouts
 ax.annotate("full coverage: barely moves\n(58 → 92 → 98)",
-            xy=(2 - 2 * w, 110), xytext=(0.72, 470), fontsize=11.5,
+            xy=(2 - 2 * w, 110), xytext=(0.60, 500), fontsize=11.5,
             color="#b85f1a", ha="center",
             arrowprops=dict(arrowstyle="->", color="#b85f1a",
-                            connectionstyle="arc3,rad=-0.15"))
-ax.annotate("best model on the censored metric,\n10× worse than cone on everyone",
-            xy=(2 + 2 * w, 970), xytext=(1.62, 840), fontsize=11.5,
-            color="#1d5fa8", ha="right",
-            arrowprops=dict(arrowstyle="->", color="#1d5fa8"))
+                            connectionstyle="arc3,rad=-0.22"))
+ax.annotate("wins its home frame (52) — but on\nALL vessels needs 970 cells vs cone's 98",
+            xy=(2 + 2 * w, 960), xytext=(1.52, 700), fontsize=11.5,
+            color="#1d5fa8", ha="center",
+            arrowprops=dict(arrowstyle="->", color="#1d5fa8",
+                            connectionstyle="arc3,rad=0.2"))
+
+# home-field-advantage markers: each fixed box evaluated on its own
+# native frame
+for gx, mi, bar_top, color in [(0, 4, 52, "#1d5fa8"),      # xlarge @ ±0.3
+                                (1, 3, 265, "#4a6480"),     # exp14 ±0.6 @ ±0.6
+                                (2, 2, 287, "#6e8296")]:    # exp14 ±1.2 @ ±1.2
+    px = gx + (mi - (len(MODELS) - 1) / 2) * w
+    ax.annotate("home\nframe", xy=(px, bar_top + 30), xytext=(px, bar_top + 130),
+                fontsize=10, color=color, ha="center", style="italic",
+                arrowprops=dict(arrowstyle="->", color=color))
 fig.tight_layout()
 out = "docs/figures/coverage_story_2h.png"
 fig.savefig(out, dpi=130)
