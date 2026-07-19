@@ -21,6 +21,35 @@ steps), same 50M samples, same LR: fixgrid p90 7/17/54/112 vs
 3. Caveat: single scale, single seed, LR not rescaled — treat as a
    directional control, not a batch-size law.
 
+## 2026-07-19 — PLAN REVISION after CHAIN4 (user-approved): head recipe becomes part of the flagship spine
+
+Supersedes the drain-order items where they conflict; spine order now:
+
+1. CHAIN5 verdict (running) — geometry at matched single-linear heads,
+   ALSO read against cone-mlp's 58.
+2. conditioning-v2 (unchanged; ctx_grad_subsample flag still awaiting
+   user sign-off before launch).
+3. muP tiers (unchanged, ~4h, gate flagship LR regardless of recipe).
+4. HEAD-DEPTH PROBE: frozen-encoder head ladder on the medium-cone-mlp
+   encoder (depths 0/1/2/3 at hidden=384, ~1 GPU-h each,
+   scripts/head_ladder.py) -> ONE full-training confirmation of the
+   chosen rung at medium (~6h). Screening bias noted: frozen features
+   understate deep heads (no co-adaptation).
+5. xlarge-cone-mlp@50M (~18h) with the chosen head — PROMOTED to
+   presumptive geometry decider (tests whether MLP unlocks cone past
+   the 18M knee; CHAIN4 reopened that verdict).
+6. Base LR+wd sweep at d=128 with FINAL head+geometry recipe. muP
+   width-series head policy: co-scale head hidden = d (medium's winner
+   was hidden=d_model=384 already) — requires reclassifying the head
+   middle matrix to a hidden role + coordinate-check revalidation
+   before the sweep transfers.
+7. Flagship package -> user launch.
+
+Defensive check for the paper (slot in any gap, ~4h): large-fixed-mlp —
+the compute-frontier bend and 18M knee were measured on single-linear
+heads; if MLP moves the FIXED curve at 18M too, part of the "data
+floor" narrative is head-limited and must be requalified.
+
 ## 2026-07-19 — CHAIN4 RESULT: the head bottleneck is REAL and scale-emergent — cone+MLP rewrites the geometry table
 
 medium-cone-mlp (identical to medium-cone except head_mlp_hidden=384,
