@@ -106,6 +106,40 @@ the compute-frontier bend and 18M knee were measured on single-linear
 heads; if MLP moves the FIXED curve at 18M too, part of the "data
 floor" narrative is head-limited and must be requalified.
 
+## 2026-07-20 — GEOMETRY VERDICT CELL (CHAIN7): fixed WINS its own metric; head bottleneck bound the fixed series too
+
+large-fixed-mlp (±0.3°, 18.3M, MLP head) uniform v2 rescore:
+4/8/23/39 vs the head-matched comparators:
+
+| model (18.3M, MLP head) | 15m | 30m | 1h | 2h | coverage |
+|---|---|---|---|---|---|
+| large-fixed-mlp (±0.3) | 4 | 8 | 23 | **39** | 0.81 |
+| large-cone-mlp | 4 | 8 | 27 | 58 | 1.00 |
+| large-fixed (LINEAR, ±0.3) | 6 | 16 | 40 | 64 | 0.81 |
+| xlarge-fixed (LINEAR, 116M) | 6 | 14 | 34 | 52 | 0.81 |
+
+Per the user's decision rule this is the CONE-LOSES case on fixed's own
+±0.3° metric: fixed-mlp 39 vs cone-mlp 58 at 2h (cone ~48%% worse),
+TIED at 15m/30m, fixed ahead from 1h. Two hard facts:
+1. Head bottleneck bound the FIXED series too: fixed-mlp (39, 18M)
+   BEATS xlarge-fixed (52, 116M) — 6x fewer params. Flagship gets the
+   MLP head regardless of geometry; the compute-frontier bend is partly
+   head-limited (requalify the scaling narrative — large-fixed-mlp is a
+   needed point).
+2. The geometry decision is now the pure tradeoff the user framed:
+   fixed-mlp is best on the 81%% that stay in-box (39); cone-mlp is far
+   better on ALL vessels (wide-frame: cone 98 vs fixed 970 at 2h on
+   ±1.2°). Cone is NOT "as good as fixed" on fixed's home metric.
+
+DIAGNOSIS BRANCH now running (CHAIN6, large-fixed-R125-mlp): does cone's
+58-vs-39 gap come from (a) the coverage burden inherent to any
+full-coverage model, or (b) cone's moving canvas? If wide-fixed-mlp
+(full coverage, static cells) also lands ~55-58, cost is coverage (a)
+and cone is no worse than any full-coverage option; if ~45, cone has an
+extra parameterization cost (b). Verdict deferred to CHAIN6 (~6h) +
+user call. Strategic floor stands: this is all <=2h; longer horizons
+(the eventual goal) untested for both, favor cone structurally.
+
 ## 2026-07-20 — S2 (ctx-geotraffic) KILLED at 13.1k: moving-target field instability; context_lr_mult fix + v3 armed
 
 Kill rule fired (fg2h 143->191, val 1.52->2.08, train +0.7 sustained
