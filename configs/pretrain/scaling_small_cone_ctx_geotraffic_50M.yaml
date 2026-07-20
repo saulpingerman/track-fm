@@ -23,6 +23,7 @@ normalization:
   sog_scale: 30.0
   dt_scale: 300.0
 train:
+  context_lr_mult: 0.1
   learning_rate: 0.0003
   weight_decay: 1.0e-05
   batch_size: 1024

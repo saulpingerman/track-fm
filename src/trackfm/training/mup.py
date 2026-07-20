@@ -147,7 +147,22 @@ def build_optimizer(model: torch.nn.Module, train_cfg,
     verbatim single-group while the flag is at its default.
     """
     decay_bn = getattr(train_cfg, "decay_bias_norm", True)
+    ctx_mult = getattr(train_cfg, "context_lr_mult", 1.0)
     if not model_cfg.mup.enabled:
+        if ctx_mult != 1.0:
+            # conditioned runs only (never the SP bit-gated baseline):
+            # context-CNN params train slower so the bias field evolves
+            # adiabatically under the co-adapting encoder/head
+            ctx = [p for n, p in model.named_parameters()
+                   if n.startswith("context_bias.")]
+            rest = [p for n, p in model.named_parameters()
+                    if not n.startswith("context_bias.")]
+            assert ctx, "context_lr_mult set but model has no context_bias"
+            return torch.optim.AdamW(
+                [{"params": rest, "lr": train_cfg.learning_rate},
+                 {"params": ctx,
+                  "lr": train_cfg.learning_rate * ctx_mult}],
+                weight_decay=train_cfg.weight_decay)
         if decay_bn:
             return torch.optim.AdamW(model.parameters(),
                                      lr=train_cfg.learning_rate,
@@ -155,6 +170,9 @@ def build_optimizer(model: torch.nn.Module, train_cfg,
         return torch.optim.AdamW(
             _split_ndim1(model.parameters(), train_cfg.weight_decay),
             lr=train_cfg.learning_rate)
+    if ctx_mult != 1.0:
+        raise ValueError("context_lr_mult under muP needs a deliberate "
+                         "group-A split — not yet classified; keep 1.0")
     groups = build_param_groups(
         model, d_model=model_cfg.d_model, d_base=model_cfg.mup.d_base,
         lr=train_cfg.learning_rate, weight_decay=train_cfg.weight_decay,

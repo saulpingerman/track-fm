@@ -179,6 +179,12 @@ class NormalizationConfig(BaseModel):
 class TrainConfig(BaseModel):
     learning_rate: float = 3e-4
     weight_decay: float = 1e-5
+    # Context-CNN LR multiplier (conditioned runs only). The bias-field
+    # CNN receives gradient from ~524k crops/step — enormous per-param
+    # signal at the shared LR. 1.0 = historical. The S2 kill (2026-07-20,
+    # field restructuring at ~10.4k destabilizing co-adaptation) motivates
+    # ~0.1 so the prior evolves adiabatically under the model.
+    context_lr_mult: float = 1.0
     # True (historical) decays EVERY param incl. biases/LayerNorm vectors —
     # invisible at wd=1e-5 but divergent from LLM practice at wd~0.1.
     # False excludes ndim<=1 params from decay (standard practice); flip it

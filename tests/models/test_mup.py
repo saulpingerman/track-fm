@@ -308,3 +308,26 @@ def test_coord_check_step0_readout_temperature():
     s = _slope(widths, ranges)
     assert s <= 0.35, f"readout temperature grows with width: slope={s:.3f} " \
                       f"ranges={ranges} (init variance rule broken?)"
+
+
+def test_context_lr_mult_split():
+    """context_lr_mult != 1 splits context_bias params into a slow group
+    (S2 moving-target fix); default 1.0 keeps the verbatim single group."""
+    import torch.nn as nn
+
+    class _TrainCtx(_Train):
+        context_lr_mult = 0.1
+
+    cfg = _cfg(64)
+    model = _model(cfg)
+    model.context_bias = nn.Linear(4, 4)     # stand-in ctx module
+    opt = build_optimizer(model, _TrainCtx(), cfg)
+    assert len(opt.param_groups) == 2
+    assert opt.param_groups[0]["lr"] == pytest.approx(3e-4)
+    assert opt.param_groups[1]["lr"] == pytest.approx(3e-5)
+    ids = {id(p) for p in opt.param_groups[1]["params"]}
+    assert ids == {id(p) for n, p in model.named_parameters()
+                   if n.startswith("context_bias.")}
+    # default stays single-group
+    m2 = _model(_cfg(64))
+    assert len(build_optimizer(m2, _Train(), _cfg(64)).param_groups) == 1

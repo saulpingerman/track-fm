@@ -106,6 +106,25 @@ the compute-frontier bend and 18M knee were measured on single-linear
 heads; if MLP moves the FIXED curve at 18M too, part of the "data
 floor" narrative is head-limited and must be requalified.
 
+## 2026-07-20 — S2 (ctx-geotraffic) KILLED at 13.1k: moving-target field instability; context_lr_mult fix + v3 armed
+
+Kill rule fired (fg2h 143->191, val 1.52->2.08, train +0.7 sustained
+from ~10.4k). NOT v1's DC drift (cap held; data clean — no NaN/inf in
+any of the 6 channels). Field snapshots (their first live catch)
+show the field RESTRUCTURING between 9.7k and 13k (saturation 52%->30%,
+mean -1.4): the ctx CNN — which receives gradient from ~524k crops per
+step at the shared 3e-4 — kept re-forming the traffic-informed field
+faster than the co-adapted encoder/head could track. Geo's redundant 3
+channels found a stable attractor early; traffic's richer landscape
+did not.
+
+Fix: TrainConfig.context_lr_mult (default 1.0 = historical; muP path
+guards with a raise until the group split is classified). Geotraffic
+config now 0.1 — the prior evolves adiabatically. CHAIN8 armed to
+relaunch v3 behind CHAIN7+CHAIN6. Fallbacks if v3 also destabilizes:
+EMA'd field (target-network style), or freeze-CNN-after-N-steps, or
+warm-start from geo's stable CNN.
+
 ## 2026-07-20 — CTX-GEO-V2 COMPLETE: bounded-bias fix validated; geography gains ~3.6% (gate passes, narrowly)
 
 Full run, no divergence (v1 died at 31.5k; v2 sailed past it), best at
