@@ -106,6 +106,26 @@ the compute-frontier bend and 18M knee were measured on single-linear
 heads; if MLP moves the FIXED curve at 18M too, part of the "data
 floor" narrative is head-limited and must be requalified.
 
+## 2026-07-20 — STRICT ±60s 2h comparison (user request): ordering robust; sparse reporters inflate everyone's p90 ~40%
+
+Only targets within ±60s of exactly 7200s (86%% of bucket, n=2685
+identical tracks, correct per-model canvas registration):
+
+| model | loose 2h p90 | strict 2h p90 |
+|---|---|---|
+| fixed ±0.3 mlp | 39 | 22 |
+| wide-fixed R125 mlp | 52 | 30 |
+| cone mlp | 58 | 36 |
+
+1. Ordering and decomposition unchanged: coverage burden 22->30
+   (+8 cells), multiplexing 30->36 (+6) — same story, cleaner data.
+   No elapsed-tolerance artifact was driving any conclusion.
+2. NEW finding: the excluded 14%% (sparse reporters) inflate p90 by
+   ~40%% for EVERY model — containment cost concentrates in sparse-
+   reporting vessels; dense reporters are far cheaper to contain.
+   Operationally meaningful segmentation; paper-worthy note; also
+   relevant to any deployment SLA framing.
+
 ## 2026-07-20 — CHAIN6 RESULT: the 2x2 completes; cone's 2h gap decomposes into coverage (2/3) + multiplexing (1/3)
 
 large-fixed-R125-mlp (wide static box, MLP head): 11/15/32/52. The
