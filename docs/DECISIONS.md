@@ -106,6 +106,32 @@ the compute-frontier bend and 18M knee were measured on single-linear
 heads; if MLP moves the FIXED curve at 18M too, part of the "data
 floor" narrative is head-limited and must be requalified.
 
+## 2026-07-20 — CTX-GEO-V2 COMPLETE: bounded-bias fix validated; geography gains ~3.6% (gate passes, narrowly)
+
+Full run, no divergence (v1 died at 31.5k; v2 sailed past it), best at
+step 47,987 (end of anneal). Uniform rescore vs the F11-correct
+baseline: ctx-geo 7/17/53/108 vs bs1024-control 7/17/54/112 — a thin
+but direction-consistent gain (-3.6%% at 2h, -1 cell at 1h, flat at
+short horizons). Exactly what the field forensics predicted: the
+learned prior = suppress-Sweden + mild coastal buffer (sdist-driven,
+corr 0.91 with coast distance on Swedish land; permissive band ~60-70km
+from asymmetric NLL cost), which real vessels rarely test. Field
+structure was STABLE over the back half of training (sat 89%% -> 87%%,
+std unchanged) — mid-run renders remain representative.
+
+Pre-registered branch (drain plan item 6) resolves to the middle case:
+signal exists but thin. Stage-2 fusion candidacy now rides ON S2
+(geo-traffic, running since 00:19Z WITH field-evolution snapshots): if
+traffic adds materially over 108, fusion is justified; if S2 ~ geo
+alone, the conditioning line has diminishing returns and stage-2/3
+drops below belief-state work in the post-flagship queue.
+
+Interpretability set (docs/figures/ctx_*): raw field, geography
+side-by-sides, canvas-local contrast, nuance views, 2h crop, scales
+diagram; findings incl. the sdist-threshold mechanism, the Gota alv
+one-pixel river, raster-edge padding caveat, sub-pixel waterway gap
+(stage-2 raster improvement if conditioning graduates).
+
 ## 2026-07-19 — WIDE-FRAME comparison: cone-mlp beats every exp-14 model ON THEIR OWN frames; the narrow-box wall quantified
 
 Same 0.6 km2 cells, wider evaluation boxes (±0.6° = 128², ±1.2° = 256²)
