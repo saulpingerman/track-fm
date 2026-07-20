@@ -106,6 +106,33 @@ the compute-frontier bend and 18M knee were measured on single-linear
 heads; if MLP moves the FIXED curve at 18M too, part of the "data
 floor" narrative is head-limited and must be requalified.
 
+## 2026-07-20 — GEOTRAFFIC-V3 COMPLETE: conditioning stack worth 9% at 1-2h; two-timescale fix validated end-to-end
+
+Full run, zero instability (v2 died at 10.4k; v3's 16 field snapshots
+show smooth growth then plateau: sat 10.8%% -> 59.5%% -> 57.7%%, mean
+stable — textbook adiabatic evolution under context_lr_mult=0.1).
+Best at step 35.8k. Uniform rescore (small-cone bs1024 family):
+
+| run | 15m | 30m | 1h | 2h |
+|---|---|---|---|---|
+| bs1024-control | 7 | 17 | 54 | 112 |
+| + geography | 7 | 17 | 53 | 108 |
+| + geo+traffic | 7 | 16 | 49 | **102** |
+
+1. Traffic adds +5.6%% at 2h ON TOP of geography (+7.5%% at 1h) — the
+   C1 gate ordering (traffic > geography) confirmed in vivo. Total
+   stage-1 conditioning: -9%% at 1-2h vs control.
+2. Pre-registered branch resolves: material gain -> stage-2 head
+   fusion KEEPS its candidacy (post-flagship queue item 8c; interacts
+   with the spectrum-head work — fusion would enter the trunk).
+3. Caveats for flagship extrapolation: measured at 1M-param scale;
+   an 18M-scale confirmation run (large-cone-{best-head}-ctx) is the
+   gate before conditioning enters the flagship recipe. Traffic stays
+   an OPTIONAL channel per the transferability doctrine (context
+   dropout needed for graceful degradation — stage-2 requirement).
+4. context_lr_mult=0.1 + field-snapshot instrumentation now validated
+   house technique for coupled-learner stability.
+
 ## 2026-07-20 — WIDE-FRAME STRICT 2h (user-demanded frame): static-large-grid 78 vs cone 84 vs narrow-box 852 on ALL vessels
 
 User correctly objected that the strict ±60s table was presented on the
