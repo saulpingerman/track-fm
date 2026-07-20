@@ -106,6 +106,26 @@ the compute-frontier bend and 18M knee were measured on single-linear
 heads; if MLP moves the FIXED curve at 18M too, part of the "data
 floor" narrative is head-limited and must be requalified.
 
+## 2026-07-21 — V3 post-hoc probes: crutch effect measured (context dropout now mandatory); bias_cap=8 destroys 85% of the lane signal
+
+1. CRUTCH TEST (field zeroed on the trained model, standard harness):
+   7/17/59/119.5 — WORSE than the 112 control. The encoder offloaded
+   ~7 cells of its own competence to the field; the field's carried
+   value is ~17 cells (119.5->102). Context dropout is REQUIRED for
+   graceful degradation (transferability doctrine) — first
+   anti-foundationality data point: mild crutch, real, quantified.
+2. CAP BINDING: water sits at pre-tanh mean +12.9; 89.7% of water is
+   beyond cap=8 (global mean-centering lets land/Sweden drag the zero;
+   tanh then flattens water). The 7.4-logit lane contrast survives as
+   1.13 logits — 85%% destroyed. Under cap=16: 4.0 logits survive.
+   Stability now comes from context_lr_mult, not the tight cap ->
+   ctx-geotraffic-cap16 rerun is a clean drain candidate (prediction:
+   2h < 102 if lane sharpness converts). Alternative design for
+   stage-2: high-pass centering before the cap.
+3. Remaining extractions (deferred): spatial gain attribution (paired
+   ranks vs control x target traffic density); conformal calibration
+   of conditioned densities (rides the drain conformal pass).
+
 ## 2026-07-20 — GEOTRAFFIC-V3 COMPLETE: conditioning stack worth 9% at 1-2h; two-timescale fix validated end-to-end
 
 Full run, zero instability (v2 died at 10.4k; v3's 16 field snapshots
