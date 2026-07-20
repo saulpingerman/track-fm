@@ -1,0 +1,53 @@
+# G128 resolution test (user hypothesis 2026-07-20): does doubling cone
+# resolution close the 58-vs-39 gap to fixed-mlp on the ±0.3° metric?
+# PRE-REGISTERED PREDICTION from the degradation diagnostic: low-40s at
+# 2h (resolution explains the entire gap; no capacity deficit found).
+data_dir: ~/data/trackfm/materialized/v1
+checkpoint_dir: ~/data/trackfm/checkpoints
+# Mirrors scaling_large_50M.yaml's ENCODER exactly (d=384, L=8, ff=2048,
+# nhead=16), keeps small_cone's G=64/F=12/cone knobs. Single-variable
+# comparison to large-fixed-50M — if cone scales like fixed at this size,
+# it should approach large-fixed's val_fixgrid_p90rank (5/14/38/64 cells).
+model:
+  d_model: 384
+  nhead: 16
+  num_layers: 8
+  dim_feedforward: 2048
+  dropout: 0.1
+  max_seq_len: 128
+  grid_size: 128
+  grid_range: 0.3
+  num_freqs: 12
+  grid_mode: cone
+  cone_r0: 0.02
+  cone_v: 0.000171
+  cone_p: 1.0
+  head_mlp_hidden: 384
+normalization:
+  lat_center: 56.25
+  lat_scale: 1.0
+  lon_center: 11.5
+  lon_scale: 2.0
+  sog_scale: 30.0
+  dt_scale: 300.0
+train:
+  learning_rate: 0.0003
+  weight_decay: 1.0e-05
+  batch_size: 640              # G128 quadruples head/loss tensors; bs halved
+  max_horizon: 800
+  num_horizon_samples: 4
+  warmup_steps: 500
+  lr_schedule: cosine
+  sigma: 0.003
+  dr_sigma: 0.05
+  precision: bf16
+  compile: false
+  val_interval_minutes: 30
+  early_stop_patience: 10
+  num_workers: 8
+  seed: 17
+  max_steps: 78125
+mlflow:
+  tracking_uri: http://127.0.0.1:5000
+  experiment: trackfm/scaling
+  run_name: scaling-large-cone-mlp-G128-50M

@@ -106,6 +106,35 @@ the compute-frontier bend and 18M knee were measured on single-linear
 heads; if MLP moves the FIXED curve at 18M too, part of the "data
 floor" narrative is head-limited and must be requalified.
 
+## 2026-07-20 — RESOLUTION DIAGNOSTIC: cone's gap to fixed is representation resolution, NOT capacity; G128 test armed (CHAIN9)
+
+User hypothesis test, no training: fixed-mlp's own density degraded to
+cone's per-horizon cell sizes (probability-space pooling, correct
+fixed-canvas registration) and rescored on identical tracks:
+
+| bucket | fixed-mlp | @cone-res | cone-mlp actual |
+|---|---|---|---|
+| 15m | 4 | 4 | 4 |
+| 30m | 8.6 | 10 | 8 |
+| 1h | 23 | **27** | **27** (EXACT match) |
+| 2h | 39 | **72** | 58 |
+
+1. 1h: resolution explains the ENTIRE cone deficit, exactly.
+2. 2h: resolution OVER-explains it (72 > 58) — cone's band-limited
+   Fourier fit is a BETTER coarse representation than pooled fixed. No
+   capacity deficit exists to explain; the user's capacity-allocation
+   hypothesis is not needed at 18M (far-traveler tax = coverage burden,
+   the CHAIN5/6 axis, not capacity).
+3. PRE-REGISTERED PREDICTION: large-cone-mlp-G128 (2h cells 0.0397 ->
+   0.0198°, ~31-node equivalent on the scoring box) lands ~40-45 at 2h
+   on the ±0.3° metric — approximately MATCHING fixed-mlp's 39 with
+   100%% coverage retained. CHAIN9 armed behind CHAIN6+CHAIN8 (bs 640,
+   78,125 steps, ~13-15h; OOM fallback bs320).
+If confirmed: the geometry fork dissolves — cone-G128-mlp is fixed's
+equal on its home metric AND the only full-coverage, long-horizon-
+extensible geometry. Flagship then = cone-mlp at the resolution the
+compute budget allows.
+
 ## 2026-07-20 — GEOMETRY VERDICT CELL (CHAIN7): fixed WINS its own metric; head bottleneck bound the fixed series too
 
 large-fixed-mlp (±0.3°, 18.3M, MLP head) uniform v2 rescore:
