@@ -118,10 +118,13 @@ floor" narrative is head-limited and must be requalified.
    beyond cap=8 (global mean-centering lets land/Sweden drag the zero;
    tanh then flattens water). The 7.4-logit lane contrast survives as
    1.13 logits — 85%% destroyed. Under cap=16: 4.0 logits survive.
-   Stability now comes from context_lr_mult, not the tight cap ->
-   ctx-geotraffic-cap16 rerun is a clean drain candidate (prediction:
-   2h < 102 if lane sharpness converts). Alternative design for
-   stage-2: high-pass centering before the cap.
+   Stability now comes from context_lr_mult, not the tight cap.
+   USER VETOED a dedicated cap16 rerun; instead a FREE eval-time probe
+   (cap=16 on the cap-8-trained model): 7/14/45/106 vs 7/16/49/102 —
+   BETTER at 30m/1h despite the co-adaptation mismatch (strong
+   evidence the cap throttles real signal; 2h dip = mismatch cost).
+   RESOLUTION: no dedicated run; every future conditioned run inherits
+   cap>=16 or high-pass centering as default, citing this probe.
 3. Remaining extractions (deferred): spatial gain attribution (paired
    ranks vs control x target traffic density); conformal calibration
    of conditioned densities (rides the drain conformal pass).
