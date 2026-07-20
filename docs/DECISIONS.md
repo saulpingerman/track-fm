@@ -130,8 +130,13 @@ CHAIN9 re-spec, user to pick:
  (d) Note: this cost wall independently strengthens the alternative-
      head arms at drain (MDN etc.) — a head whose resolution doesn't
      cost (2F+1)^2*G^2 would let cone scale resolution cheaply.
-CHAIN9 stays armed but its config will be re-pointed per the user's
-choice; it launches only after CHAIN6+CHAIN8 regardless.
+DECIDED (user delegated): option (c) — F24/G128 with
+num_horizon_samples 4->2 (~21h). Rationale: (a) risks an ambiguous
+middle; (b)'s 45h blocks the flagship path for two days. The protocol
+deviation is pre-registered as auditable: if the 2h result lands in
+the ambiguous 45-50 band, a small-cone h2-vs-h4 control run
+disambiguates deviation-cost from resolution-gain before any verdict.
+Same chain script (CHAIN9); config contents re-specced in place.
 
 ## 2026-07-20 — RESOLUTION DIAGNOSTIC: cone's gap to fixed is representation resolution, NOT capacity; G128 test armed (CHAIN9)
 

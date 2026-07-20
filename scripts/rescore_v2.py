@@ -64,7 +64,7 @@ RUNS = [
     ("scaling_large_fixed_R125_50M", "scaling-large-fixed-R125-50M"),
     ("scaling_small_cone_mdn_50M", "scaling-small-cone-mdn-50M"),
     ("scaling_large_fixed_R125_mlp_50M", "scaling-large-fixed-R125-mlp-50M"),
-    ("scaling_large_cone_mlp_G128_50M", "scaling-large-cone-mlp-G128-50M"),
+    ("scaling_large_cone_mlp_G128_50M", "scaling-large-cone-mlp-F24G128-50M"),
     ("scaling_large_mlp_50M", "scaling-large-mlp-50M"),
 ]
 

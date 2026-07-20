@@ -1,7 +1,12 @@
-# G128 resolution test (user hypothesis 2026-07-20): does doubling cone
-# resolution close the 58-vs-39 gap to fixed-mlp on the ±0.3° metric?
-# PRE-REGISTERED PREDICTION from the degradation diagnostic: low-40s at
-# 2h (resolution explains the entire gap; no capacity deficit found).
+# F24/G128 resolution test — re-specced after the band-limit null (G
+# alone is inert; the basis, not the lattice, sets resolution). Exact
+# 2x-resolution twin of the F12/G64 family: F and G both doubled, so
+# oversampling (2.67x), sigma-in-band-units, and canvas-fraction
+# constructs are all preserved. num_horizon_samples 4->2 to keep the
+# run ~21h (synthesis FLOPs ~(2F+1)^2*G^2); PRE-REGISTERED: if the 2h
+# result lands ambiguously in 45-50, run a small-cone h2-vs-h4 control
+# before interpreting. PREDICTION: ~43-45 at 2h on the ±0.3° metric
+# (vs fixed-mlp 39, cone-F12 58) with full coverage retained.
 data_dir: ~/data/trackfm/materialized/v1
 checkpoint_dir: ~/data/trackfm/checkpoints
 # Mirrors scaling_large_50M.yaml's ENCODER exactly (d=384, L=8, ff=2048,
@@ -17,7 +22,7 @@ model:
   max_seq_len: 128
   grid_size: 128
   grid_range: 0.3
-  num_freqs: 12
+  num_freqs: 24
   grid_mode: cone
   cone_r0: 0.02
   cone_v: 0.000171
@@ -35,7 +40,7 @@ train:
   weight_decay: 1.0e-05
   batch_size: 640              # G128 quadruples head/loss tensors; bs halved
   max_horizon: 800
-  num_horizon_samples: 4
+  num_horizon_samples: 2
   warmup_steps: 500
   lr_schedule: cosine
   sigma: 0.003
@@ -50,4 +55,4 @@ train:
 mlflow:
   tracking_uri: http://127.0.0.1:5000
   experiment: trackfm/scaling
-  run_name: scaling-large-cone-mlp-G128-50M
+  run_name: scaling-large-cone-mlp-F24G128-50M
