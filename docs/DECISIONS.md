@@ -399,6 +399,35 @@ sig05 (aliasing), bs1024 control, large-cone-mlp, large-fixed_R125,
 then muP smoke tiers, then the unified v2+conformal rescoring and the
 flagship recommendation package.
 
+## 2026-07-20 — CTX-GEO v2 RESULT: fix fully validated; geography buys a marginal 2h gain at 2.4x wall-clock
+
+small-cone-ctx-geo-v2 (bounded/centered bias field) ran start-to-finish
+with zero instability — flat val through the entire window where v1
+diverged, smooth train loss, clean anneal. The DC-drift root cause and
+the cap fix are CONFIRMED by outcome.
+
+Final vs bs1024-control (same bs/steps; ctx is 2.4x slower wall-clock,
+7.7h vs 3.2h, from per-pair bias cropping):
+
+| run | 15m | 30m | 1h | 2h |
+|---|---|---|---|---|
+| bs1024-control | 7 | 17 | 54 | 111 |
+| ctx-geo-v2 | 7 | 17 | 54 | 107 |
+
+Geography's effect: identical <=1h, -3.6% at 2h only — inside the
+overlap-widened CIs, though directionally where coastline interaction
+should matter. Land-leakage comparison matches the prediction: small
+underway land-mass reductions (2h 12.7%->12.0%), harbor mass
+untouched, nll_sea unchanged, no density holes.
+
+Flagship implication (pending geotraffic-v2): a within-noise gain at
+2.4x train cost does NOT belong in the flagship pretrain. The gate
+evidence always ranked traffic >> geography; geotraffic-v2 (running,
+~done 08:00Z) is the real test. If it also lands marginal, the
+recommendation is bare-posit flagship (which also serves the
+transferability constraint) with conditioning kept as a downstream/
+fine-tune option.
+
 ## 2026-07-19 — GEOMETRY RESULT (chain5): wide-fixed R125 buys 2h coverage by selling every shorter horizon
 
 large-fixed-R125 (18.3M, linear head, full ceilings 1.00) final

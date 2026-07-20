@@ -107,8 +107,12 @@ game; AIS-luxury fields only ever with dropout/graceful degradation.
   only 3-9% and tracks genuine port arrivals; moored vessels correctly
   hold ~50% mass on harbor pixels. Geography's win, if any, is in-disk
   shaping. Expectations should be modest.
-- TBD(ctx-geo v2 / ctx-geotraffic v2 vs bs1024-control): the actual
-  containment deltas + land-leakage comparison.
+- RESULT(ctx-geo v2): stability fix fully validated (zero instability
+  end-to-end). Containment 7/17/54/107 vs control 7/17/54/111 —
+  identical <=1h, -3.6% at 2h (within widened CIs), at 2.4x wall-clock.
+  Land-leakage as predicted: modest in-disk shaping, harbors intact.
+- TBD(ctx-geotraffic v2, running): traffic was the strongest gate
+  signal — this decides the axis.
 Recommendation shape: include geo(+traffic) conditioning in the
 flagship ONLY if v2 shows a clean, stable containment win; traffic
 prior must be rebuilt train-period-only for the flagship's train
