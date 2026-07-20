@@ -106,6 +106,38 @@ the compute-frontier bend and 18M knee were measured on single-linear
 heads; if MLP moves the FIXED curve at 18M too, part of the "data
 floor" narrative is head-limited and must be requalified.
 
+## 2026-07-20 — CHAIN6 RESULT: the 2x2 completes; cone's 2h gap decomposes into coverage (2/3) + multiplexing (1/3)
+
+large-fixed-R125-mlp (wide static box, MLP head): 11/15/32/52. The
+full head-matched 18.3M table:
+
+| model | 15m | 30m | 1h | 2h | coverage |
+|---|---|---|---|---|---|
+| fixed ±0.3 mlp | 4 | 8 | 23 | 39 | 81%% |
+| wide-fixed R125 mlp | 11 | 15 | 32 | 52 | 100%% |
+| cone mlp | 4 | 8 | 27 | 58 | 100%% |
+
+1. Coverage burden (39 -> 52 at matched static geometry): +13 cells,
+   ~2/3 of cone's total 2h gap. Inherent to ANY full-coverage model.
+2. Dynamic-canvas cost at 2h (52 vs 58, IDENTICAL cell size + band
+   limit at that horizon): +6 cells (~11%%) — a real but modest
+   multiplexing cost (one time-conditioned basis serving all horizons
+   vs one static canvas). NOT resolution at 2h (cells/band equal).
+3. Horizon balance: cone wins 3 of 4 buckets in the full-coverage
+   class (4/8/27 vs 11/15/32) — adaptive resolution dominating short
+   horizons as designed; wide-static wins only 2h.
+4. CHAIN9 (F24/G128) now decides the championship: predicted ~43-45
+   at 2h would have cone winning ALL buckets at full coverage.
+
+## 2026-07-20 — GEOTRAFFIC-V3 PREVIEW: context_lr_mult fix validated in-flight; traffic adding real gains
+
+At step 41.9k/48.8k (~86%%): val_loss descending cleanly (1.73 -> 1.21,
+no instability past the step-10.4k point that killed v2), fg2h
+164 -> ~101-104 — ALREADY beating geo-only's final 108 and the
+control's 112. Field snapshots: mean rock-stable (+3.36-3.38),
+saturation drifting slowly 61 -> 57%% — adiabatic evolution exactly as
+the two-timescale fix intends. Full verdict at completion (~1h).
+
 ## 2026-07-20 — USER CAVEAT VINDICATED: the band limit binds, not the cell lattice; CHAIN9 re-spec required
 
 The user flagged the resolution diagnostic as evidence-not-proof
