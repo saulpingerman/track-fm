@@ -106,6 +106,33 @@ the compute-frontier bend and 18M knee were measured on single-linear
 heads; if MLP moves the FIXED curve at 18M too, part of the "data
 floor" narrative is head-limited and must be requalified.
 
+## 2026-07-20 — USER CAVEAT VINDICATED: the band limit binds, not the cell lattice; CHAIN9 re-spec required
+
+The user flagged the resolution diagnostic as evidence-not-proof
+(training gradient only ever saw coarse supervision). Chasing it:
+(1) the F=12 basis's finest feature is canvas/24 = 2.7 cells — the
+BASIS is coarser than the lattice, and it scales with the cone canvas,
+as does the soft-target sigma (canvas-fraction). Every resolution
+element shrinks together. (2) Eval-time test: cone-mlp's own
+coefficients synthesized at G=128 — NULL (2h 53.9 vs 55.3, paired).
+G alone is inert; the resolution knob is F (num_freqs), with G scaled
+to hold the 2.7x oversampling.
+
+Cost wall (flagship-relevant): Fourier synthesis FLOPs scale as
+(2F+1)^2 * G^2 — the exact 2x-resolution twin (F24/G128) is ~15x
+head-synthesis compute, turning a 6h run into ~45h. Options for the
+CHAIN9 re-spec, user to pick:
+ (a) F18/G96 (+50%% resolution, ~15h): partial probe, predicted 2h
+     ~47-54 — may not close the gap to 39.
+ (b) F24/G128 (~45h): the decisive 2x twin; predicted 2h ~43-45.
+ (c) F24/G128 with num_horizon_samples 4->2 (~21h): decisive
+     resolution, one protocol deviation from the family.
+ (d) Note: this cost wall independently strengthens the alternative-
+     head arms at drain (MDN etc.) — a head whose resolution doesn't
+     cost (2F+1)^2*G^2 would let cone scale resolution cheaply.
+CHAIN9 stays armed but its config will be re-pointed per the user's
+choice; it launches only after CHAIN6+CHAIN8 regardless.
+
 ## 2026-07-20 — RESOLUTION DIAGNOSTIC: cone's gap to fixed is representation resolution, NOT capacity; G128 test armed (CHAIN9)
 
 User hypothesis test, no training: fixed-mlp's own density degraded to
