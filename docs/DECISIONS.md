@@ -106,6 +106,23 @@ the compute-frontier bend and 18M knee were measured on single-linear
 heads; if MLP moves the FIXED curve at 18M too, part of the "data
 floor" narrative is head-limited and must be requalified.
 
+## 2026-07-20 — WIDE-FRAME STRICT 2h (user-demanded frame): static-large-grid 78 vs cone 84 vs narrow-box 852 on ALL vessels
+
+User correctly objected that the strict ±60s table was presented on the
+±0.3°-censored frame (fixed's home game) — the wrong frame for the
+cone-vs-static-large-grid question. Full population (±1.2° frame, same
+0.6 km² cells, n=3,317 strict-2h, identical tracks): R125-mlp 78,
+cone-mlp 84, fixed±0.3-mlp 852 (the coverage wall). RULE GOING FORWARD:
+every geometry table states its frame + population explicitly; the
+±0.3 frame answers "fixed's home metric" ONLY.
+
+Standing picture at strict 2h: static-wide narrowly best on everyone
+(78 vs 84, the ~7%% multiplexing cost); cone strongly best 15m-1h
+(4/8/27 vs 11/15/32). Neither dominates -> CHAIN9 (F24/G128) is the
+tiebreaker; if it closes cone's 2h toward ~low-70s wide-frame, cone
+takes all buckets; else the flagship geometry is an operational call
+(2h specialist vs all-horizon generalist).
+
 ## 2026-07-20 — STRICT ±60s 2h comparison (user request): ordering robust; sparse reporters inflate everyone's p90 ~40%
 
 Only targets within ±60s of exactly 7200s (86%% of bucket, n=2685
