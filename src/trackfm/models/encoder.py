@@ -18,7 +18,7 @@ import torch.nn as nn
 
 from trackfm.config import ModelConfig, NormalizationConfig
 from trackfm.models.fourier_head import (DirectGridHead, FourierHead2D,
-                                         MDNHead2D)
+                                         MDNHead2D, SpectrumHead2D)
 
 
 class SinusoidalEncoding(nn.Module):
@@ -102,7 +102,8 @@ class CausalAISModel(nn.Module):
         # compatibility; head_type='direct' swaps in the ablation head
         # (per-cell logits, no continuous density).
         head_cls = {"fourier": FourierHead2D, "direct": DirectGridHead,
-                    "mdn": MDNHead2D}[model.head_type]
+                    "mdn": MDNHead2D,
+                    "spectrum": SpectrumHead2D}[model.head_type]
         # muP recipe (a): readout init variance ~ 1/fan_in^2 (std scales
         # 1/d), correcting the width-dependent softmax temperature of a
         # fixed std. SP keeps 0.01 exactly (bit-for-bit; normal_ consumes
@@ -162,6 +163,14 @@ class CausalAISModel(nn.Module):
         x = self.pos_encoder(x)
         mask = self._get_causal_mask(input_seq.shape[1], input_seq.device)
         return self.transformer(x, mask=mask)
+
+    def _pair_R(self, elapsed_s: torch.Tensor) -> torch.Tensor:
+        """Physical canvas half-range per pair (deg). Cone: R(t); fixed:
+        grid_range. Consumed by scale-indexed heads (spectrum)."""
+        m = self.model_cfg
+        if m.grid_mode == "cone":
+            return m.cone_r0 + m.cone_v * elapsed_s.clamp(min=0.0) ** m.cone_p
+        return torch.full_like(elapsed_s, m.grid_range)
 
     def _pair_bias(self, origins: torch.Tensor,
                    elapsed_s: torch.Tensor) -> Optional[torch.Tensor]:
@@ -279,7 +288,12 @@ class CausalAISModel(nn.Module):
 
             cond_flat = conditioned.view(batch_size * num_pairs, -1)
             bias = self._pair_bias(torch.cat(all_origins, dim=1), all_cum_dt)
-            log_dens_flat = self.fourier_head(cond_flat, bias=bias)
+            if isinstance(self.fourier_head, SpectrumHead2D):
+                log_dens_flat = self.fourier_head(
+                    cond_flat, bias=bias,
+                    R_deg=self._pair_R(all_cum_dt).reshape(-1))
+            else:
+                log_dens_flat = self.fourier_head(cond_flat, bias=bias)
             log_densities = log_dens_flat.view(batch_size, num_pairs, grid_size, grid_size)
 
             return log_densities, all_targets, horizon_indices, future_mask
@@ -315,7 +329,12 @@ class CausalAISModel(nn.Module):
             cond_flat = conditioned.view(batch_size * num_samples, -1)
             origins = src_pos.unsqueeze(1).expand(-1, num_samples, -1)
             bias = self._pair_bias(origins, cum_times)
-            log_dens_flat = self.fourier_head(cond_flat, bias=bias)
+            if isinstance(self.fourier_head, SpectrumHead2D):
+                log_dens_flat = self.fourier_head(
+                    cond_flat, bias=bias,
+                    R_deg=self._pair_R(cum_times).reshape(-1))
+            else:
+                log_dens_flat = self.fourier_head(cond_flat, bias=bias)
             log_densities = log_dens_flat.view(batch_size, num_samples, grid_size, grid_size)
 
             future_mask = torch.ones(num_samples, dtype=torch.bool, device=device)
@@ -355,7 +374,12 @@ class CausalAISModel(nn.Module):
         gs = self.model_cfg.grid_size
         origins = src_pos.unsqueeze(1).expand(-1, num_samples, -1)
         bias = self._pair_bias(origins, cum_time)
-        log_densities = self.fourier_head(cond_flat, bias=bias).view(
+        if isinstance(self.fourier_head, SpectrumHead2D):
+            ld_flat = self.fourier_head(cond_flat, bias=bias,
+                                        R_deg=self._pair_R(cum_time).reshape(-1))
+        else:
+            ld_flat = self.fourier_head(cond_flat, bias=bias)
+        log_densities = ld_flat.view(
             features.shape[0], num_samples, gs, gs)
         return log_densities, targets
 

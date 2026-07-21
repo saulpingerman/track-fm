@@ -190,3 +190,103 @@ class FourierHead2D(nn.Module):
         log_density = F.log_softmax(logits, dim=-1)
 
         return log_density.view(batch_size, self.grid_size, self.grid_size)
+
+
+class SpectrumHead2D(nn.Module):
+    """Physical-spectrum density head: coefficients indexed by PHYSICAL
+    frequency instead of canvas slot.
+
+    The standard FourierHead2D asks its projector for canvas-harmonic
+    coefficients — but under a horizon-scaled canvas (cone) the same
+    physical density needs a DILATED coefficient vector at every canvas
+    scale, forcing the network to learn a smooth 63x-range rescaling
+    operator conditioned on time (diagnosed as the dominant share of
+    cone's 2h deficit; the F24/G128 null showed raw resolution capacity
+    is not the constraint). Here the dilation is analytic instead: a
+    continuous spectrum function phi(k; z) is learned over physical
+    frequencies k (cycles/degree), and each canvas SAMPLES it at its own
+    physical harmonics k_j = j / (2 R). One scale-free function, trained
+    by every pair at every horizon; canvas geometry reduces to where you
+    evaluate it. F and R become inference-time sampling choices.
+
+    Factorized for compute: phi(gamma(k), h) = tail(GELU(A gamma(k) +
+    B h)), with h = trunk(z) (trunk hidden = mlp_hidden, so the CHAIN4
+    mixing capacity is preserved and param-matched). gamma(k) uses
+    displacement-dual sinusoids — coefficients of a density displaced by
+    delta oscillate in k with period 1/delta, so gamma must resolve
+    displacement scales up to the canvas extent (NeRF-encoding logic,
+    scales 0.02..1.5 deg geometric).
+
+    Zero-init: tail's last linear zeroed -> all coefficients 0 ->
+    uniform density at step 0 (house identity discipline).
+    """
+
+    N_SCALES = 6
+    SCALE_MIN, SCALE_MAX = 0.02, 1.5          # degrees, displacement-dual
+
+    def __init__(self, d_model: int, grid_size: int = 64,
+                 num_freqs: int = 12, grid_range: float = 0.1,
+                 mlp_hidden: int = 0, readout_std: float = 0.01,
+                 phi_hidden: int = 128):
+        super().__init__()
+        self.grid_size = grid_size
+        self.num_freqs = num_freqs
+        self.grid_range = grid_range
+        self.phi_hidden = phi_hidden
+
+        trunk_hidden = mlp_hidden if mlp_hidden > 0 else d_model
+        self.trunk = nn.Sequential(nn.Linear(d_model, trunk_hidden), nn.GELU())
+        nn.init.normal_(self.trunk[0].weight, std=readout_std)
+        nn.init.zeros_(self.trunk[0].bias)
+
+        scales = torch.tensor(
+            np.geomspace(self.SCALE_MIN, self.SCALE_MAX, self.N_SCALES),
+            dtype=torch.float32)
+        self.register_buffer('scales', scales)
+        gamma_dim = 4 * self.N_SCALES + 3      # sin/cos per axis + log mags
+        self.k_proj = nn.Linear(gamma_dim, phi_hidden)
+        self.h_proj = nn.Linear(trunk_hidden, phi_hidden)
+        self.tail = nn.Sequential(
+            nn.GELU(), nn.Linear(phi_hidden, phi_hidden), nn.GELU(),
+            nn.Linear(phi_hidden, 2))
+        nn.init.zeros_(self.tail[-1].weight)
+        nn.init.zeros_(self.tail[-1].bias)
+
+        # canvas-harmonic index lattice + synthesis bases (canvas coords —
+        # identical to FourierHead2D; physical mapping enters via R only)
+        x = torch.linspace(-grid_range, grid_range, grid_size)
+        xx, yy = torch.meshgrid(x, x, indexing='ij')
+        freqs = torch.arange(-num_freqs, num_freqs + 1, dtype=torch.float)
+        fx, fy = torch.meshgrid(freqs, freqs, indexing='ij')
+        self.register_buffer('freq_x', fx.flatten())
+        self.register_buffer('freq_y', fy.flatten())
+        L = 2 * grid_range
+        phase = (2 * np.pi / L) * (
+            self.freq_x.view(1, 1, -1) * xx.flatten().view(1, -1, 1) +
+            self.freq_y.view(1, 1, -1) * yy.flatten().view(1, -1, 1))
+        self.register_buffer('cos_basis', torch.cos(phase).squeeze(0))
+        self.register_buffer('sin_basis', torch.sin(phase).squeeze(0))
+
+    def _gamma(self, k: torch.Tensor) -> torch.Tensor:
+        """k: (N, P, 2) physical frequencies -> (N, P, gamma_dim)."""
+        ang = 2 * np.pi * k.unsqueeze(-1) * self.scales   # (N,P,2,S)
+        feats = [torch.sin(ang).flatten(-2), torch.cos(ang).flatten(-2),
+                 torch.log1p(k.abs()),
+                 torch.log1p(k.pow(2).sum(-1, keepdim=True).sqrt())]
+        return torch.cat(feats, dim=-1)
+
+    def forward(self, z: torch.Tensor, bias: torch.Tensor | None = None,
+                R_deg: torch.Tensor | None = None) -> torch.Tensor:
+        N = z.shape[0]
+        if R_deg is None:                       # fixed geometry default
+            R_deg = z.new_full((N,), self.grid_range)
+        h = self.trunk(z)                                    # (N, H_t)
+        k = torch.stack([self.freq_x, self.freq_y], -1)      # (P, 2)
+        k = k.unsqueeze(0) / (2.0 * R_deg.view(-1, 1, 1))    # (N, P, 2)
+        mix = self.k_proj(self._gamma(k)) + self.h_proj(h).unsqueeze(1)
+        coeffs = self.tail(mix)                              # (N, P, 2)
+        logits = coeffs[..., 0] @ self.cos_basis.T + coeffs[..., 1] @ self.sin_basis.T
+        if bias is not None:
+            logits = logits + bias.reshape(N, -1)
+        log_density = F.log_softmax(logits, dim=-1)
+        return log_density.view(N, self.grid_size, self.grid_size)

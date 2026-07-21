@@ -83,7 +83,7 @@ class ModelConfig(BaseModel):
     grid_size: int = 64
     grid_range: float = 0.3          # degrees
     num_freqs: int = 12
-    head_type: Literal["fourier", "direct", "mdn"] = "fourier"  # non-default = ablations
+    head_type: Literal["fourier", "direct", "mdn", "spectrum"] = "fourier"  # non-default = ablations
     # head_mlp_hidden>0 inserts one hidden layer inside the density head
     # (Linear(d_model, head_mlp_hidden) -> GELU -> Linear(...)). 0 keeps the
     # historical single-linear projection. Tests whether the encoder->basis
@@ -139,6 +139,11 @@ class ModelConfig(BaseModel):
         invariants impossible to violate silently."""
         if not self.mup.enabled:
             return self
+        if self.head_type == "spectrum":
+            raise ValueError(
+                "muP + spectrum head: phi/trunk roles not yet classified in "
+                "trackfm/training/mup.py — keep mup.enabled False for "
+                "spectrum-head runs until the classification lands.")
         if self.pos_mode != "index_sinusoidal":
             raise ValueError(
                 "muP + time_rope is untested (custom attention layers are "
