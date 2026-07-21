@@ -106,6 +106,35 @@ the compute-frontier bend and 18M knee were measured on single-linear
 heads; if MLP moves the FIXED curve at 18M too, part of the "data
 floor" narrative is head-limited and must be requalified.
 
+## 2026-07-21 — CHAIN9 RESULT: resolution-doubling does NOT close cone's 2h gap (55 vs 58) — spectrum-head motivation strengthened; muP LR transfer VALIDATED; 5.5h idle post-mortem
+
+1. F24/G128 (exact 2x-resolution twin, h2): 4/8/26/55 vs F12's
+   4/8/27/58 and fixed-mlp's 39. Landed ABOVE the pre-registered
+   ambiguity band (45-50) -> verdict per pre-registration: doubling the
+   band limit buys ~3 cells, NOT the ~15 predicted. Reconciliation
+   with the degradation diagnostic: representation CAPACITY was never
+   the binding constraint — the 2h regime lacks TRAINING SIGNAL
+   (per-scale data dilution, worsened by h2) and still pays the learned-
+   dilation burden. Both are exactly what the physical-spectrum head
+   removes (all data trains one scale-free spectrum; dilation analytic)
+   -> the spectrum prototype is now the sharpest test standing, and
+   the h2-vs-h4 control is moot. Side fact: MFU 0.41 (campaign high) —
+   F24 compute is dense, just unproductive at 2h.
+2. muP TIER GATES: tier2 LR-transfer curves — optimum lr = 1e-3 at
+   d=64, d=128, AND d=256 (width-stable optimum = the muP property;
+   under SP it drifts). No NaNs anywhere. Flagship LR can be swept at
+   d=128 and transferred. (tier1 'clipped=100%' flag needs a read of
+   the gate spec — noted, not blocking.)
+3. POST-MORTEM (5.5h GPU idle 17:15-22:45Z): CHAIN10 completed fine;
+   nothing was armed behind it because the spectrum head was never
+   implemented — because NO autonomous turns fired: ScheduleWakeup was
+   not re-armed after an interactive stretch and the campaign Monitor
+   had silently died. RULE: any turn ending with deferred work MUST
+   re-arm the wakeup in that same turn; monitor liveness gets checked
+   at each processing turn. Recovery: head-ladder launched immediately
+   (fills tonight), spectrum implementation begins now, prototype arms
+   behind ladder.
+
 ## 2026-07-21 — V3 post-hoc probes: crutch effect measured (context dropout now mandatory); bias_cap=8 destroys 85% of the lane signal
 
 1. CRUTCH TEST (field zeroed on the trained model, standard harness):
