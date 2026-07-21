@@ -1,0 +1,57 @@
+# Physical-spectrum head prototype (2026-07-21): identical to
+# large_cone_mlp except head_type — coefficients indexed by PHYSICAL
+# frequency (phi(k;z), analytic dilation) instead of canvas slot.
+# Trunk hidden = 384 (the CHAIN4 mixing capacity, param-comparable).
+# BASELINE: large-cone-mlp 4/8/27/58 (36 strict-2h). SUCCESS SIGNATURE:
+# horizon-balance collapse — 2h improves materially, 15m-1h hold
+# (scale-sharing kills per-scale data dilution + learned-dilation cost).
+data_dir: ~/data/trackfm/materialized/v1
+checkpoint_dir: ~/data/trackfm/checkpoints
+# Mirrors scaling_large_50M.yaml's ENCODER exactly (d=384, L=8, ff=2048,
+# nhead=16), keeps small_cone's G=64/F=12/cone knobs. Single-variable
+# comparison to large-fixed-50M — if cone scales like fixed at this size,
+# it should approach large-fixed's val_fixgrid_p90rank (5/14/38/64 cells).
+model:
+  d_model: 384
+  nhead: 16
+  num_layers: 8
+  dim_feedforward: 2048
+  dropout: 0.1
+  max_seq_len: 128
+  grid_size: 64
+  grid_range: 0.3
+  num_freqs: 12
+  grid_mode: cone
+  cone_r0: 0.02
+  cone_v: 0.000171
+  cone_p: 1.0
+  head_mlp_hidden: 384
+  head_type: spectrum
+normalization:
+  lat_center: 56.25
+  lat_scale: 1.0
+  lon_center: 11.5
+  lon_scale: 2.0
+  sog_scale: 30.0
+  dt_scale: 300.0
+train:
+  learning_rate: 0.0003
+  weight_decay: 1.0e-05
+  batch_size: 1280           # matches scaling_large_50M for clean comparison
+  max_horizon: 800
+  num_horizon_samples: 4
+  warmup_steps: 500
+  lr_schedule: cosine
+  sigma: 0.003
+  dr_sigma: 0.05
+  precision: bf16
+  compile: false
+  val_interval_minutes: 30
+  early_stop_patience: 10
+  num_workers: 8
+  seed: 17
+  max_steps: 39062
+mlflow:
+  tracking_uri: http://127.0.0.1:5000
+  experiment: trackfm/scaling
+  run_name: scaling-large-cone-spectrum-50M
