@@ -57,7 +57,13 @@ def main():
     base = load_config("configs/pretrain/scaling_large_cone_mlp_50M.yaml",
                        PretrainConfig)
     nm = base.normalization
-    X = np.stack([np.asarray(t)[-128:] for t in x_raw]).astype(np.float32)
+    def last128(t):
+        t = np.asarray(t, dtype=np.float32)[-128:]
+        if len(t) < 128:                      # 570/2257 tracks are short:
+            pad = np.repeat(t[:1], 128 - len(t), axis=0)   # front-pad with
+            t = np.concatenate([pad, t])                   # first posit
+        return t
+    X = np.stack([last128(t) for t in x_raw]).astype(np.float32)
     X[..., 0] = (X[..., 0] - nm.lat_center) / nm.lat_scale
     X[..., 1] = (X[..., 1] - nm.lon_center) / nm.lon_scale
     X[..., 2] = X[..., 2] / nm.sog_scale
