@@ -106,6 +106,18 @@ the compute-frontier bend and 18M knee were measured on single-linear
 heads; if MLP moves the FIXED curve at 18M too, part of the "data
 floor" narrative is head-limited and must be requalified.
 
+## 2026-07-22 — USER ORDERS: spectrum full run NEXT (CHAIN12 armed behind overnight FT); FT round-2 queued after it
+
+Sequence: overnight FT program (running, ~6-8am EDT) -> CHAIN12 =
+large-cone-spectrum full pretrain (~22h; the run the user paused
+yesterday, now resumed from scratch with the ckpt-phi fix) -> FT
+ROUND-2 (to be built during the spectrum window and armed as CHAIN13):
+vessel-class-v2 probe sweep (12+ ship-type classes from our corpus via
+mmsi_shiptype table joining v3sub200 meta; vessel-disjoint splits),
+DTU anomaly probes if adapter ready, origin-augmented port head.
+Spectrum verdict criteria unchanged: vs large-cone-mlp 4/8/27/58 (36
+strict); success = horizon-balance collapse.
+
 ## 2026-07-22 — FT-SWEEP-A COMPLETE: 13-encoder LP leaderboard; projector finding REPLICATED both geometries; feature-quality scale saturation
 
 Linear probes, frozen backbones, port-destination (811 classes), 300k
