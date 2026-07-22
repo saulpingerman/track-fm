@@ -89,6 +89,15 @@ class ModelConfig(BaseModel):
     # historical single-linear projection. Tests whether the encoder->basis
     # projection is a mixing bottleneck vs a real head-side capacity issue.
     head_mlp_hidden: int = 0
+    # spectrum head only: 0 = exact continuous-R phi evaluation (all runs
+    # to date). N>0 snaps each pair's R to N log-spaced bin centers over
+    # the cone operating envelope and gathers a per-bin k_proj(gamma(k))
+    # table — removes the per-pair gamma transcendentals + k_proj matmul
+    # (the memory-bound share of spectrum step time). Quantization is
+    # consistent across train/eval, but gamma features at high k*scale
+    # products still move under a <1% k snap, so this changes the learned
+    # function's inputs: FUTURE runs only, never toggle mid-run.
+    spectrum_r_bins: int = 0
     # 'cone': origin-centred window whose half-range grows with ELAPSED
     # TIME, R(t) = cone_r0 + cone_v * seconds; loss/eval operate on the
     # normalized canvas (targets / R, sigma scaled by 1/grid_range).

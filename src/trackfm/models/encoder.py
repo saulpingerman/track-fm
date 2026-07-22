@@ -114,9 +114,13 @@ class CausalAISModel(nn.Module):
                            else 0.01 * model.mup.d_base / model.d_model)
         else:
             readout_std = 0.01
+        head_kwargs = dict(mlp_hidden=model.head_mlp_hidden,
+                           readout_std=readout_std)
+        if model.head_type == "spectrum":
+            head_kwargs["r_bins"] = model.spectrum_r_bins
         self.fourier_head = head_cls(
             model.d_model, model.grid_size, model.num_freqs, model.grid_range,
-            mlp_hidden=model.head_mlp_hidden, readout_std=readout_std,
+            **head_kwargs,
         )
 
         # Static-context conditioning (optional): global bias field over

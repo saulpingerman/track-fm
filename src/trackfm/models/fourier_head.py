@@ -223,11 +223,17 @@ class SpectrumHead2D(nn.Module):
 
     N_SCALES = 6
     SCALE_MIN, SCALE_MAX = 0.02, 1.5          # degrees, displacement-dual
+    # R-binning envelope (r_bins > 0): log-spaced bin centers covering the
+    # cone operating range R(t) = r0 + v*t on <=2.6h windows (r0=0.02,
+    # max ~1.6 deg). 256 bins over [0.02, 2.0] -> max k rel-error 0.91%
+    # (half a log step). Longer-horizon runs must raise r_bins with the
+    # envelope; out-of-range R clamps to the edge bins.
+    R_BIN_MIN, R_BIN_MAX = 0.02, 2.0
 
     def __init__(self, d_model: int, grid_size: int = 64,
                  num_freqs: int = 12, grid_range: float = 0.1,
                  mlp_hidden: int = 0, readout_std: float = 0.01,
-                 phi_hidden: int = 128):
+                 phi_hidden: int = 128, r_bins: int = 0):
         super().__init__()
         self.grid_size = grid_size
         self.num_freqs = num_freqs
@@ -267,6 +273,13 @@ class SpectrumHead2D(nn.Module):
         self.register_buffer('cos_basis', torch.cos(phase).squeeze(0))
         self.register_buffer('sin_basis', torch.sin(phase).squeeze(0))
 
+        self.r_bins = r_bins
+        if r_bins > 0:               # no RNG consumed: exact-path heads
+            centers = torch.exp(torch.linspace(  # stay seed-identical
+                float(np.log(self.R_BIN_MIN)), float(np.log(self.R_BIN_MAX)),
+                r_bins))
+            self.register_buffer('r_bin_centers', centers)
+
     def _gamma(self, k: torch.Tensor) -> torch.Tensor:
         """k: (N, P, 2) physical frequencies -> (N, P, gamma_dim)."""
         ang = 2 * np.pi * k.unsqueeze(-1) * self.scales   # (N,P,2,S)
@@ -293,20 +306,48 @@ class SpectrumHead2D(nn.Module):
         coeffs = self.tail(mix)
         return coeffs[..., 0] @ self.cos_basis.T + coeffs[..., 1] @ self.sin_basis.T
 
+    def _bin_ids(self, R_deg: torch.Tensor) -> torch.Tensor:
+        """Nearest log-spaced bin index for each R (clamped to envelope)."""
+        lo, hi = float(np.log(self.R_BIN_MIN)), float(np.log(self.R_BIN_MAX))
+        step = (hi - lo) / (self.r_bins - 1)
+        ids = torch.round(
+            (R_deg.clamp(self.R_BIN_MIN, self.R_BIN_MAX).log() - lo) / step)
+        return ids.long().clamp(0, self.r_bins - 1)
+
+    def _phi_logits_binned(self, z_c: torch.Tensor, ids_c: torch.Tensor,
+                           table: torch.Tensor) -> torch.Tensor:
+        """Exact-path twin that gathers k_proj(gamma(k)) from the per-bin
+        table instead of evaluating gamma at each pair's continuous R."""
+        h = self.trunk(z_c)
+        mix = table.index_select(0, ids_c) + self.h_proj(h).unsqueeze(1)
+        coeffs = self.tail(mix)
+        return coeffs[..., 0] @ self.cos_basis.T + coeffs[..., 1] @ self.sin_basis.T
+
     def forward(self, z: torch.Tensor, bias: torch.Tensor | None = None,
                 R_deg: torch.Tensor | None = None) -> torch.Tensor:
         N = z.shape[0]
         if R_deg is None:                       # fixed geometry default
             R_deg = z.new_full((N,), self.grid_range)
+        if self.r_bins > 0:
+            # Per-bin table once per forward, OUTSIDE the checkpointed
+            # chunks (small enough to retain: r_bins x P x phi_hidden).
+            ids = self._bin_ids(R_deg)
+            k_b = torch.stack([self.freq_x, self.freq_y], -1).unsqueeze(0) \
+                / (2.0 * self.r_bin_centers.view(-1, 1, 1))
+            table = self.k_proj(self._gamma(k_b))
         outs = []
         for s0 in range(0, N, self._CHUNK):
             z_c = z[s0:s0 + self._CHUNK]
-            R_c = R_deg[s0:s0 + self._CHUNK]
+            if self.r_bins > 0:
+                fn_args = (self._phi_logits_binned, z_c,
+                           ids[s0:s0 + self._CHUNK], table)
+            else:
+                fn_args = (self._phi_logits, z_c, R_deg[s0:s0 + self._CHUNK])
             if self.USE_CKPT and self.training and torch.is_grad_enabled():
                 lg = torch.utils.checkpoint.checkpoint(
-                    self._phi_logits, z_c, R_c, use_reentrant=False)
+                    *fn_args, use_reentrant=False)
             else:
-                lg = self._phi_logits(z_c, R_c)
+                lg = fn_args[0](*fn_args[1:])
             outs.append(lg)
         logits = torch.cat(outs, dim=0)
         if bias is not None:
