@@ -138,8 +138,15 @@ VERDICTS (pre-registered):
 6. CONTEXT CAVEAT: dest-given-origin baseline (.754 acc top-1, .907
    top-5, using privileged origin label) rivals every probe's accuracy
    — encoders must be judged origin-blind (vs nearest-port .125 f1) or
-   in an origin-augmented deployment head (tier B arm). Top-1/3/5 pass
-   over all 13 probes running (ft_sweep_a_topk.json).
+   in an origin-augmented deployment head (tier B arm). Top-1/3/5 pass complete.
+TOP-K EXTENSION (uniform reload pass, validated top1==sweep acc):
+best encoders BEAT the privileged origin-lookup at EVERY k —
+large-cone-mlp .776/.899/.920 and large-fixed-mlp .774/.899/.920 vs
+dest-given-origin .754/.878/.907 — from kinematics alone, no origin
+label. Random-init floor .644/.829/.874 (class concentration makes
+top-k floors high; read gains above floor). Full 13-row table in
+~/data/trackfm/ft_sweep_a_topk.json.
+
 
 ## 2026-07-22 — HEAD LADDER COMPLETE (knee at depth 1, with a depth-3 anomaly); spectrum prototype OOM'd at launch, fixed, relaunched
 
