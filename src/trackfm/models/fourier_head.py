@@ -275,17 +275,40 @@ class SpectrumHead2D(nn.Module):
                  torch.log1p(k.pow(2).sum(-1, keepdim=True).sqrt())]
         return torch.cat(feats, dim=-1)
 
+    USE_CKPT = True          # gradient-checkpoint phi chunks (recompute
+                             # in backward). False trades ~52 GB retained
+                             # activations at bs640 for ~1.7x step speed.
+    _CHUNK = 32768          # pairs per phi chunk: bounds the (chunk, P,
+                             # phi_hidden) activation at ~1.3 GB; combined
+                             # with per-chunk gradient checkpointing the
+                             # backward peak stays chunk-sized too (at
+                             # bs1280 the unchunked mix tensor is ~100 GB —
+                             # the CHAIN11 launch OOM)
+
+    def _phi_logits(self, z_c: torch.Tensor, R_c: torch.Tensor) -> torch.Tensor:
+        h = self.trunk(z_c)
+        k = torch.stack([self.freq_x, self.freq_y], -1)
+        k = k.unsqueeze(0) / (2.0 * R_c.view(-1, 1, 1))
+        mix = self.k_proj(self._gamma(k)) + self.h_proj(h).unsqueeze(1)
+        coeffs = self.tail(mix)
+        return coeffs[..., 0] @ self.cos_basis.T + coeffs[..., 1] @ self.sin_basis.T
+
     def forward(self, z: torch.Tensor, bias: torch.Tensor | None = None,
                 R_deg: torch.Tensor | None = None) -> torch.Tensor:
         N = z.shape[0]
         if R_deg is None:                       # fixed geometry default
             R_deg = z.new_full((N,), self.grid_range)
-        h = self.trunk(z)                                    # (N, H_t)
-        k = torch.stack([self.freq_x, self.freq_y], -1)      # (P, 2)
-        k = k.unsqueeze(0) / (2.0 * R_deg.view(-1, 1, 1))    # (N, P, 2)
-        mix = self.k_proj(self._gamma(k)) + self.h_proj(h).unsqueeze(1)
-        coeffs = self.tail(mix)                              # (N, P, 2)
-        logits = coeffs[..., 0] @ self.cos_basis.T + coeffs[..., 1] @ self.sin_basis.T
+        outs = []
+        for s0 in range(0, N, self._CHUNK):
+            z_c = z[s0:s0 + self._CHUNK]
+            R_c = R_deg[s0:s0 + self._CHUNK]
+            if self.USE_CKPT and self.training and torch.is_grad_enabled():
+                lg = torch.utils.checkpoint.checkpoint(
+                    self._phi_logits, z_c, R_c, use_reentrant=False)
+            else:
+                lg = self._phi_logits(z_c, R_c)
+            outs.append(lg)
+        logits = torch.cat(outs, dim=0)
         if bias is not None:
             logits = logits + bias.reshape(N, -1)
         log_density = F.log_softmax(logits, dim=-1)

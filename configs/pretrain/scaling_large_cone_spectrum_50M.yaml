@@ -37,9 +37,9 @@ normalization:
 train:
   learning_rate: 0.0003
   weight_decay: 1.0e-05
-  batch_size: 1280           # matches scaling_large_50M for clean comparison
+  batch_size: 640            # phi memory: halved vs family (chunk+ckpt bound activations)
   max_horizon: 800
-  num_horizon_samples: 4
+  num_horizon_samples: 2
   warmup_steps: 500
   lr_schedule: cosine
   sigma: 0.003
@@ -50,7 +50,7 @@ train:
   early_stop_patience: 10
   num_workers: 8
   seed: 17
-  max_steps: 39062
+  max_steps: 78125
 mlflow:
   tracking_uri: http://127.0.0.1:5000
   experiment: trackfm/scaling

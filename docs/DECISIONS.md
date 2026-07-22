@@ -106,6 +106,30 @@ the compute-frontier bend and 18M knee were measured on single-linear
 heads; if MLP moves the FIXED curve at 18M too, part of the "data
 floor" narrative is head-limited and must be requalified.
 
+## 2026-07-22 — HEAD LADDER COMPLETE (knee at depth 1, with a depth-3 anomaly); spectrum prototype OOM'd at launch, fixed, relaunched
+
+LADDER (frozen large-cone-mlp encoder, fresh heads, fixgrid p90):
+d0 7.3/18/48/111 | d1 4/11/32/78 | d2 4/10/30/78 | d3 4/10/29/69.
+Verdict: 0->1 is the jump (reproduces CHAIN4 on frozen features); 1->2
+FLAT -> flagship mlp-head recipe = ONE hidden layer. ANOMALY: d3 broke
+the plateau (-12%% at 2h, single seed, 8-batch screen) — nonmonotone
+78/78/69 reads as noise-or-late-gain; NOT chased now (the spectrum
+head's trunk+phi is already deeper than d1); becomes a confirmation
+candidate only if the spectrum prototype disappoints. SIDE FINDING:
+d0-on-frozen-mlp-features (111) is WORSE than the linear-trained
+encoder's native 87 -> mlp-cotrained features are less linearly
+decodable (SSL-projector signature, first half); the transfer half
+gets tested by the queued LP-probe comparison.
+
+SPECTRUM LAUNCH OOM: phi materialized (pairs x 625 x 128) activations
+(~100 GB at bs1280) — invisible at smoke scale. Fix: chunked phi
+(32768 pairs) + per-chunk gradient checkpointing (backward peak stays
+chunk-sized; probed 38 GiB at bs640), no-ckpt variant OOMs (52 GB
+retained) — ckpt kept. Step cost 2.33s at h4 => 50h; relaunched
+(CHAIN11b) at h2/bs640/78k steps ~22h — same protocol deviation as
+CHAIN9 with the same pre-registered ambiguity control. Verdict ETA
+~Wed evening EDT.
+
 ## 2026-07-21 — CHAIN9 RESULT: resolution-doubling does NOT close cone's 2h gap (55 vs 58) — spectrum-head motivation strengthened; muP LR transfer VALIDATED; 5.5h idle post-mortem
 
 1. F24/G128 (exact 2x-resolution twin, h2): 4/8/26/55 vs F12's
