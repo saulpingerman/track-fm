@@ -106,6 +106,41 @@ the compute-frontier bend and 18M knee were measured on single-linear
 heads; if MLP moves the FIXED curve at 18M too, part of the "data
 floor" narrative is head-limited and must be requalified.
 
+## 2026-07-22 — FT-SWEEP-A COMPLETE: 13-encoder LP leaderboard; projector finding REPLICATED both geometries; feature-quality scale saturation
+
+Linear probes, frozen backbones, port-destination (811 classes), 300k
+train windows, MLflow trackfm/ft-port-dest. f1_macro/acc:
+large-fixed-mlp .254/.774 | large-cone-mlp .248/.776 | xlarge-fixed
+.245/.774 | large-cone .210/.749 | exp11-116M .204/.755 | golden-large
+.201/.750 | large-fixed .203/.747 | exp14-100M .189/.738 | exp14-18M
+.151/.718 | small-cone .125/.682 | ctx-geotraffic .122/.681 | exp10
+.104/.654 | RANDOM-INIT .095/.644. Baselines (full test): majority
+.194 acc/.001 f1; nearest-port .199/.125; origin-copy .425/.439;
+dest-given-origin .754/.411 (top-5 .907).
+
+VERDICTS (pre-registered):
+1. MLP-vs-linear co-training: mlp backbones probe BETTER, replicated
+   in both geometries (cone +18%%, fixed +25%%) — SSL-projector story
+   confirmed end-to-end; the user's crutch worry is retired for LP
+   transfer at depth 1. Flagship head choice double-justified.
+2. Scale saturates for features: xlarge-linear (.245, 116M) ~ 18M
+   mlp-trained (.248-.254). Head co-training ~ 6.4x params.
+3. Geometry effect tiny (~2%%): representations care about head
+   co-training, not canvas.
+4. Old-vs-new: recipe doubles features at matched size (golden .201 vs
+   exp10 .104); modern 26mo data adds ~+23%% (golden -> cone-mlp).
+   exp11 (real paper backbone) respectable .204 but beaten by modern
+   18M. exp10 ~ random-init (.104 vs .095) — pre-paper pretraining
+   contributed almost nothing transferable.
+5. Conditioning: ctx-geotraffic ~ small-cone (.122 vs .125) — the
+   field neither helped nor hurt BACKBONE features (value lives in the
+   field; consistent with the crutch probe).
+6. CONTEXT CAVEAT: dest-given-origin baseline (.754 acc top-1, .907
+   top-5, using privileged origin label) rivals every probe's accuracy
+   — encoders must be judged origin-blind (vs nearest-port .125 f1) or
+   in an origin-augmented deployment head (tier B arm). Top-1/3/5 pass
+   over all 13 probes running (ft_sweep_a_topk.json).
+
 ## 2026-07-22 — HEAD LADDER COMPLETE (knee at depth 1, with a depth-3 anomaly); spectrum prototype OOM'd at launch, fixed, relaunched
 
 LADDER (frozen large-cone-mlp encoder, fresh heads, fixgrid p90):
