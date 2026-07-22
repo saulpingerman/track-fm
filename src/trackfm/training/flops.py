@@ -23,16 +23,43 @@ def encoder_flops_per_sample(m: ModelConfig, seq_len: int | None = None) -> floa
 
 
 def head_flops_per_sample(m: ModelConfig, num_pairs: int) -> float:
-    """Forward FLOPs for horizon conditioning + Fourier head over num_pairs."""
+    """Forward FLOPs for horizon conditioning + density head over num_pairs.
+
+    Head-type aware: the spectrum head evaluates a per-frequency MLP
+    (gamma -> k_proj -> tail) at every (pair, harmonic) — encoder-scale
+    work; omitting it made CHAIN12's reported MFU read ~2x low. MFU
+    convention, not HFU: gradient-checkpoint recompute is NOT counted,
+    so a checkpointed spectrum run's hardware-FLOPs sit ~1 extra phi
+    forward above this number.
+    """
     d = m.d_model
-    coeffs = 2 * (2 * m.num_freqs + 1) ** 2
+    lattice = (2 * m.num_freqs + 1) ** 2      # harmonic lattice points
+    coeffs = 2 * lattice                       # (cos, sin) per point
     grid = m.grid_size * m.grid_size
-    per_pair = (
-        d + d * d          # time_proj MLP (1->d, d->d)
-        + 2 * d * d        # horizon_proj (2d -> d)
-        + d * coeffs       # coefficient predictor
-        + coeffs * grid    # basis matmul -> logits
-    )
+    cond = d + d * d + 2 * d * d   # time_proj MLP (1->d, d->d) + horizon_proj
+    hidden = m.head_mlp_hidden
+    if m.head_type == "spectrum":
+        from trackfm.models.fourier_head import SpectrumHead2D
+        s_scales = SpectrumHead2D.N_SCALES
+        gamma_dim = 4 * s_scales + 3
+        phi = 128                  # SpectrumHead2D phi_hidden (ctor default)
+        trunk_hidden = hidden if hidden > 0 else d
+        per_freq = (
+            10 * s_scales          # gamma: ang mults + sin/cos + log terms
+            + gamma_dim * phi      # k_proj
+            + phi * phi + phi * 2  # tail
+        )
+        per_pair = (cond
+                    + d * trunk_hidden      # trunk
+                    + trunk_hidden * phi    # h_proj (once per pair)
+                    + lattice * per_freq    # phi at every harmonic
+                    + coeffs * grid)        # cos/sin synthesis -> logits
+    else:
+        if hidden > 0:             # mlp projector (CHAIN4 heads)
+            predict = d * hidden + hidden * coeffs
+        else:
+            predict = d * coeffs
+        per_pair = cond + predict + coeffs * grid
     return 2.0 * num_pairs * per_pair
 
 
