@@ -1895,3 +1895,18 @@ escape tail is maneuvering vessels, not just fast ones.
 - Tests: tests/models/test_spectrum_r_bins.py (error bound, binned==exact at bin
   centers, clamping, grads through checkpointed binned path, config plumbing;
   models suite 67 passed). All 3 overnight CPU units now shipped.
+
+## 2026-07-22 ~7:45 PM EDT — CHAIN13 waiter found dead; re-armed + CHAIN14 added
+- Routine wakeup check found NO chain13 process despite "CHAIN13 ARMED" in
+  campaign.log (armed 03:18Z during the FT-cancel swap — almost certainly killed
+  by the same unbracketed-pkill incident that took out my own compound shells that
+  night). Silent consequence had it gone unnoticed: GPU idle after spectrum, no
+  tier-B FTs. **This is why every wakeup re-verifies the armed chain with
+  bracketed pgrep instead of trusting the arm log.**
+- Fixed chain13's own wait-loop pgreps to bracketed form (script was dead, so not
+  a live-script mutation), relaunched under setsid (PID 723025).
+- NEW chain14_vessel_probe.sh (PID 723024): waits for chain12+chain13+any
+  pretrain/finetune to be gone with two consecutive 300s clean polls, then runs
+  scripts/ft_vessel_probe_v2.py -> trackfm/ft-vessel-class (*-v2-lp). Full
+  overnight pipeline: spectrum -> rescore (me, on monitor wake) + CHAIN13 8 FTs
+  -> CHAIN14 vessel-v2 probes.
