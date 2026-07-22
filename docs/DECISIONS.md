@@ -1867,3 +1867,18 @@ escape tail is maneuvering vessels, not just fast ones.
    per-horizon) -> Kalman(tuned) -> TrAISformer -> TrackFM. Fixed-sigma
    ratios flatter the model (smoke: 1.71x vs 1.08x tuned); strong
    baselines are the honest headline.
+
+## 2026-07-22 ~22:4x EDT — Overnight CPU units 1–2 (spectrum still training, 68%)
+- **vessel-v2 probe ready**: `scripts/ft_vessel_probe_v2.py`. Probe-time class filter
+  (drop junk `1"`; require ≥500 train / ≥100 val / ≥100 test) keeps **15/22 classes**,
+  462k/112k/103k windows, all classes in every split (verified on the real npz).
+  Torch linear probe (standardized feats, AdamW, val-selected LR {3e-3,1e-3}, top-3
+  logged) replaces sklearn — n is 300× exp-13. Runs at GPU drain, after CHAIN13.
+  Spectrum encoder included in the roster.
+- **MFU was lying by 1.8×**: `head_flops_per_sample` charged the spectrum head as a
+  slot head, dropping the per-harmonic φ MLP (625 × (k_proj + tail) per pair —
+  encoder-scale work). Fixed head-type-aware (+ mlp-projector accounting for CHAIN4
+  heads); tests in `tests/training/test_flops.py`. Live run's honest MFU ≈ **0.068**,
+  not 0.038 (HFU higher still: USE_CKPT recomputes φ once in backward — deliberately
+  not counted, MFU-not-HFU convention). Remaining gap vs dense-mlp runs = elementwise
+  γ + chunking overhead; R-binning (unit 3, next) attacks the γ/k_proj share.
