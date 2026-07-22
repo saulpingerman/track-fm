@@ -1882,3 +1882,16 @@ escape tail is maneuvering vessels, not just fast ones.
   not 0.038 (HFU higher still: USE_CKPT recomputes φ once in backward — deliberately
   not counted, MFU-not-HFU convention). Remaining gap vs dense-mlp runs = elementwise
   γ + chunking overhead; R-binning (unit 3, next) attacks the γ/k_proj share.
+
+## 2026-07-22 ~23:2x EDT — CPU unit 3: spectrum_r_bins (R-binned gamma/k_proj cache)
+- `ModelConfig.spectrum_r_bins` (default 0 = exact continuous-R path, bit-identical
+  to CHAIN12). N>0: snap R to N log-spaced centers over [0.02, 2.0] (cone envelope,
+  R(t)=0.02+1.71e-4t, max ~1.6 deg on 2.6h windows); gather per-bin k_proj(gamma(k))
+  table computed once per forward outside the checkpointed chunks. 256 bins -> max
+  k rel-err 0.91%; out-of-envelope clamps to edge bins; longer-horizon runs raise N.
+- Honest caveat in code+tests: gamma features at high k*scale still move under a <1%
+  k snap (phase amplifies), so binning is consistent train/eval quantization, not
+  output-invariant — never toggle mid-run; FUTURE runs only.
+- Tests: tests/models/test_spectrum_r_bins.py (error bound, binned==exact at bin
+  centers, clamping, grads through checkpointed binned path, config plumbing;
+  models suite 67 passed). All 3 overnight CPU units now shipped.
