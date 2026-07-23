@@ -2038,3 +2038,27 @@ mid-run instability). **FLAGSHIP LR: 3e-4, settled.** Small-tier 1e-3 A/B
 still runs (completes the story ~5PM) but cannot change the flagship call.
 Lesson for the paper's recipe section: LR-transfer claims need budget-matched
 confirmation, not just width-matched.
+
+## 2026-07-23 5:00 PM EDT — LR A/B COMPLETE: optimum SHIFTS with width at full budget (small: 1e-3 wins -27%; large: 1e-3 loses +45%)
+
+| tier | 3e-4 | 1e-3 | verdict |
+|---|---|---|---|
+| small (0.84M) | 5/18/62/121 | **4/12/41/88** | 1e-3 wins 27-34% every bucket |
+| large (18M) | **4/8/27/58** | 4/13/42/84 | 3e-4 wins 45-63% past 15m |
+
+1. **Full finding**: at the full 50M-sample budget the LR optimum moved >=3x
+   across a 21x width range — in BOTH directions vs the muP-tier proxy claim
+   ("1e-3 stable across d=64/128/256"). Short-budget sweeps are unreliable
+   for long-budget LR selection, width-matched or not.
+2. **FLAGSHIP: 3e-4 stands** (validated at 18M; width-shift direction says
+   3e-4-or-lower at 116M, never higher).
+3. **CAVEATS OPENED on prior small-tier results** (all ran at 3e-4, now known
+   badly suboptimal for small): (a) the scaling curve's small-end points are
+   pessimistic — small-cone-mlp@1e-3 (88) nearly matches large-cone-linear
+   (87); (b) "projector null at small" (120 vs 121) may be LR-confounded —
+   at the right LR the projector might matter at small too. Paper wording
+   softened accordingly; a small-cone@1e-3 (no mlp) control would settle (b)
+   — 3.2h, queue only if the paper needs the claim.
+4. Small@1e-3 (88, 0.84M) vs large@1e-3 (84, 18M): at the WRONG large-LR,
+   width is nearly worthless — LR error can masquerade as scale saturation.
+   Reinforces the paper's "recipe > scale" theme.

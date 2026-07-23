@@ -107,7 +107,10 @@ horizon-FLAT; constant +1 cell blur). Exact analytic dilation
 
 - [x] LR A/B large: 1e-3 LOSES 4/13/42/84 vs 4/8/27/58 — proxy-tier
       optima don't transfer to full budget; flagship LR = 3e-4 (settled)
-- [ ] LR A/B: small-cone-mlp @1e-3 vs 121 (due ~7 PM EDT 7/23)
+- [x] LR A/B small: 1e-3 WINS 4/12/41/88 vs 5/18/62/121 — optimum
+      SHIFTS with width at full budget (opposite direction vs large!);
+      small-tier 3e-4 results (incl projector-null-at-small) now carry
+      an LR caveat
 - [ ] xlarge-cone-mlp 50M scout (due ~noon 7/24) — missing scaling cell
 - [ ] Flagship (user launches; config flagship_xlarge_cone_mlp_26mo.yaml)
 - [ ] Anomaly detection v2 rerun (not yet scheduled)
