@@ -69,6 +69,7 @@ RUNS = [
     ("scaling_large_cone_spectrum_50M", "scaling-large-cone-spectrum-50M"),
     ("scaling_large_cone_mlp_lr1e3_50M", "scaling-large-cone-mlp-lr1e3-50M"),
     ("scaling_small_cone_mlp_lr1e3_50M", "scaling-small-cone-mlp-lr1e3-50M"),
+    ("scaling_xlarge_cone_mlp_50M", "scaling-xlarge-cone-mlp-50M"),
 ]
 
 MAXB = int(sys.argv[1]) if len(sys.argv) > 1 else 120
