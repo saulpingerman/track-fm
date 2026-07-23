@@ -393,6 +393,18 @@ vessel-type transfer (Section~\ref{sec:transfer}): head choice and backbone
 quality dissociate. Because it needs no grid retraining at new horizons,
 we develop it as the extension path to beyond-2h forecasting.
 
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/dissociation_scatter.png}
+    \caption{Forecasting containment vs.\ representation transfer across
+    all encoders. The spectrum head (tied-best transfer, worst-of-modern
+    containment) and the conditioned pretrain (the reverse) break any
+    single-axis notion of model quality; open markers are fixed
+    $\pm0.3^{\circ}$ canvases whose containment is computed on the 81\%
+    of vessels they cover.}
+    \label{fig:dissociation}
+\end{figure}
+
 \section{Transfer experiments}
 \label{sec:transfer}
 

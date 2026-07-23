@@ -1,0 +1,79 @@
+"""Head/backbone dissociation scatter: forecasting containment vs transfer.
+
+X = 2h fixgrid p90 containment (0.6 km2 cells, log scale, lower=better);
+Y = vessel-type-v2 linear-probe f1_macro (higher=better). If containment
+quality and representation quality were one axis, points would fall on a
+monotone curve; the spectrum point (worst-of-modern containment, tied-best
+transfer) and ctx-geotraffic (good containment, poor transfer) break it.
+
+Open markers = fixed +/-0.3 canvases whose 2h containment is computed on
+the 81% of vessels they cover (home metric); filled = full population.
+
+Usage: python scripts/gen_dissociation_scatter.py
+Writes docs/figures/dissociation_scatter.png
+"""
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+ORANGE, BLUE, TEAL, SLATE = "#d9772f", "#2878c8", "#1f9e89", "#8494a8"
+
+#      name, 2h p90 (cells), vessel f1, color, censored(open marker)
+PTS = [
+    ("large-fixed-mlp", 39, .3825, ORANGE, True),
+    ("cone-spectrum", 67, .3824, TEAL, False),
+    ("xlarge-fixed", 52, .378, BLUE, True),
+    ("large-cone-mlp", 58, .366, ORANGE, False),
+    ("small-cone", 120, .347, BLUE, False),
+    ("golden-large", 86, .346, SLATE, True),
+    ("exp14-100M", 129, .341, SLATE, True),
+    ("large-cone", 87, .335, BLUE, False),
+    ("exp14-18M", 133, .334, SLATE, True),
+    ("large-fixed", 64, .322, BLUE, True),
+    ("ctx-geotraffic", 102, .310, BLUE, False),
+]
+OFFS = {  # label offsets (pts) to avoid collisions
+    "large-fixed-mlp": (8, 2), "cone-spectrum": (8, 2),
+    "xlarge-fixed": (8, -3), "large-cone-mlp": (8, 2),
+    "small-cone": (8, 2), "golden-large": (-8, 6),
+    "exp14-100M": (8, -2), "large-cone": (8, -8),
+    "exp14-18M": (8, 4), "large-fixed": (8, -4),
+    "ctx-geotraffic": (-8, -12),
+}
+
+
+def main():
+    fig, ax = plt.subplots(figsize=(10.5, 7))
+    for name, x, y, c, censored in PTS:
+        ax.scatter(x, y, s=110, color="white" if censored else c,
+                   edgecolor=c, linewidth=2.2, zorder=3)
+        dx, dy = OFFS[name]
+        ax.annotate(name, (x, y), textcoords="offset points",
+                    xytext=(dx, dy), fontsize=10,
+                    ha="left" if dx > 0 else "right")
+    ax.set_xscale("log")
+    ax.set_xticks([40, 60, 80, 100, 130])
+    ax.set_xticklabels(["40", "60", "80", "100", "130"])
+    ax.invert_xaxis()                      # right = better forecasting
+    ax.set_xlabel("2h containment: p90 rank, 0.6 km$^2$ cells "
+                  "(log, lower/right = better) — open markers scored on "
+                  "censored 81% population")
+    ax.set_ylabel("vessel-type transfer: linear-probe f1_macro (higher = better)")
+    ax.set_title("Forecasting quality and representation quality dissociate",
+                 loc="left", fontsize=14)
+    # the two story arrows
+    ax.annotate("spectrum: worst modern containment,\ntied-best transfer",
+                xy=(67, .3824), xytext=(115, .372), fontsize=10, color=TEAL,
+                arrowprops=dict(arrowstyle="->", color=TEAL, lw=1.4))
+    ax.annotate("conditioned pretrain: good containment,\nworst modern transfer",
+                xy=(102, .310), xytext=(68, .318), fontsize=10, color=BLUE,
+                arrowprops=dict(arrowstyle="->", color=BLUE, lw=1.4))
+    ax.grid(alpha=0.25, which="both")
+    ax.spines[["top", "right"]].set_visible(False)
+    fig.tight_layout()
+    fig.savefig("docs/figures/dissociation_scatter.png", dpi=150)
+    print("wrote dissociation_scatter.png")
+
+
+if __name__ == "__main__":
+    main()
