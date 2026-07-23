@@ -19,42 +19,50 @@ SLATE, LIGHT = "#8494a8", "#c0c6cc"
 OUT = "docs/figures"
 
 
-def strategy_progression():
-    encoders = ["large-fixed-mlp", "large-cone-mlp", "xlarge-fixed"]
-    lp = [0.254, 0.248, 0.245]
-    lpft = [0.346, 0.335, 0.330]
-    full = [0.364, 0.363, None]
+def strategy_progression(random_lpft=None, random_full=None):
+    """random_lpft/random_full: fill in when CHAIN17 controls land."""
+    encoders = ["large-fixed-mlp", "large-cone-mlp", "xlarge-fixed",
+                "random-init"]
+    lp = [0.254, 0.248, 0.245, 0.095]
+    lpft = [0.346, 0.335, 0.330, random_lpft]
+    full = [0.364, 0.363, None, random_full]
     shades = {  # one hue per encoder family, darkening with strategy
         "large-fixed-mlp": ["#f2c09a", "#e59a56", ORANGE],
         "large-cone-mlp": ["#a9cbee", "#5f9dd8", BLUE],
         "xlarge-fixed": ["#c3ccd8", "#9fadc0", SLATE],
+        "random-init": ["#dfe3e8", "#cdd3da", LIGHT],
     }
-    fig, ax = plt.subplots(figsize=(10, 6.4))
+    fig, ax = plt.subplots(figsize=(11.5, 6.4))
     width, gap = 0.26, 0.06
     for i, enc in enumerate(encoders):
         vals = [lp[i], lpft[i], full[i]]
         for j, (v, lab) in enumerate(zip(vals, ["LP", "LP-FT", "full FT"])):
-            if v is None:
-                continue
             x = i + (j - 1) * (width + gap)
+            if v is None:
+                if enc == "random-init":       # control queued (CHAIN17)
+                    ax.bar(x, 0.02, width, color="none", edgecolor="gray",
+                           ls=":", lw=1.2)
+                    ax.text(x, 0.026, "queued", ha="center", fontsize=8,
+                            color="gray", rotation=90, va="bottom")
+                continue
             ax.bar(x, v, width, color=shades[enc][j],
                    label=lab if i == 0 else None)
             ax.text(x, v + 0.004, f"{v:.3f}", ha="center", fontsize=10)
     ax.axhline(0.411, ls="--", color="purple", lw=1.5)
-    ax.text(2.42, 0.415, "dest-given-origin lookup (.411)\nuses privileged origin label",
+    ax.text(3.42, 0.415, "dest-given-origin lookup (.411)\nuses privileged origin label",
             color="purple", fontsize=9, ha="right")
-    ax.axhline(0.095, ls="--", color="gray", lw=1.5)
-    ax.text(2.42, 0.099, "random-init LP (.095)", color="gray", fontsize=9,
-            ha="right")
     ax.annotate("full FT closes the\ngeometry gap: .364 vs .363",
-                xy=(0.68, 0.363), xytext=(1.25, 0.30), fontsize=10,
+                xy=(0.68, 0.363), xytext=(1.45, 0.30), fontsize=10,
                 arrowprops=dict(arrowstyle="->", color="black", lw=1))
-    ax.set_xticks(range(3))
+    ax.annotate("pretraining = 2.6x the\nfeature quality of random init",
+                xy=(2.68, 0.10), xytext=(2.0, 0.175), fontsize=10,
+                arrowprops=dict(arrowstyle="->", color="black", lw=1))
+    ax.set_xticks(range(4))
     ax.set_xticklabels(encoders, fontsize=11)
     ax.set_ylabel("destination f1_macro (811 classes, test)")
     ax.set_ylim(0, 0.46)
     ax.set_title("Port-destination: fine-tuning strategy ladder — "
-                 "LP → LP-FT (+35%) → full FT (encoders converge)",
+                 "pretrained vs random-init at every rung",
                  loc="left", fontsize=13)
     ax.legend(title="strategy (bar shade)", loc="upper left", fontsize=10)
     ax.spines[["top", "right"]].set_visible(False)
@@ -125,22 +133,32 @@ def vessel_leaderboard():
     print("wrote ft_vessel_v2_leaderboard.png")
 
 
-def eta_chart():
+def eta_chart(random_mae=None, random_med=None):
+    """random_mae/med: fill in when the CHAIN17 control lands."""
     rows = [("xlarge-fixed", 505, 191, BLUE),
             ("large-cone-mlp", 517, 206, ORANGE),
             ("large-fixed-mlp", 524, 211, ORANGE),
             ("cone-spectrum", 544, 213, TEAL)]
+    if random_mae is not None:
+        rows.append(("random-init", random_mae, random_med, LIGHT))
     names = [r[0] for r in rows][::-1]
     mae = [r[1] for r in rows][::-1]
     med = [r[2] for r in rows][::-1]
     colors = [r[3] for r in rows][::-1]
-    fig, ax = plt.subplots(figsize=(9.5, 4.6))
+    fig, ax = plt.subplots(figsize=(10.5, 4.9))
     ax.barh(names, mae, color=colors)
     for i, (v, m) in enumerate(zip(mae, med)):
-        ax.text(v + 4, i, f"{v} min  (median {m})", va="center", fontsize=10)
+        ax.text(v + 6, i, f"{v} min  (median {m})", va="center", fontsize=10)
+    ax.axvline(775, ls="--", color="gray", lw=1.5)
+    ax.text(770, len(rows) - 0.62,
+            "predict train-median\nbaseline (775 / med 422)",
+            color="gray", fontsize=9, ha="right")
+    if random_mae is None:
+        ax.text(770, 0.52, "random-init control queued (CHAIN17)",
+                color="gray", fontsize=9, ha="right", style="italic")
     ax.set_xlabel("ETA mean absolute error, minutes (linear probe, test) — lower is better")
-    ax.set_xlim(0, 640)
-    ax.set_title("ETA regression: ordering REVERSES vs classification — "
+    ax.set_xlim(0, 830)
+    ax.set_title("ETA regression: all encoders beat the constant baseline; "
                  "capacity wins (116M best)", loc="left", fontsize=12.5)
     ax.spines[["top", "right"]].set_visible(False)
     fig.tight_layout()
