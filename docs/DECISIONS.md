@@ -1952,3 +1952,26 @@ pair mixes). Uniform rescore_v2 (fixgrid p90, ±0.3 frame, 0.6 km2 cells, val):
    -equivariance, R-binning, honest FLOPs) is built and tested either way.
 6. Pipeline: CHAIN13 FT START 3:36 AM (ft-large-fixed-mlp-lpft first);
    CHAIN14 vessel-v2 probes queued behind it.
+
+## 2026-07-23 6:05 AM EDT — TIER-B FT WRAP (8/8, zero fails)
+
+Port-dest (811 classes, test f1_macro / acc):
+| encoder | LP (sweep A) | LP-FT | full FT |
+|---|---|---|---|
+| large-fixed-mlp | .254 | .346 / .804 | **.364** / .802 |
+| large-cone-mlp | .248 | .335 / .805 | **.363** / .803 |
+| xlarge-fixed | .245 | .330 / .802 | — |
+
+ETA regression (test MAE / MedAE minutes): xlarge **505/191** < cone-mlp 517/206 < fixed-mlp 524/211.
+
+1. LP-FT: uniform ~+35%% relative over LP, ordering preserved — LP is a valid
+   cheap ranker WITHIN a task for these encoders.
+2. **Full FT erases the geometry gap** (.364 vs .363): the LP-era fixed-over-cone
+   2.4%% edge was a projector/feature-layout artifact, not transfer capability.
+   Geometry choice can be made on forecasting merits alone.
+3. **Task-dependence is real**: ETA reverses the ordering (cone edges fixed;
+   xlarge best overall — regression may reward the 116M capacity that
+   classification saturated on). Single-task LP leaderboards would mislead.
+4. All full-FT acc ~flat .80 while f1 climbs: FT gains concentrate in rare
+   classes. Running detail: ~/data/trackfm/ft_tier_b_summary.md.
+5. CHAIN14 (vessel-v2 probes, 14 encoders + baselines) fires next at drain.
