@@ -158,16 +158,18 @@ architectures capture longer-range temporal dependencies: TrAISformer
 \citep{nguyen2021traisformer} introduced a sparse high-dimensional AIS
 representation with classification loss to handle multimodality; TRFM-LS
 \citep{jiang2023trfmls} combined transformers with LSTM modules; TPTrans
-\citep{wang2024tptrans} employed multi-head attention for spatiotemporal
-features. Graph neural networks model vessel interactions
-\citep{zhao2022kgcnlstm, wang2024stmgf}. Our work differs in evaluating
+\citep{ouyang2024tptrans} employed multi-head attention for spatiotemporal
+features. Graph neural networks model vessel interactions.
+% TODO(citations): restore GNN cites once author lists verified
+% (k-GCN-LSTM, Physica A 2022; STMGF-Net, 2024) — old draft's keys had
+% unverifiable/wrong attributions. Our work differs in evaluating
 probabilistic forecasts by operational containment area rather than
 point-estimate error, and in treating the forecaster as a pretrained
 backbone for transfer.
 
 \paragraph{Foundation Models for Trajectories}
 TrajFM \citep{lin2024trajfm} targets vehicle trajectories with masking and
-recovery objectives; the Pretrained Mobility Transformer \citep{jiang2024pmt}
+recovery objectives; the Pretrained Mobility Transformer \citep{wu2024pmt}
 applies GPT-style pretraining to human mobility; time-series foundation
 models address prediction and anomaly detection broadly \citep{jin2024tsfm}.
 Maritime trajectories differ in continuous unconstrained space, irregular
@@ -176,10 +178,12 @@ horizon-scaled geometry exploits.
 
 \paragraph{Maritime Behavior Analysis}
 Anomaly detection taxonomies and methods are surveyed in
-\citet{riveiro2018anomaly}; deep approaches include autoencoders and GANs
-\citep{chen2024wgananomalym} and multi-task frameworks \citep{shin2025aisllm}.
+\citet{riveiro2018anomaly}; deep approaches include probabilistic sequence models
+\citep{nguyen2018geotracknet} and multi-task frameworks \citep{park2025aisllm}.
+% TODO(citations): old draft's chen2024wgananomalym could not be verified
+% (likely miscited); replaced with GeoTrackNet.
 Collision risk work increasingly integrates probabilistic trajectory
-prediction \citep{zhang2025collisionrisk}, which requires exactly the
+prediction \citep{jurkus2025collision}, which requires exactly the
 calibrated spatial densities TrackFM outputs.
 
 \section{Data}
