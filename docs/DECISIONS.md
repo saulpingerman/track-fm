@@ -1975,3 +1975,46 @@ ETA regression (test MAE / MedAE minutes): xlarge **505/191** < cone-mlp 517/206
 4. All full-FT acc ~flat .80 while f1 climbs: FT gains concentrate in rare
    classes. Running detail: ~/data/trackfm/ft_tier_b_summary.md.
 5. CHAIN14 (vessel-v2 probes, 14 encoders + baselines) fires next at drain.
+
+## 2026-07-23 6:25 AM EDT — VESSEL-V2 LEADERBOARD (15 classes, 677k windows, vessel-disjoint): SPECTRUM TIES FOR #1 ON TRANSFER despite losing containment
+
+CHAIN14 complete in 15 min (zero SKIPs; all 14 encoders). Test f1_macro / acc / top-3:
+
+| encoder | f1 | acc | top3 |
+|---|---|---|---|
+| **large-fixed-mlp** | **.3825** | .421 | .707 |
+| **cone-spectrum** | **.3824** | .419 | .700 |
+| xlarge-fixed | .378 | .413 | .679 |
+| large-cone-mlp | .366 | .413 | .694 |
+| small-cone | .347 | .387 | .683 |
+| golden-large | .346 | .378 | .657 |
+| exp14-100M | .341 | .374 | .667 |
+| exp11-116M | .341 | .374 | .644 |
+| large-cone (linear) | .335 | .378 | .680 |
+| exp14-18M | .334 | .364 | .655 |
+| large-fixed (linear) | .322 | .358 | .667 |
+| ctx-geotraffic | .310 | .344 | .654 |
+| exp10-large | .269 | .308 | .614 |
+| random-large | .200 | .235 | .516 |
+| kinstats baseline | .151 | .194 | .494 |
+| majority | .009 | .073 | — |
+
+1. **HEADLINE: cone-spectrum ties large-fixed-mlp for #1** (.3824 vs .3825 —
+   dead tie) while losing containment 67-vs-58. The spectrum head produces
+   the best-tier BACKBONE even as its densities rank worse — strongest
+   projector-effect evidence yet (smooth phi may absorb less task-specific
+   warping than the free slot head, protecting encoder generality). Directly
+   feeds the foundationness program: head choice and encoder quality
+   dissociate.
+2. Task now separates encoders properly (677k windows vs exp-13's 2.2k):
+   trained-vs-random gap .38 vs .20; every encoder >> kinstats .151.
+3. mlp-head 50M encoders dominate old-era exp models (golden/exp11/exp14
+   cluster ~.34); exp10 confirmed weakest again.
+4. **ctx-geotraffic lands LOW (.310, below its unconditioned sibling
+   small-cone .347)** — first direct evidence for the user's channels-are-
+   anti-foundational concern: conditioning helped forecasting (-9%%) but
+   HURT representation transfer (-11%% f1 here). Needs a dedicated control
+   before doctrine, but the flag is planted.
+5. Protocol notes: torch linear probe (std-features, val-selected LR),
+   15/22 classes (junk 1" dropped, stranded rares filtered), all classes
+   present in every split. MLflow trackfm/ft-vessel-class (*-v2-lp).
