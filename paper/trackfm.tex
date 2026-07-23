@@ -374,10 +374,23 @@ Under the compute-matched 50M budget, scaling the encoder from 18M to 116M
 parameters does not improve cone forecasting (85 vs.\ 87 at 2h with linear
 heads) and does not match the projector intervention (fixed: 116M-linear 52
 vs.\ 18M-projector 39). The scaling series (2M$\to$116M, fixed geometry)
-saturates by 18M on containment. Transfer shows the same saturation on
-classification tasks but \emph{not} on regression
+saturates by 18M on containment (Figure~\ref{fig:scaling}); the projector
+intervention is null at 2M and decisive at 18M, locating the bottleneck in
+head-side mixing capacity rather than encoder width. Transfer shows the
+same saturation on classification tasks but \emph{not} on regression
 (Section~\ref{sec:transfer}). \todo{xlarge-cone-projector scaling cell +
 LR-transfer study land this week; full-data flagship separately}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/scaling_containment.png}
+    \caption{2h containment vs.\ encoder parameters at the compute-matched
+    50M-sample budget. The fixed-geometry linear-head series saturates by
+    18M; the cone linear-head series is flat from 18M to 116M; one
+    projector layer at 18M (stars) is worth more than the full
+    18M$\to$116M scale step.}
+    \label{fig:scaling}
+\end{figure}
 
 \subsection{Grid-free spectrum head}
 \label{sec:spectrum}
