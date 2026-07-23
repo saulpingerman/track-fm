@@ -382,8 +382,13 @@ saturates by 18M on containment (Figure~\ref{fig:scaling}); the projector
 intervention is null at 2M and decisive at 18M, locating the bottleneck in
 head-side mixing capacity rather than encoder width. Transfer shows the
 same saturation on classification tasks but \emph{not} on regression
-(Section~\ref{sec:transfer}). \todo{xlarge-cone-projector scaling cell +
-LR-transfer study land this week; full-data flagship separately}
+(Section~\ref{sec:transfer}). Learning-rate transfer follows the same
+budget caveat: a proxy-budget sweep across widths placed the optimum at
+$10^{-3}$, yet at the full 50M-sample budget it degrades two-hour
+containment by 45\% (84 vs.\ 58) --- width-matched LR transfer does not
+imply budget-matched transfer, and our recipe keeps $3\times10^{-4}$.
+\todo{xlarge-cone-projector scaling cell lands this week; full-data
+flagship separately}
 
 \begin{figure}[t]
     \centering

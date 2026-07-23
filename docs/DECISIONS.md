@@ -2018,3 +2018,23 @@ CHAIN14 complete in 15 min (zero SKIPs; all 14 encoders). Test f1_macro / acc / 
 5. Protocol notes: torch linear probe (std-features, val-selected LR),
    15/22 classes (junk 1" dropped, stranded rares filtered), all classes
    present in every split. MLflow trackfm/ft-vessel-class (*-v2-lp).
+
+## 2026-07-23 1:45 PM EDT — LR A/B VERDICT (large): 1e-3 LOSES decisively; flagship stays at 3e-4
+
+large-cone-mlp full 50M recipe, only change lr 3e-4 -> 1e-3:
+| | 15m | 30m | 1h | 2h |
+|---|---|---|---|---|
+| 3e-4 (champion) | 4 | 8 | 27 | **58** |
+| 1e-3 | 4 | 13 | 42 | **84** |
+
++45-63%% worse at every bucket past 15m — nearly erases the entire projector
+gain (cone-linear is 87). Run was healthy (no divergence); val plateaued
+~1.03 vs champion 0.883, mid-run rise at ~50-60%% then partial anneal
+recovery. VERDICT: the CHAIN10 muP-tier optimum (1e-3, stable at d=64/128/256
+on SHORT proxy budgets) does NOT transfer to the full 50M-sample recipe at
+d=384. Proxy-budget LR sweeps overestimate the optimum for long-budget
+cosine runs (short runs reward fast early progress; full runs pay for the
+mid-run instability). **FLAGSHIP LR: 3e-4, settled.** Small-tier 1e-3 A/B
+still runs (completes the story ~5PM) but cannot change the flagship call.
+Lesson for the paper's recipe section: LR-transfer claims need budget-matched
+confirmation, not just width-matched.

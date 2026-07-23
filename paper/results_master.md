@@ -105,7 +105,8 @@ horizon-FLAT; constant +1 cell blur). Exact analytic dilation
 
 ## Pending (update when they land)
 
-- [ ] LR A/B: large-cone-mlp @1e-3 vs 58 (due ~3:30 PM EDT 7/23)
+- [x] LR A/B large: 1e-3 LOSES 4/13/42/84 vs 4/8/27/58 — proxy-tier
+      optima don't transfer to full budget; flagship LR = 3e-4 (settled)
 - [ ] LR A/B: small-cone-mlp @1e-3 vs 121 (due ~7 PM EDT 7/23)
 - [ ] xlarge-cone-mlp 50M scout (due ~noon 7/24) — missing scaling cell
 - [ ] Flagship (user launches; config flagship_xlarge_cone_mlp_26mo.yaml)
