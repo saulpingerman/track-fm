@@ -1910,3 +1910,45 @@ escape tail is maneuvering vessels, not just fast ones.
   scripts/ft_vessel_probe_v2.py -> trackfm/ft-vessel-class (*-v2-lp). Full
   overnight pipeline: spectrum -> rescore (me, on monitor wake) + CHAIN13 8 FTs
   -> CHAIN14 vessel-v2 probes.
+
+## 2026-07-23 ~3:45 AM EDT — SPECTRUM VERDICT: loses to cone-mlp at every bucket past 15m (+16-25%); analytic dilation worked, output-stage expressiveness paid for it
+
+Run completed 3:34 AM EDT (78,125 steps, bs640/h2, healthy throughout; final
+val_loss 0.741 vs cone-mlp's 0.883 trail — losses NOT comparable across h2/h4
+pair mixes). Uniform rescore_v2 (fixgrid p90, ±0.3 frame, 0.6 km2 cells, val):
+
+| bucket | spectrum | cone-mlp | cone-linear |
+|---|---|---|---|
+| 15m | 4 | 4 | 7 |
+| 30m | 10 | 8 | 14 |
+| 1h  | 32 | 27 | 40 |
+| 2h  | **67** | **58** | 87 |
+
+1. **Pre-registered success signature (horizon-balance collapse) NOT met** —
+   and the diagnosis is sharper than a miss: NATIVE-canvas k90 is spectrum
+   6/8/8/8 vs cone-mlp 5/7/7/7. Both heads are already perfectly
+   horizon-flat on the native canvas; spectrum adds a CONSTANT +1 cell of
+   blur at every horizon. There was no dilation imbalance left to collapse
+   (cone-mlp's trunk had solved it); the fixgrid 2h gap is proportional
+   canvas blur, not horizon-specific failure.
+2. **Beats cone-linear decisively** (67 vs 87 at 2h): trunk MLP + phi >
+   bare slot linear. The loss is specifically vs the free slot-indexed MLP
+   output stage.
+3. **Post-mortem as pre-registered** (written down before the verdict):
+   (a) k-smoothness prior vs oscillatory coefficient structure -> uniform
+   peak blur — exactly the constant +1-native-cell signature observed;
+   (b) capacity confound — phi machinery 217k vs mlp head 628k params.
+   (a) and (b) remain entangled by design error (mine: claimed
+   param-comparable, shipped 3x smaller).
+4. Strict ±60s rerun SKIPPED: prior strict pass proved ordering robustness
+   (no tolerance artifact); verdict is uniform across buckets and does not
+   hinge on it.
+5. **Options for the line** (user decides): (i) ONE param-matched revision
+   — phi_hidden 256 + ~14 gamma scales (628k-matched, phase-resolution-
+   sized) to disambiguate capacity vs smoothness; (ii) retire spectrum for
+   <=2h products (cone-mlp is champion) and reserve it for long-horizon
+   extensibility where slot heads need grid retrains and it needs none —
+   its original raison d'etre; (iii) drop the line. Machinery (exact scale
+   -equivariance, R-binning, honest FLOPs) is built and tested either way.
+6. Pipeline: CHAIN13 FT START 3:36 AM (ft-large-fixed-mlp-lpft first);
+   CHAIN14 vessel-v2 probes queued behind it.
