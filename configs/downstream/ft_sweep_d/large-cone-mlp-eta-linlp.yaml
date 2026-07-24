@@ -1,8 +1,8 @@
-task: classification
-label_column: destination
+task: regression
+label_column: remaining_s
 data_dir: ~/data/trackfm/ports/v2
-checkpoint_dir: ~/data/trackfm/checkpoints/finetune/ft_sweep_d/large-fixed-mlp-linlp
-backbone: ~/data/trackfm/checkpoints/scaling-large-mlp-50M/best.pt
+checkpoint_dir: ~/data/trackfm/checkpoints/finetune/ft_sweep_d/large-cone-mlp-eta-linlp
+backbone: ~/data/trackfm/checkpoints/scaling-large-cone-mlp-50M/best.pt
 model:
   d_model: 384
   nhead: 16
@@ -13,6 +13,10 @@ model:
   grid_size: 64
   grid_range: 0.3
   num_freqs: 12
+  grid_mode: cone
+  cone_r0: 0.02
+  cone_v: 0.000171
+  cone_p: 1.0
   head_mlp_hidden: 384
 normalization:
   lat_center: 56.25
@@ -22,18 +26,18 @@ normalization:
   sog_scale: 30.0
   dt_scale: 300.0
 train:
-  strategy: lp
   pooling: mean
-  batch_size: 512
-  max_epochs: 8
-  early_stopping_patience: 3
+  batch_size: 256
   learning_rate: 0.0002
   weight_decay: 0.0
   max_train_windows: 300000
   precision: bf16
   seed: 17
+  strategy: lp
+  max_epochs: 8
+  early_stopping_patience: 3
   linear_head: true
 mlflow:
   tracking_uri: http://127.0.0.1:5000
-  experiment: trackfm/ft-port-dest
-  run_name: large-fixed-mlp-linlp
+  experiment: trackfm/ft-eta
+  run_name: large-cone-mlp-eta-linlp

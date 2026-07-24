@@ -27,7 +27,6 @@ normalization:
   dt_scale: 300.0
 train:
   strategy: lp
-  linear_head: true
   pooling: mean
   batch_size: 512
   max_epochs: 8
@@ -37,6 +36,7 @@ train:
   max_train_windows: 300000
   precision: bf16
   seed: 17
+  linear_head: true
 mlflow:
   tracking_uri: http://127.0.0.1:5000
   experiment: trackfm/ft-port-dest

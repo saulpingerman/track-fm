@@ -1,8 +1,8 @@
 task: classification
 label_column: destination
 data_dir: ~/data/trackfm/ports/v2
-checkpoint_dir: ~/data/trackfm/checkpoints/finetune/ft_sweep_d/large-fixed-mlp-linlp
-backbone: ~/data/trackfm/checkpoints/scaling-large-mlp-50M/best.pt
+checkpoint_dir: ~/data/trackfm/checkpoints/finetune/ft_sweep_d/large-fixed-linlp
+backbone: ~/data/trackfm/checkpoints/scaling-large-50M/best.pt
 model:
   d_model: 384
   nhead: 16
@@ -13,7 +13,6 @@ model:
   grid_size: 64
   grid_range: 0.3
   num_freqs: 12
-  head_mlp_hidden: 384
 normalization:
   lat_center: 56.25
   lat_scale: 1.0
@@ -36,4 +35,4 @@ train:
 mlflow:
   tracking_uri: http://127.0.0.1:5000
   experiment: trackfm/ft-port-dest
-  run_name: large-fixed-mlp-linlp
+  run_name: large-fixed-linlp
