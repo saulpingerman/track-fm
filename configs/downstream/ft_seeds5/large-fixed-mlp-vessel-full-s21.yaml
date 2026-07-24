@@ -1,0 +1,38 @@
+task: classification
+label_column: vessel_type
+data_dir: ~/data/trackfm/vessel_v2
+checkpoint_dir: ~/data/trackfm/checkpoints/finetune/ft_seeds5/large-fixed-mlp-vessel-full-s21
+backbone: ~/data/trackfm/checkpoints/scaling-large-mlp-50M/best.pt
+model:
+  d_model: 384
+  nhead: 16
+  num_layers: 8
+  dim_feedforward: 2048
+  dropout: 0.1
+  max_seq_len: 128
+  grid_size: 64
+  grid_range: 0.3
+  num_freqs: 12
+  head_mlp_hidden: 384
+normalization:
+  lat_center: 56.25
+  lat_scale: 1.0
+  lon_center: 11.5
+  lon_scale: 2.0
+  sog_scale: 30.0
+  dt_scale: 300.0
+train:
+  pooling: mean
+  batch_size: 256
+  learning_rate: 0.0002
+  weight_decay: 0.0
+  max_train_windows: 300000
+  precision: bf16
+  seed: 21
+  strategy: full
+  max_epochs: 15
+  early_stopping_patience: 4
+mlflow:
+  tracking_uri: http://127.0.0.1:5000
+  experiment: trackfm/ft-vessel-class
+  run_name: large-fixed-mlp-vessel-full-s21
