@@ -58,13 +58,22 @@ def main():
     ax.set_xlabel("2h containment: p90 rank, 0.6 km$^2$ cells "
                   "(log, lower/right = better) — open markers scored on "
                   "censored 81% population")
-    ax.set_ylabel("vessel-type transfer: linear-probe f1_macro (higher = better)")
-    ax.set_title("Forecasting quality and representation quality dissociate",
+    ax.set_ylabel("feature quality: ship-type classification from FROZEN\n"
+                  "features (linear-probe f1_macro, 15 classes; higher = better)")
+    ax.set_title("A model's forecast quality does not predict its feature quality",
                  loc="left", fontsize=14)
+    ax.text(0.02, 0.975,
+            "Each point = one pretrained encoder.\n"
+            "x: how small an area its 2h forecasts pin a vessel to (its actual job).\n"
+            "y: how well a linear classifier reads SHIP TYPE off its frozen features\n"
+            "    (a task it was never trained for — the foundation-model test).",
+            transform=ax.transAxes, va="top", fontsize=9.5, color="#444",
+            bbox=dict(boxstyle="round,pad=0.4", fc="#f5f5f5", ec="#ccc"))
     # the two story arrows
     ax.annotate("spectrum: worst modern containment,\ntied-best transfer",
-                xy=(67, .3824), xytext=(115, .372), fontsize=10, color=TEAL,
-                arrowprops=dict(arrowstyle="->", color=TEAL, lw=1.4))
+                xy=(68.5, .3805), xytext=(122, .3625), fontsize=10, color=TEAL,
+                arrowprops=dict(arrowstyle="->", color=TEAL, lw=1.4,
+                                connectionstyle="arc3,rad=0.12", shrinkB=3))
     ax.annotate("conditioned pretrain: good containment,\nworst modern transfer",
                 xy=(101, .3125), xytext=(97, .3225), fontsize=10, color=BLUE,
                 ha="left",
