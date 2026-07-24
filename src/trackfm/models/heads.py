@@ -51,11 +51,14 @@ class PortClassifier(nn.Module):
 
     def __init__(self, encoder: CausalAISModel, num_classes: int,
                  pooling: Pooling = "mean", dropout: float = 0.3,
-                 freeze_encoder: bool = False):
+                 freeze_encoder: bool = False, linear_head: bool = False):
         super().__init__()
         self.encoder = encoder
         self.pooling: Pooling = pooling
-        self.head = MLPHead(encoder.d_model, num_classes, dropout)
+        # linear_head=True -> TRUE linear probe (feature-quality reading);
+        # default MLPHead (2 hidden layers) is the frozen-MLP ladder rung
+        self.head = (nn.Linear(encoder.d_model, num_classes) if linear_head
+                     else MLPHead(encoder.d_model, num_classes, dropout))
         if freeze_encoder:
             for p in self.encoder.parameters():
                 p.requires_grad = False
@@ -70,11 +73,13 @@ class EtaRegressor(nn.Module):
     """Time-to-arrival regression; predicts log1p(remaining seconds)."""
 
     def __init__(self, encoder: CausalAISModel, pooling: Pooling = "mean",
-                 dropout: float = 0.3, freeze_encoder: bool = False):
+                 dropout: float = 0.3, freeze_encoder: bool = False,
+                 linear_head: bool = False):
         super().__init__()
         self.encoder = encoder
         self.pooling: Pooling = pooling
-        self.head = MLPHead(encoder.d_model, 1, dropout)
+        self.head = (nn.Linear(encoder.d_model, 1) if linear_head
+                     else MLPHead(encoder.d_model, 1, dropout))
         if freeze_encoder:
             for p in self.encoder.parameters():
                 p.requires_grad = False

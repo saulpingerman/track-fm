@@ -53,6 +53,11 @@ class FinetuneTrainConfig(BaseModel):
     # strategy="lp" run uses learning_rate/max_epochs/
     # early_stopping_patience, identical to freeze_encoder=True.
     strategy: Literal["full", "lp", "lp-ft"] = "full"
+    # linear_head=True replaces the 2-hidden-layer MLPHead with a single
+    # nn.Linear — the TRUE linear probe. (Historical note: every strategy
+    # ="lp" run before 2026-07-24 used the MLP head; those results are the
+    # frozen-MLP rung of the ladder, not linear probes.)
+    linear_head: bool = False
     lp_max_epochs: int = 30
     lp_patience: int = 5
     lp_learning_rate: Optional[float] = None   # None -> learning_rate
@@ -186,12 +191,12 @@ def run_finetune(cfg: FinetuneConfig, datasets: dict[str, Dataset],
     if cfg.task == "classification":
         assert num_classes, "num_classes required for classification"
         model = PortClassifier(encoder, num_classes, t.pooling, t.head_dropout,
-                               frozen).to(device)
+                               frozen, t.linear_head).to(device)
         loss_fn = F.cross_entropy
         primary, mode = "f1_macro", "max"
     else:
         model = EtaRegressor(encoder, t.pooling, t.head_dropout,
-                             frozen).to(device)
+                             frozen, t.linear_head).to(device)
         loss_fn = lambda out, y: F.huber_loss(out, EtaRegressor.target(y))
         primary, mode = "mae_minutes", "min"
 
