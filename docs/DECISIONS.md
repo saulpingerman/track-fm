@@ -2177,3 +2177,16 @@ HEADLINE: TrackFM is a foundation model — frozen features beat from-scratch tr
 on classification, and adaptation improves over random-init on every task; the
 magnitude is task-dependent (strong classification, weak regression), reported honestly.
 Vessel-15 ladder (CHAIN22) + seed error bars (CHAIN22/23) pending.
+
+## 2026-07-24 4:30 AM EDT — OPS BUG (recurring): pgrep chain-gate matched orphan launcher-shell heredoc text; 32min GPU idle
+CHAIN22's gate `while pgrep -f "trackfm [f]inetune"` blocked ~32min after CHAIN21
+done, because the two `bash -c` LAUNCHER wrappers (from Bash-tool `cat > chainNN.sh
+<<EOF ... EOF` heredocs that CREATED chain22/23) never exited, and their cmdlines
+contain the literal script text incl "uv run trackfm finetune". pgrep -f matched
+those zombies -> gate never released. Fixed by killing the 2 orphan wrappers by
+exact PID; CHAIN22 started immediately. LESSON (3rd time this class of bug hit —
+see 2026-07-21/22): chain gates must match ORCHESTRATOR SCRIPT NAMES
+(`[c]hainNN_x.sh`), never generic tool strings like "trackfm finetune" that appear
+in launcher heredocs. Future chains: gate on script basenames only. Also: launch
+chain scripts by Write-ing the file then `bash scriptfile` (no inline heredoc in
+the Bash-tool command) so no wrapper carries the script text.
