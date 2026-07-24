@@ -2062,3 +2062,31 @@ confirmation, not just width-matched.
 4. Small@1e-3 (88, 0.84M) vs large@1e-3 (84, 18M): at the WRONG large-LR,
    width is nearly worthless — LR error can masquerade as scale saturation.
    Reinforces the paper's "recipe > scale" theme.
+
+## 2026-07-24 1:30 AM EDT — POST-MORTEM: my concurrent launch OOMed the box; scout killed at 28%, user's tmux session destroyed as collateral
+
+What happened (journal-confirmed): I launched the random-init FT controls
+(CHAIN17b) concurrent with the running xlarge scout at user request for
+faster chart completion. I budgeted VRAM but NOT system RAM. The FT job's
+normal footprint is ~90 GB anon RSS (never measured — sweep-A ran it on an
+idle box); scout tree holds ~44 GB; 134 > 125 GB. 01:14:46 kernel OOM
+killed the FT; systemd then tore down the ENTIRE tmux-spawn cgroup scope
+("Failed with result 'oom-kill'", SIGKILL at 01:16:16) — killing the
+scout (4.5h lost), chains 16/17b/18, and the user's tmux working session
+(nohup/setsid do not escape the cgroup; everything descends from the tmux
+scope Claude Code runs in).
+
+Cost: scout restarted from scratch (no pretrain resume support; dead ckpts
+archived to scaling-xlarge-cone-mlp-50M-killed-oom0724/, stale MLflow run
+marked KILLED). New ETA ~6 PM EDT 7/24. Chains 16->17->18 relaunched
+SEQUENTIAL.
+
+RULES (standing):
+1. NEVER co-schedule GPU jobs without a SYSTEM-RAM budget (not just VRAM).
+   Known footprints: pretrain tree ~44 GB; port-dest FT ~90 GB; both
+   at once cannot fit in 125 GB.
+2. Concurrency on this box is opt-out-by-default: chains stay serial
+   unless both RAM and VRAM budgets are verified with measured numbers.
+3. A kernel OOM here doesn't kill one process — systemd kills the whole
+   scope, taking the user's live session with it. Treat RAM overruns as
+   box-wide outages, not per-job failures.
