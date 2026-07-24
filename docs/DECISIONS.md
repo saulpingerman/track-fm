@@ -2109,3 +2109,32 @@ the 23-cell PD+ETA matrix; vessel adapter next; scout/flagship deferred.
 Ops note: chain21 stalled 20 min on a pgrep gate matching my own stale
 shell's heredoc text ("trackfm finetune" inside cmdline) — waiter gates
 must match executable paths, not free text; killed stale shell.
+
+## 2026-07-24 ~11 PM EDT — 16h unattended FT program armed (Fable credits out; running on Opus 4.8)
+
+State for robust unattended operation:
+- MONITOR re-armed (task br0dppcnb, persistent): campaign.log DONE|FAIL|
+  KILLED|START|Traceback|OOM. The prior monitor had died (TaskList empty) —
+  this is the primary crash/idle detector for the next 16h.
+- QUEUE (~14h tested work, all serial, each run if/else FAIL-guarded so one
+  crash never halts a chain; every chain gates on the PRIOR ORCHESTRATOR
+  exiting, not a momentary FT gap — prevents the 2-concurrent-FT OOM):
+  * CHAIN21 (running): PD+ETA matrix, 23 runs (5 encoders x linear-frozen/
+    mlp-frozen/full + random-full + random-eta).
+  * CHAIN22 (armed): fair window-stats baselines (CPU) + vessel ladder (5
+    enc x mlp-frozen/full + random-full, via new finetune-vessel) + 6 PD
+    seed replicates.
+  * CHAIN23 (armed): ETA + vessel headline full-FT seed replicates s18/s19.
+- VESSEL ADAPTER (new, TESTED before queuing): finetune-vessel CLI. Caught
+  a real bug in test — normalize_features re-sins the already-sin cog column
+  (npz is 6-col model format, not 5-col raw); fixed to normalize cols 0/1/2/5
+  only, matching ft_vessel_probe_v2. Smoke run passed end-to-end.
+- PRELIMINARY: true linear probes (linlp) read ~.343 (cone-mlp) / .340
+  (fixed-mlp) on port-dest — ABOVE the old "lp" .248. The old sweep-A "lp"
+  used the MLPHead-with-dropout on frozen features; a clean linear layer
+  (convex, no dropout) probes better. If it holds across the matrix, frozen
+  linear-probe > random-init FULL fine-tune (.285) — a strong foundation
+  result. Confirm when matrix completes.
+- RESIDUAL RISK: no per-job timeout; a hung (not crashed) job would idle the
+  GPU until the next wakeup catches the silence. Acceptable (full-FT ~16-30min,
+  never observed hanging); wakeup checks cover it.
