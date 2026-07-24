@@ -336,3 +336,46 @@ def finetune_port_task(cfg: FinetuneConfig) -> dict[str, float]:
     sizes = {k: len(v) for k, v in datasets.items()}
     logger.info(f"datasets: {sizes}, classes: {num_classes}")
     return run_finetune(cfg, datasets, num_classes)
+
+
+def finetune_vessel_task(cfg: FinetuneConfig) -> dict[str, float]:
+    """Vessel-type classification through the SAME trainer as port tasks.
+
+    Reuses ArrayTaskDataset + run_finetune. Class filter AND normalization
+    are identical to scripts/ft_vessel_probe_v2.py (drop junk '1"', require
+    >=500 train / >=100 val / >=100 test), so the MLP-frozen and full-FT
+    rungs land on the exact 15-class task the linear probe used. The npz is
+    ALREADY 6-col model format [lat,lon,sog,cog_SIN,cog_COS,dt] (builder
+    did the sin/cos), so normalize ONLY lat/lon/sog/dt in place and leave
+    cols 3/4 untouched. (Do NOT use normalize_features here — it expects
+    5-col raw with cog_DEG and would re-sin the sin column to ~0.)
+    """
+    data_dir = Path(cfg.data_dir).expanduser()
+    DROP = {'1"'}
+    MIN = {"train": 500, "val": 100, "test": 100}
+    name_of = {v: k for k, v in json.loads((data_dir / "labels.json").read_text()).items()}
+    raw = {s: np.load(data_dir / f"{s}.npz") for s in ("train", "val", "test")}
+    counts = {s: np.bincount(raw[s]["y"], minlength=len(name_of)) for s in raw}
+    keep = [i for i in range(len(name_of))
+            if name_of[i] not in DROP and all(counts[s][i] >= MIN[s] for s in raw)]
+    remap = {old: new for new, old in enumerate(keep)}
+    nm = cfg.normalization
+    t = cfg.train
+    datasets = {}
+    for s, z in raw.items():
+        sel = np.isin(z["y"], keep)
+        x = z["x"][sel].astype(np.float32).copy()
+        x[..., 0] = (x[..., 0] - nm.lat_center) / nm.lat_scale
+        x[..., 1] = (x[..., 1] - nm.lon_center) / nm.lon_scale
+        x[..., 2] = x[..., 2] / nm.sog_scale
+        x[..., 5] = x[..., 5] / nm.dt_scale       # cols 3,4 = cog sin/cos, already done
+        y = np.array([remap[v] for v in z["y"][sel]], dtype=np.int64)
+        if s == "train" and t.max_train_windows and len(y) > t.max_train_windows:
+            rng = np.random.default_rng(t.seed)
+            idx = rng.choice(len(y), t.max_train_windows, replace=False)
+            x, y = x[idx], y[idx]
+        datasets[s] = ArrayTaskDataset(x, y)
+    logger.info(f"vessel classes kept {len(keep)}/{len(name_of)}: "
+                f"{[name_of[i] for i in keep]}")
+    logger.info(f"datasets: { {k: len(v) for k, v in datasets.items()} }")
+    return run_finetune(cfg, datasets, len(keep))

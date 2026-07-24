@@ -150,6 +150,21 @@ def finetune(
     finetune_port_task(cfg)
 
 
+@app.command("finetune-vessel")
+def finetune_vessel(
+    config: Path = typer.Option(..., help="FinetuneConfig YAML (vessel npz)"),
+):
+    """Fine-tune an encoder on the vessel-type task (npz, same ladder)."""
+    import logging
+
+    from trackfm.config import load_config
+    from trackfm.training.finetune import FinetuneConfig, finetune_vessel_task
+
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
+    cfg = load_config(config, FinetuneConfig)
+    finetune_vessel_task(cfg)
+
+
 @app.command()
 def evaluate(
     checkpoint: Path = typer.Option(..., help="Model checkpoint"),
