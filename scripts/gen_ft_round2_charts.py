@@ -109,22 +109,20 @@ def vessel_leaderboard():
     a1.set_xlabel("vessel-type f1_macro (15 classes, test)")
     a1.set_title("Feature quality: linear probe on frozen backbones",
                  loc="left", fontsize=12)
-    a1.set_xlim(0, 0.44)
+    a1.set_xlim(0, 0.56)
     a2.barh(names, top3, color=colors)
     for i, v in enumerate(top3):
         a2.text(v + 0.004, i, f"{v:.3f}", va="center", fontsize=10)
     a2.axvline(0.494, ls="--", color="gray", lw=1.5)
     a2.text(0.498, 14.0, "kinstats (.494)", color="gray", fontsize=9)
-    a2.set_xlabel("top-3 accuracy")
+    a2.set_xlabel("top-3 accuracy (axis starts at 0.45)")
     a2.set_title("Deployment view: top-3 accuracy", loc="left", fontsize=12)
     a2.set_xlim(0.45, 0.78)
     for a in (a1, a2):
         a.spines[["top", "right"]].set_visible(False)
-    a1.annotate("spectrum ties #1 on transfer\n(despite losing containment)",
-                xy=(0.388, 12.0), xytext=(0.315, 0.35), fontsize=10,
-                arrowprops=dict(arrowstyle="->", color=TEAL, lw=1.4,
-                                connectionstyle="arc3,rad=-0.15"),
-                color=TEAL)
+    # inline note on the spectrum row itself — no cross-panel arrow
+    a1.text(0.437, 12, "← ties #1 on transfer\n     (despite losing containment)",
+            fontsize=9.5, color=TEAL, va="center")
     handles = [plt.Rectangle((0, 0), 1, 1, color=c) for c in
                (ORANGE, TEAL, BLUE, SLATE, LIGHT)]
     fig.legend(handles, ["modern, MLP-head co-trained", "spectrum head",

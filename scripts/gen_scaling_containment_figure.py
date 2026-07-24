@@ -28,14 +28,17 @@ def main():
     ax.plot(fx, fy, "o-", color=SLATE, lw=2, ms=9,
             label="fixed ±0.3° geometry, linear head (81% home metric)")
     for p, v, n in FIXED:
-        ax.annotate(f"{n}  ({v})", (p, v), textcoords="offset points",
-                    xytext=(8, 6), fontsize=9.5, color=SLATE)
+        dy = -15 if n == "small" else 6      # de-collide with small-cone
+        star = "*" if n in ("nano", "small", "medium") else ""
+        ax.annotate(f"{n}{star}  ({v})", (p, v), textcoords="offset points",
+                    xytext=(8, dy), fontsize=9.5, color=SLATE)
     cx = [p for p, _, _ in CONE]
     cy = [v for _, v, _ in CONE]
     ax.plot(cx, cy, "s--", color=BLUE, lw=1.8, ms=9,
             label="cone geometry, linear head (100% population)")
     for p, v, n in CONE:
-        ax.annotate(f"{n}  ({v})", (p, v), textcoords="offset points",
+        star = "*" if n == "small-cone" else ""
+        ax.annotate(f"{n}{star}  ({v})", (p, v), textcoords="offset points",
                     xytext=(8, 6), fontsize=9.5, color=BLUE)
 
     # projector interventions: vertical arrows at fixed x
@@ -73,7 +76,11 @@ def main():
     ax.legend(loc="upper right", fontsize=9.5)
     ax.grid(alpha=0.25, which="both")
     ax.spines[["top", "right"]].set_visible(False)
-    fig.tight_layout()
+    fig.text(0.01, 0.005,
+             "* sub-18M points trained at lr 3e-4; the full-budget LR study "
+             "(small optimum = 1e-3: 121\u219288) shows the curve's left end "
+             "is pessimistic.", fontsize=8.5, color="#666")
+    fig.tight_layout(rect=[0, 0.03, 1, 1])
     fig.savefig("docs/figures/scaling_containment.png", dpi=150)
     print("wrote scaling_containment.png")
 

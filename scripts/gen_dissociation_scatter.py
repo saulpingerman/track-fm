@@ -66,8 +66,19 @@ def main():
                 xy=(67, .3824), xytext=(115, .372), fontsize=10, color=TEAL,
                 arrowprops=dict(arrowstyle="->", color=TEAL, lw=1.4))
     ax.annotate("conditioned pretrain: good containment,\nworst modern transfer",
-                xy=(102, .310), xytext=(68, .318), fontsize=10, color=BLUE,
-                arrowprops=dict(arrowstyle="->", color=BLUE, lw=1.4))
+                xy=(101, .3125), xytext=(97, .3225), fontsize=10, color=BLUE,
+                ha="left",
+                arrowprops=dict(arrowstyle="->", color=BLUE, lw=1.4,
+                                shrinkB=4))
+    # marker-style legend (was only explained in the axis label)
+    filled = plt.Line2D([], [], marker="o", ls="", color="#666",
+                        markersize=10, label="full population (100%)")
+    open_m = plt.Line2D([], [], marker="o", ls="", markerfacecolor="white",
+                        markeredgecolor="#666", markeredgewidth=2,
+                        markersize=10,
+                        label="censored home metric (81%, fixed ±0.3°)")
+    ax.legend(handles=[filled, open_m], loc="lower right", fontsize=9.5,
+              framealpha=0.9)
     ax.grid(alpha=0.25, which="both")
     ax.spines[["top", "right"]].set_visible(False)
     fig.tight_layout()
