@@ -2190,3 +2190,16 @@ see 2026-07-21/22): chain gates must match ORCHESTRATOR SCRIPT NAMES
 in launcher heredocs. Future chains: gate on script basenames only. Also: launch
 chain scripts by Write-ing the file then `bash scriptfile` (no inline heredoc in
 the Bash-tool command) so no wrapper carries the script text.
+
+## 2026-07-24 ~4:45 AM EDT — fair-window-stats baseline ABANDONED (buggy + redundant)
+The new fair_window_baselines.py produced impossible results (pd acc .9999/f1
+.50, mlp acc 1.0 on 811 classes) — the acc-high/f1-low pattern is majority-class
+collapse (my subset loaded as ~one class, not the real 19.4%-majority dist), a
+data-loading bug (likely label-column/vocab mishandling after the 128x5 reshape
+fix). NOT worth more overnight debugging: it is REDUNDANT with the already-
+validated fair window-only floors — nearest-port (.199 acc/.125 f1, PD), train-
+median (775 MAE, ETA), kinematic-stats (.151 f1, vessel). Ladder charts will use
+THOSE as the fair-baseline dashed lines; window-stats deferred (fix + test when
+attended). Lesson (again): new bulk-data-loading code needs a class-distribution
+sanity assert before use; reuse WindowTaskDataset rather than reimplement parquet
+loading. json left in place but IGNORED.
