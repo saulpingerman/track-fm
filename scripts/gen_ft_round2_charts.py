@@ -30,7 +30,7 @@ def strategy_progression(random_lpft=None, random_full=None):
         "large-fixed-mlp": ["#f2c09a", "#e59a56", ORANGE],
         "large-cone-mlp": ["#a9cbee", "#5f9dd8", BLUE],
         "xlarge-fixed": ["#c3ccd8", "#9fadc0", SLATE],
-        "random-init": ["#dfe3e8", "#cdd3da", LIGHT],
+        "random-init": ["#b9c0c9", "#a5adb8", "#929ba7"],
     }
     fig, ax = plt.subplots(figsize=(11.5, 6.4))
     width, gap = 0.26, 0.06
@@ -51,12 +51,18 @@ def strategy_progression(random_lpft=None, random_full=None):
     ax.axhline(0.411, ls="--", color="purple", lw=1.5)
     ax.text(3.42, 0.415, "dest-given-origin lookup (.411)\nuses privileged origin label",
             color="purple", fontsize=9, ha="right")
-    ax.annotate("full FT closes the\ngeometry gap: .364 vs .363",
-                xy=(0.68, 0.363), xytext=(1.45, 0.30), fontsize=10,
-                arrowprops=dict(arrowstyle="->", color="black", lw=1))
-    ax.annotate("pretraining = 2.6x the\nfeature quality of random init",
-                xy=(2.68, 0.10), xytext=(2.0, 0.175), fontsize=10,
-                arrowprops=dict(arrowstyle="->", color="black", lw=1))
+    # annotation text lives in the open band above the bars (y ~.38-.40);
+    # arrows terminate ON bar tops, clear of the value labels
+    ax.annotate("full FT closes the geometry\ngap: .364 vs .363",
+                xy=(1.32, 0.360), xytext=(1.62, 0.386), fontsize=10,
+                ha="left", va="top",
+                arrowprops=dict(arrowstyle="->", color="black", lw=1,
+                                shrinkB=2))
+    ax.annotate("pretraining = 2.6x the feature\nquality of random init (LP)",
+                xy=(2.57, 0.065), xytext=(2.98, 0.20), fontsize=10,
+                ha="center",
+                arrowprops=dict(arrowstyle="->", color="black", lw=1,
+                                connectionstyle="arc3,rad=0.2", shrinkB=1))
     ax.set_xticks(range(4))
     ax.set_xticklabels(encoders, fontsize=11)
     ax.set_ylabel("destination f1_macro (811 classes, test)")
