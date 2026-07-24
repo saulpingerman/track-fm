@@ -2138,3 +2138,42 @@ State for robust unattended operation:
 - RESIDUAL RISK: no per-job timeout; a hung (not crashed) job would idle the
   GPU until the next wakeup catches the silence. Acceptable (full-FT ~16-30min,
   never observed hanging); wakeup checks cover it.
+
+## 2026-07-24 ~4 AM EDT — FT MATRIX COMPLETE (CHAIN21, 23 runs, 0 failures): the foundation-model result, per task
+
+Uniform ladder (linear-frozen / MLP-frozen / full-FT) × 5 encoders + random-init,
+fair baselines only (privileged origin-lookup demoted to footnote). Protocol
+locked with user 2026-07-24.
+
+PORT-DESTINATION (811 cls, test f1_macro):
+| encoder | linear-frozen | MLP-frozen(old"lp") | full-FT |
+|---|---|---|---|
+| large-cone-mlp | .343 | .248 | .362 |
+| large-fixed-mlp | .340 | .254 | — |
+| xlarge-fixed | .319 | .245 | .367 |
+| large-cone | .272 | — | .358 |
+| large-fixed | — | — | — |
+| **random-init** | — | — | **.285** |
+- FOUNDATION DELTA: pretrained full-FT .362-.367 vs random-init full-FT .285 = **+27-29%**.
+- Frozen LINEAR probe (.343) BEATS random-init FULL fine-tune (.285): freezing the
+  pretrained encoder + one linear layer > training a whole model from scratch.
+- NEW: true linear head (.343) >> the old MLPHead-on-frozen ".lp" (.248) — the old
+  "linear probe" number was an MLP-with-dropout underfitting artifact; relabel all
+  historical "LP" as "MLP-frozen". Projector-pretrained encoders (cone-mlp/fixed-mlp)
+  probe best; scale barely helps (xlarge .367 ~ 18M .362).
+
+ETA (regression, test MAE min, lower better):
+- linear-frozen: 683-724 (LINEAR HEAD WEAK for regression).
+- MLP-frozen: xlarge 505, cone-mlp 517.
+- full-FT: xlarge 468 < large-cone 477 < cone-mlp 480 < fixed-mlp/fixed 481.
+- random-init full-FT: 492.
+- FOUNDATION DELTA: pretrained full-FT 468-481 vs random 492 = **+2-5%** only.
+- VERDICT: ETA is the WEAK-transfer task. Pretraining's learned traffic patterns
+  help classification hugely (+27%) but time-regression barely (~2-5%, leans on
+  last-position kinematics). Capacity helps ETA (xlarge best 468) — opposite of
+  classification where scale saturates.
+
+HEADLINE: TrackFM is a foundation model — frozen features beat from-scratch training
+on classification, and adaptation improves over random-init on every task; the
+magnitude is task-dependent (strong classification, weak regression), reported honestly.
+Vessel-15 ladder (CHAIN22) + seed error bars (CHAIN22/23) pending.
