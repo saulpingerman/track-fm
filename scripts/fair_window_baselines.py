@@ -31,12 +31,19 @@ SEED, TRAIN_CAP = 17, 300_000
 
 
 def load_split(split: str, label: str, cap: int | None):
+    # port "features" = Array(f32, 640) = 128 x 5 RAW [lat,lon,sog,cog_deg,dt]
+    # (same as WindowTaskDataset: reshape to NUM_FEATURES=5 then
+    # normalize_features -> 128 x 6 [lat,lon,sog,cog_sin,cog_cos,dt]).
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from trackfm.datasets.windowing import normalize_features
     shards = sorted((D / "port_windows").glob("shard_*.parquet"))
     df = (pl.scan_parquet(shards).filter(pl.col("split") == split)
           .select(["features", label]).collect())
     if cap and df.height > cap:
         df = df.sample(cap, seed=SEED)
-    x = df["features"].to_numpy().reshape(-1, 128, 6).astype(np.float32)
+    raw = df["features"].to_numpy().reshape(-1, 128, 5).astype(np.float32)
+    x = normalize_features(raw)          # -> (N, 128, 6), cog->sin/cos
     return x, df[label]
 
 
