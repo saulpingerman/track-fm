@@ -2090,3 +2090,22 @@ RULES (standing):
 3. A kernel OOM here doesn't kill one process — systemd kills the whole
    scope, taking the user's live session with it. Treat RAM overruns as
    box-wide outages, not per-job failures.
+
+## 2026-07-24 2:20 AM EDT — THE FOUNDATION NUMBER: from-scratch full FT .285 vs pretrained full FT .364 (+27% rel)
+
+random-large-full (champion architecture, random init, identical full-FT
+recipe, port-dest): test f1 .285 / acc .786. Pretrained: fixed-mlp .364,
+cone-mlp .363. **Pretraining improves the final fully-fine-tuned model by
++27%% relative f1** — the canonical foundation-model comparison (user
+protocol). Accuracy nearly matches (.786 vs .802) — pretraining's gains
+concentrate in rare classes, same pattern as every FT result.
+Protocol locked (user, tonight): 5-encoder matrix (cone-mlp, fixed-mlp,
+cone, fixed, xlarge-fixed) x (linear-frozen / 2-layer-MLP-frozen / full
+FT); random-init = full FT always (+ linear floor); LP-FT dropped (never
+beat full FT); baselines must consume ONLY the window (origin-lookup &
+origin-copy demoted to privileged footnotes); port-prior vector planned
+to make origin info fair for BOTH model and baseline. CHAIN21 running
+the 23-cell PD+ETA matrix; vessel adapter next; scout/flagship deferred.
+Ops note: chain21 stalled 20 min on a pgrep gate matching my own stale
+shell's heredoc text ("trackfm finetune" inside cmdline) — waiter gates
+must match executable paths, not free text; killed stale shell.
